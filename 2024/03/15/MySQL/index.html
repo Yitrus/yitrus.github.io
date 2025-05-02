@@ -413,12 +413,25 @@
             <div class="row tag-cate">
                 <div class="col s7">
                     
-                          <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
-                          </div>
+                    <div class="article-tag">
+                        
+                            <a href="/tags/MySQL/">
+                                <span class="chip bg-color">MySQL</span>
+                            </a>
+                        
+                    </div>
                     
                 </div>
                 <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/DB/" class="post-category">
+                                DB
+                            </a>
+                        
+                    </div>
                     
                 </div>
             </div>
@@ -436,14 +449,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    0
+                    2.2k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    1 分
+                    7 分
                 </div>
                 
 
@@ -471,7 +484,104 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                
+                <h3 id="数据库引擎和数据写入流程"><a href="#数据库引擎和数据写入流程" class="headerlink" title="数据库引擎和数据写入流程"></a>数据库引擎和数据写入流程</h3><p><img src="/images/2025-04-14104828.png"></p>
+<p>红色那个应该是指优化器吧。其中存储引擎主要指innodb这个是默认的。存储引擎主要是通过执行器对数据库内存和存储的数据进行读取和写入。主要的读取和写入发生在buffer pool，为了支持回滚旧数据被放在磁盘的undo Log；为了防止buffer pool的数据断电挂起之类的丢失，内存中还有块Redo Log Buffer，会将信息刷到磁盘的Redo Log，这个过程是经过或者同时放在操作系统page cache的，然后要频繁刷盘。</p>
+<blockquote>
+<p>有意思：innodb在用io线程写入磁盘文件时，采用系统调用的open+write函数，但是自己提供了一套完整的缓存架构，在调用open函数获取fd文件描述符时，使用O-direct方式跳过了内核提供的缓存区page cache</p>
+</blockquote>
+<p>为了使一些操作失误可以恢复，BinLog日志模块和InnoDB没有关系，用于变更历史查询、数据库备份和恢复、主从复制。</p>
+<p><img src="/images/2025-04-14110925.png"></p>
+<h3 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h3><p><img src="/images/2025-04-14112023.png"></p>
+<p>frm体积较小。独立表空间由16KB的页组成，多个相关的页被一直访问可以组成一个区防止磁盘读取时访问过于磁头移动的耗时。32个页一个区，256个区一个组（256MB），与区和区组不同还有一个逻辑概念段，不对应表空间中的连续物理区域。用于区分不同功能的区和在碎片区中的页，分为叶子节点段和非叶子节点段，和B+属索引的叶子、非叶子相对应。</p>
+<p><img src="/images/2025-04-14131247.png"></p>
+<h3 id="执行原理"><a href="#执行原理" class="headerlink" title="执行原理"></a>执行原理</h3><p>其中查询缓存已经被舍弃了,命中率低会引入缓存查询开销还有添加缓存的开销。</p>
+<p><strong>执行1条select语句，发生了什么？</strong></p>
+<ul>
+<li>连接器：跟客户端建立连接、获取权限、维持和管理连接。</li>
+<li><del>查询缓存：查询语句如果命中查询缓存则直接返回，否则继续往下执行。MySQL8.0已删除该模块；</del> 因为发现缓存区是个包袱，不命中次数多增加了查找次数。</li>
+<li>解析SQL，通过解析器对SQL查询语句进行词法分析、语法分析，然后构建语法树。</li>
+<li>执行SQL：执行SQL共有三个阶段：<ul>
+<li>预处理阶段：检查表或字段是否存在；将select*中的符号扩展为表上的所有列。</li>
+<li>优化阶段：基于查询成本的考虑，选择查询成本最小的执行计划；</li>
+<li>执行阶段：根据执行计划执行SQL查询语句，从存储引擎读取记录，返回给客户端；</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/2025-04-14140809.png"></p>
+<p><img src="/images/2025-04-14142315.png"></p>
+<p>在存储引擎中会将命令拆分为微事务Mini Transaction（<strong>MTR</strong>），对于底层页来说每一个MTR都是原子访问，</p>
+<h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><p><img src="/images/2025-04-14155616.png"></p>
+<p>mysql聚簇和非聚簇索引的区别：</p>
+<p>都是B+树的数据结构</p>
+<ul>
+<li>聚簇索引：将数据存储与索引放到了一块、并且是按照一定的顺序组织的，找到索引也就找到了数据，<strong>数据的物理存放顺序与索引顺序是一致的</strong>，即：只要索引是相邻的，那么对应的数据一定也是相邻地存放在磁盘上的</li>
+<li>非聚簇索引：叶子节点不存储数据、<strong>存储的是数据行地址</strong>，也就是说根据索引查找到数据行的位置再取磁盘查找数据，这个就有点类似一本树的目录，比如我们要找第三章第一节，那我们先在这个目录里面找，找到对应的页码后再去对应的页码看文章。</li>
+</ul>
+<p><img src="/images/2025-04-14164006.png"></p>
+<p>更贴近于数据结构的方式：</p>
+<p><img src="/images/2025-04-15112328.png"></p>
+<p>表里面的B+树竟然两三层是最合适的，查询底层节点的磁盘 I/O次数会更少。</p>
+<p>explan加到sql语句之前，会显示出使用的哪种索引方式，比如key在树上就是聚簇索引，没在走全表扫描（比如查询条件是 <code>WHERE name = 'Alice'</code>，但主键索引是按 <code>id</code> 组织的，与 <code>name</code> 完全无关）。</p>
+<p>默认情况下，数据库不会自动创建所有索引：</p>
+<ul>
+<li><strong>主键索引（Primary Key）</strong>：<br>如果表定义了主键（如 <code>PRIMARY KEY (id)</code>），数据库<strong>会自动创建主键索引</strong>（聚簇索引）。这是唯一由数据库自动创建的索引类型（在大多数数据库中，如 MySQL/InnoDB）。</li>
+<li><strong>唯一约束（Unique Key）</strong>：<br>如果字段被标记为 <code>UNIQUE</code>，数据库会自动创建唯一索引来保证唯一性。</li>
+<li><strong>其他普通索引</strong>：<br><strong>不会自动创建</strong>，需要开发者手动建立。</li>
+</ul>
+<p>常见需要手动创建的索引类型:</p>
+<ol>
+<li><p><strong>普通索引（加速查询）</strong>：</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">INDEX</span> idx_name <span class="token keyword">ON</span> users<span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">-- 为 name 列创建索引</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p><strong>联合索引（优化多列查询）</strong>：</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">INDEX</span> idx_name_age <span class="token keyword">ON</span> users<span class="token punctuation">(</span>name<span class="token punctuation">,</span> age<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">-- 同时查询 name 和 age 时使用</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p><strong>覆盖索引（避免回表）</strong>：</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">CREATE</span> <span class="token keyword">INDEX</span> idx_covering <span class="token keyword">ON</span> users<span class="token punctuation">(</span>name<span class="token punctuation">,</span> age<span class="token punctuation">,</span> email<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token comment">-- 若查询只需这3列，无需回表查主键</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
+</ol>
+<h3 id="事务体系ACID"><a href="#事务体系ACID" class="headerlink" title="事务体系ACID"></a>事务体系ACID</h3><p><strong>Atomicity</strong> Consistency Isolation Durability<br><strong>一致性</strong>、隔离性、持久性、原子性</p>
+<ul>
+<li><p>原子性的问题就是保证事务操作只能全部成功，部分失败都得撤回，由undo log机制保证。一条数据改动对应一条undo log通常。</p>
+</li>
+<li><p>在多个事务同时执行时会有三大明显问题：1. A事务读到了B事务还没提交的数据，B数据说不定会回滚，称之为<strong>脏读</strong>；2. A事务执行过程中对同一条数据进行两次读取，在这<u>两次读取之间B事务修改了这个数据并进行了完整提交</u>，于是A事务两次读取属于<strong>不可重复读</strong>； 3. A也是两次读取，在两次读取间B事务在集合中<u>增加或者删除了部分数据</u>，A事务读到了不一致的行数据，称之为<strong>幻读</strong>。</p>
+</li>
+</ul>
+<p>四种隔离级别解决上述三种问题：</p>
+<p><img src="/images/2025-04-14174501.png"></p>
+<p>读未提交：读取数据时MVCC<strong>读取版本链中的最新版本</strong>；更新数据加共享行锁</p>
+<p>读已提交：MVCC快照读，更新数据使用独占行锁</p>
+<p>可重复读：MVCC快照读，next-key行锁</p>
+<p>串行利用的表锁</p>
+<ul>
+<li>持久性的问题：刷盘时由redo log保证内存中数据不丢失；操作系统4KB，数据库16KB，为了保证每一个磁盘中数据是完整的，建立双写缓冲区。</li>
+</ul>
+<h5 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h5><p>和undo log中的版本链有关，但是不能解决幻读问题。在查询的时候创建readview快照信息，根据事务ID决定怎么去找Undo Log中的数据，是不是事务保存之前保存下来的。这里的ID是行中的隐藏字段。</p>
+<h3 id="数据库锁原理"><a href="#数据库锁原理" class="headerlink" title="数据库锁原理"></a>数据库锁原理</h3><p>Mysql锁有哪些，如何理解<br>按锁粒度分类：</p>
+<ol>
+<li><p>行锁：锁某行数据，锁粒度最小，并发度高</p>
+</li>
+<li><p>表锁：锁整张表，锁粒度最大，并发度低</p>
+</li>
+<li><p>间隙锁：锁的是一个区间</p>
+<p>还可以分为：</p>
+<ol start="4">
+<li>共享锁：也就是读锁，一个事务给某行数据加了读锁，其他事务也可以读，但是不能写</li>
+<li>排它锁：也就是写锁，一个事务给某行数据加了写锁，其他事务不能读，也不能写<br>还可以分为：<ol>
+<li>乐观锁：并不会真正的去锁某行记录，而是通过一个<strong>版本号来实现</strong>的</li>
+<li>悲观锁：上面所的行锁、表锁等都是悲观锁</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="/images/2025-04-14201823.png"></p>
+<ul>
+<li>排它锁也叫独占锁、写锁或X锁，其他事务无法对已锁定的数据进行查询或修改。当我们对数据进行更新的时候，也就是<strong>INSERT、DELETE或者UPDATE的时候，数据库也会自动使用排它锁</strong>，防止其他事务对该数据行进行操作。</li>
+<li>共享锁也叫读锁或S锁，在进行<strong>SELECT的时候，会将对象进行共享锁锁定</strong>，当数据读取完毕之后，就会释放共享锁，这样就可以保证数据在读取时不被修改。</li>
+<li>RecordLock记录锁，仅仅把一条记录锁上，记录锁分为排他锁和共享锁。</li>
+<li>GapLock间隙锁，<strong>锁定一个范围，但是不包含记录本身</strong>。间隙锁之间是兼容的，两个事务可以同时持有包含共同间隙范围的间隙锁，并不存在互斥关系。</li>
+<li>Next-Key Lock临键锁：Record Lock+Gap Lock的组合，<strong>锁定一个范围，并且锁定记录本身</strong>。next-keylock即能保护该记录，又能阻止其他事务将新纪录插入到被保护记录前面的间隙中。</li>
+</ul>
+
                 
             </div>
             <hr/>
@@ -534,7 +644,11 @@
                 <div class="post-meta__tag-list" style="display: inline-block;">
                     
                         <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
+                            
+                                <a href="/tags/MySQL/">
+                                    <span class="chip bg-color">MySQL</span>
+                                </a>
+                            
                         </div>
                     
                 </div>
@@ -580,31 +694,31 @@
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2024/05/12/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9B%B8%E5%85%B3%E5%AE%9E%E9%AA%8C%E7%9A%84%E5%8F%82%E6%95%B0/">
+                <a href="/2024/04/18/%E5%9F%BA%E4%BA%8EOptane%E7%9A%84%E5%88%86%E5%B1%82%E5%86%85%E5%AD%98%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E5%92%8C%E5%AE%89%E8%A3%85/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="数据库相关实验的参数与指标">
+                        <img src="/medias/featureimages/2.jpg" class="responsive-img" alt="基于Optane的分层内存内核编译和安装">
                         
-                        <span class="card-title">数据库相关实验的参数与指标</span>
+                        <span class="card-title">基于Optane的分层内存内核编译和安装</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            
+                            编译Multi-clock(从安装系统开始适合入门)；MC的参数敏感性实验；以及Nimble,Tiering-0.8,HeMem,Autotiering顶会开源内核的编译安装
                         
                     </div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2024-05-12
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-04-18
                         </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Basics/" class="post-category">
-                                    Basics
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
                                 </a>
                             
                             
@@ -614,20 +728,16 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Redis/">
-                        <span class="chip bg-color">Redis</span>
+                    <a href="/tags/Hybrid-Memory/">
+                        <span class="chip bg-color">Hybrid-Memory</span>
                     </a>
                     
-                    <a href="/tags/MySQL/">
-                        <span class="chip bg-color">MySQL</span>
+                    <a href="/tags/Optane/">
+                        <span class="chip bg-color">Optane</span>
                     </a>
                     
-                    <a href="/tags/YCSB/">
-                        <span class="chip bg-color">YCSB</span>
-                    </a>
-                    
-                    <a href="/tags/TPCC/">
-                        <span class="chip bg-color">TPCC</span>
+                    <a href="/tags/Kernel-Crashed/">
+                        <span class="chip bg-color">Kernel-Crashed</span>
                     </a>
                     
                 </div>
@@ -653,7 +763,7 @@
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            一些简单的机器学习算法也可以在实际问题中取得不错的效果。温故知新。
+                            一些简单的机器学习算法也可以在实际问题中取得不错的效果，温故知新
                         
                     </div>
                     <div class="publish-info">
@@ -675,8 +785,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Machine-Learning/">
-                        <span class="chip bg-color">Machine Learning</span>
+                    <a href="/tags/Machine-learning/">
+                        <span class="chip bg-color">Machine-learning</span>
                     </a>
                     
                 </div>
@@ -816,7 +926,7 @@
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2024</span>
+                <span id="year">2019-2025</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -825,7 +935,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">175.9k</span>&nbsp;字
+                class="white-color">245.9k</span>&nbsp;字
             
             
             

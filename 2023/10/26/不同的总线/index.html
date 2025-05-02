@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="不同的总线和内存条组成, Yi&#39;s Blog">
+    <meta name="keywords" content="总线总类和内存条组成, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>不同的总线和内存条组成 | Yi&#39;s Blog</title>
+    <title>总线总类和内存条组成 | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -294,12 +294,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">不同的总线和内存条组成</h1> -->
+                    <!-- <h1 class="description center-align post-title">总线总类和内存条组成</h1> -->
                 </div>
             </div>
         </div>
@@ -439,8 +439,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/Basics/" class="post-category">
-                                Basics
+                            <a href="/categories/OS/" class="post-category">
+                                OS
                             </a>
                         
                     </div>
@@ -461,14 +461,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.7k
+                    3.4k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    9 分
+                    12 分
                 </div>
                 
 
@@ -548,6 +548,43 @@
 <p>如下图，一般文件读写在page cache使用buffer IO如果不命中有2次上下文切换和3次拷贝。<br><img src="https://images.weserv.nl/?url=https://img-blog.csdnimg.cn/57d7f3138355481fabd774aa88d22ba9.png"></p>
 <p>部分应用使用direct IO可以减少拷贝。这取决于你的程序是否存在局部性原理可以充分利用page cache.</p>
 <h2 id="DAX"><a href="#DAX" class="headerlink" title="DAX"></a>DAX</h2><p>允许应用程序直接将数据从内存传输到存储设备。绕过传统的文件系统栈，允许应用程序通过Direct Memory Access (DMA)直接与存储设备进行交互，特别是与非易失性内存（NVM）设备一起使用。</p>
+<h2 id="内存条和服务器配置信息解释"><a href="#内存条和服务器配置信息解释" class="headerlink" title="内存条和服务器配置信息解释"></a>内存条和服务器配置信息解释</h2><blockquote>
+<p>内存条和服务器那一连串的数字和字母到底是啥？虽然本文的解释不适用于所有，但是可以做些参考。</p>
+</blockquote>
+<p><strong>内存条上信息：16GB 2Rx8 PC4-3200AA-RE2-12 HMA82GR7DJR8N-XN T4 AC 2128</strong></p>
+<ol>
+<li><p>16GB：这表示内存条的容量为16GB。</p>
+</li>
+<li><p>2Rx8：这是内存条的组织结构标识。 “2R” 表示内存模块上有两个内存芯片排列，而 “x8” 表示每个芯片是8位宽。</p>
+</li>
+<li><p>PC4-3200AA-RE2-12：这是内存条的速度和规范标识。 “PC4” 表示这是DDR4类型的内存， “3200” 表示内存的数据传输速度为3200MHz， “AA” 表示内存模块的时序配置， “RE2” 表示内存的特定组织结构，而 “12” 是内存模块的电压标识。</p>
+</li>
+<li><p>HMA82GR7DJR8N-XN：这是内存模块的型号和序列号。</p>
+</li>
+<li><p>T4 AC 2128：这是内存模块的制造商和生产批次等其他信息。这些信息通常与特定的制造商有关，对于不同的制造商可能会有不同的含义。</p>
+</li>
+</ol>
+<p><strong>3200MT/s RDIMMs</strong> 指一种类型的内存模块</p>
+<ol>
+<li><p>3200MT/s：这表示内存模块的数据传输速度为3200MT/s，其中 “MT/s” 表示每秒的兆传输速度。这是内存模块的时钟速度，用于衡量内存的数据传输能力。较高的速度表示内存可以更快地读取和写入数据。（3200MT/s和3200MHz一个意思）</p>
+</li>
+<li><p>RDIMMs：这是内存模块的类型，即注册内存模块（Registered DIMM）。RDIMMs是一种内存技术，通过在内存模块和内存控制器之间添加一个注册器（register）来提供更好的信号完整性和稳定性。RDIMMs通常用于服务器和工作站等高性能计算环境，可以支持更大容量的内存。</p>
+</li>
+</ol>
+<hr>
+<p>*<em>服务器配置5317 <em>2/Intel持久内存200系列256G</em>2+320016G</em>12/SSD960G<em>2+2.4TB SAS</em>2**</p>
+<ol>
+<li><p>5317 * 2：是指使用    Intel® Xeon® Gold 5317 Processor处理器，数量为2个。</p>
+</li>
+<li><p>Intel持久内存200系列256G * 2：这表示使用 Intel Persistent Memory 200 系列，容量为256GB，数量为2个。Intel Persistent Memory 是一种介于传统内存和存储之间的新型存储技术，具有较高的容量和持久性。</p>
+</li>
+<li><p>3200 16G * 12：这可能是指使用DDR4内存，容量为16GB，频率为3200MHz，数量为12个。</p>
+</li>
+<li><p>SSD 960G * 2：这表示使用两个容量为960GB的固态硬盘（SSD）。</p>
+</li>
+<li><p>2.4TB SAS * 2：这表示使用两个容量为2.4TB的SAS硬盘。SAS（Serial Attached SCSI）硬盘是一种高性能和可靠性的存储解决方案，适用于需要大容量存储的应用。</p>
+</li>
+</ol>
 
                 
             </div>
@@ -696,8 +733,8 @@
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Basics/" class="post-category">
-                                    Basics
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
                                 </a>
                             
                             
@@ -749,8 +786,8 @@
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Basics/" class="post-category">
-                                    Basics
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
                                 </a>
                             
                             
@@ -759,14 +796,6 @@
                 </div>
                 
                 <div class="card-action article-tags">
-                    
-                    <a href="/tags/kernelspace/">
-                        <span class="chip bg-color">kernelspace</span>
-                    </a>
-                    
-                    <a href="/tags/userspace/">
-                        <span class="chip bg-color">userspace</span>
-                    </a>
                     
                     <a href="/tags/namespace/">
                         <span class="chip bg-color">namespace</span>
@@ -916,7 +945,7 @@
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2024</span>
+                <span id="year">2019-2025</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -925,7 +954,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">175.9k</span>&nbsp;字
+                class="white-color">245.9k</span>&nbsp;字
             
             
             

@@ -1,0 +1,1134 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Vue基础语法, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>Vue基础语法 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/6.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">Vue基础语法</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/JavaScript/">
+                                <span class="chip bg-color">JavaScript</span>
+                            </a>
+                        
+                            <a href="/tags/Vue/">
+                                <span class="chip bg-color">Vue</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2022-09-21
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    2.2k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    8 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="一、Mustach（双花括号）"><a href="#一、Mustach（双花括号）" class="headerlink" title="一、Mustach（双花括号）"></a>一、Mustach（双花括号）</h2><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/fea70b9b8e61b009394699d0bdaa5a22.png"><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/c0ad7c34fc3afe9f75ccbea83c027602.png"></p>
+<h2 id="二、插值操作"><a href="#二、插值操作" class="headerlink" title="二、插值操作"></a>二、插值操作</h2><h3 id="1-v-once不允许被修改"><a href="#1-v-once不允许被修改" class="headerlink" title="1.v-once不允许被修改"></a>1.v-once不允许被修改</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/652fa18c991c9ecd877de1c6a82cde09.png"><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/cc1782c6a2a3b7dcd0ea4e10b7607f87.png"></p>
+<h3 id="2-v-html将内容解析为html的格式"><a href="#2-v-html将内容解析为html的格式" class="headerlink" title="2.v-html将内容解析为html的格式"></a>2.v-html将内容解析为html的格式</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/c3c124c65b5477dfee1da665cb690165.jpeg#pic_center"><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/c15f9f4cf0c621dc5c28c1adfb64e7c8.jpeg#pic_center"></p>
+<h3 id="2-v-text会被覆盖不好用"><a href="#2-v-text会被覆盖不好用" class="headerlink" title="2.v-text会被覆盖不好用"></a>2.v-text会被覆盖不好用</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/1ae7ddc6c03ca0ab7644b6427caad27c.jpeg#pic_center"></p>
+<p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/1483b2d0fe954f0e12aa8bedae23d5fc.jpeg#pic_center"></p>
+<h3 id="3-v-pre不去解析直接显示出来"><a href="#3-v-pre不去解析直接显示出来" class="headerlink" title="3.v-pre不去解析直接显示出来"></a>3.v-pre不去解析直接显示出来</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/8bce699a35c0065d7e62d3ffa862d01f.jpeg#pic_center"></p>
+<p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/79edc92a44463119523788af81c0d6e2.jpeg#pic_center"></p>
+<h3 id="4-v-cloak"><a href="#4-v-cloak" class="headerlink" title="4.v-cloak"></a>4.v-cloak</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/cbde399105efd8f50ac53c9ca9916817.jpeg#pic_center"><br>setTimeout(function(){……}, 1000)时，页面会先渲染了，js被卡住了。那么v-cloak可以在被卡住的时候什么都不显示。</p>
+<p>以上操作都是针对Mustach的，去动态决定内容，但属性也需要动态决定。</p>
+<h2 id="三、v-bind"><a href="#三、v-bind" class="headerlink" title="三、v-bind"></a>三、v-bind</h2><h3 id="1-基本使用方法"><a href="#1-基本使用方法" class="headerlink" title="1.基本使用方法"></a>1.基本使用方法</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/4478e8867643561f4c8dd1afbed5cbb4.jpeg#pic_center"></p>
+<h3 id="2-绑定class实现点击后切换颜色"><a href="#2-绑定class实现点击后切换颜色" class="headerlink" title="2.绑定class实现点击后切换颜色"></a>2.绑定class实现点击后切换颜色</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/9ed70dc2016837920d37589508bc2a5e.jpeg#pic_center"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/c3898e84ee92b60a5d3e7031763e8c72.jpeg#pic_center"></p>
+<h3 id="3-绑定class数组"><a href="#3-绑定class数组" class="headerlink" title="3.绑定class数组"></a>3.绑定class数组</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/504a14e7729d2459148241349b122489.jpeg#pic_center">上下两个h2标签效果是一样的，就是你可以用数组的形式给他几个类，用的很少。</p>
+<h3 id="4-绑定style（对象语法）"><a href="#4-绑定style（对象语法）" class="headerlink" title="4.绑定style（对象语法）"></a>4.绑定style（对象语法）</h3><p>注意在使用样式时的引号，以前的写法是没有的，现在要把它当成字符串是要加上的，而动态的那个值本身就解析为字符串所以又没加。（大概如此理解吧）<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/9e57957de8352504999cef33f0c4b174.jpeg#pic_center"><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/5760f25b1bf0f814df956a6b9c8a7267.jpeg#pic_center"></p>
+<h3 id="5-绑定style（数组语法）"><a href="#5-绑定style（数组语法）" class="headerlink" title="5.绑定style（数组语法）"></a>5.绑定style（数组语法）</h3><p>用的很少<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/cb82ac310f6546b41603c6ada19f4b93.jpeg#pic_center"></p>
+<h2 id="四、计算属性（希望数据经过某种变化再显示出来）"><a href="#四、计算属性（希望数据经过某种变化再显示出来）" class="headerlink" title="四、计算属性（希望数据经过某种变化再显示出来）"></a>四、计算属性（希望数据经过某种变化再显示出来）</h2><h3 id="1-简单使用"><a href="#1-简单使用" class="headerlink" title="1.简单使用"></a>1.简单使用</h3><p>四种写法得到一样的效果<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/27cfcc1188b1359eb888e31b011a4cbc.jpeg#pic_center"><br>computed调用几次都执行一次是有缓存的，methods调用几次执行几次，没有缓存，特别是当需要展示的数据要经过for循环的处理时，用计算属性更加合理。computed的function（）取名字不要取动词的名字。<br>再举例一个应用场景：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/2983b528fa442e308a89984c4df4addf.jpeg#pic_center">其中ES6的语法更加简单了：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/398320abe22b42b0387d94438d07e2a9.jpeg#pic_center"></p>
+<h3 id="2-计算属性get和set方法"><a href="#2-计算属性get和set方法" class="headerlink" title="2.计算属性get和set方法"></a>2.计算属性get和set方法</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/1080e1c2d358862880627ace275d19f4.jpeg#pic_center">fullName是一个属性，但是{}本身也是一个对象，所以fullName属性对应是一个对象。这个对象完整写法有set和get方法，但是set一般都是空的，没有set方法，是一个只读属性，一般删除set方法。既然只有get方法就可以也省略掉get：写法像注释掉的那段一样。</p>
+<p>使用set的例子：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/4673f878fb9c5bacc94b882895cfb904.jpeg#pic_center"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/6c7b3b20d03c3a9a82289d569eafda21.jpeg#pic_center"></p>
+<h2 id="五、v-on绑定监听"><a href="#五、v-on绑定监听" class="headerlink" title="五、v-on绑定监听"></a>五、v-on绑定监听</h2><h3 id="1-事件绑定"><a href="#1-事件绑定" class="headerlink" title="1.事件绑定"></a>1.事件绑定</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/b5aded48560afbb85c9ac8c289c6a480.jpeg#pic_center"></p>
+<p>还有很多事件可以监听，比如键盘鼠标的，语法糖则是将v-on：换成@</p>
+<h3 id="2-参数传递"><a href="#2-参数传递" class="headerlink" title="2.参数传递"></a>2.参数传递</h3><p>函数本身不要求传参数，如图效果一样的<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/5cb7f1c3042763086722a43ddfd94d3a.jpeg#pic_center">要求传参，但没有传，显示为undefined(写函数时没有省略小括号)。<br>既要求传参没有传，又省略了函数小括号，Vue则会默认将浏览器产生的event事件对象作为参数传入到方法。</p>
+<p>如果一个方法既需要event参数，又需要其他参数。好，现在你又不写括号，那么第一个参数是event，后面都undefined。（写了个空括号当然都undefined）正确写法是把你想获得的event参数写作$event<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/8b7d1b57601522dab8533b38c2098be7.jpeg#pic_center"></p>
+<h3 id="3-修饰符"><a href="#3-修饰符" class="headerlink" title="3.修饰符"></a>3.修饰符</h3><p>先来讲的是事件冒泡：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/f4c746f76f3be97f98e3d5954aaa4eed.jpeg#pic_center">点击按钮不希望有divClick的打印，于是把按钮的@click改为@click.stop</p>
+<p><a target="_blank" rel="noopener" href="https://www.runoob.com/vue3/vue3-events.html">这里有很多修饰符的介绍</a></p>
+<p>监听键盘某个键帽：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/dedb19ebadbcf8b3dd32ba1a55bb15fb.jpeg#pic_center"></p>
+<h2 id="六、v-if、v-else-if、v-else"><a href="#六、v-if、v-else-if、v-else" class="headerlink" title="六、v-if、v-else-if、v-else"></a>六、v-if、v-else-if、v-else</h2><h3 id="1-v-if"><a href="#1-v-if" class="headerlink" title="1.v-if"></a>1.v-if</h3><p>（由一个布尔变量决定他要不要显示出来）<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/3c101fbd3895eb2f4416e663d39b2f07.jpeg#pic_center">效果如下图：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/1c2757080ee9b1ea23df577b165044aa.jpeg#pic_center"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/ebf6bdcd3c2f32bf7eab4893614ec64c.jpeg#pic_center"></p>
+<h3 id="2-v-else"><a href="#2-v-else" class="headerlink" title="2.v-else"></a>2.v-else</h3><p>顾名思义if没了就它上<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/ceb6006fd550eca676bdd41fc0522b76.jpeg#pic_center"><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/353f4d293859bfcf1179caf6e3ec53b3.jpeg#pic_center"></p>
+<h3 id="3-v-else-if"><a href="#3-v-else-if" class="headerlink" title="3.v-else-if"></a>3.v-else-if</h3><p>（不建议用太多，复杂判断不写标签里，写函数里呀）<br>like this，如图有两种方式效果一样的：<br>这是放在计算属性里<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/793f1c919fbaf41877dec7c6f47433d9.jpeg#pic_center"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/0c0c67e4098d8b0ea6b5f2ba6c36152b.jpeg#pic_center">效果：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/3a918653671659a1585e8aacc4cc9c5f.jpeg#pic_center"></p>
+<h3 id="4-v-if在使用时和v-show的区别"><a href="#4-v-if在使用时和v-show的区别" class="headerlink" title="4.v-if在使用时和v-show的区别"></a>4.v-if在使用时和v-show的区别</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/b9420901f182b44f2c62c401edd8a92f.jpeg#pic_center">在网页打开检查就能发现区别：<br>aaa的标签直接从dom被移除了<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/2f634672256131dd38dc82dc72e2e47e.jpeg#pic_center">于是在开发时的选择：<br>当需要在显示与隐藏之间切片很频繁时,使用v- show<br>当只有一次切换时,通过使用v-if</p>
+<h2 id="七、v-for和数组"><a href="#七、v-for和数组" class="headerlink" title="七、v-for和数组"></a>七、v-for和数组</h2><h3 id="1-v-for遍历数组"><a href="#1-v-for遍历数组" class="headerlink" title="1.v-for遍历数组"></a>1.v-for遍历数组</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/6a733c5e19160ca0514f2604656e53b3.jpeg#pic_center"></p>
+<h3 id="2-v-for遍历对象"><a href="#2-v-for遍历对象" class="headerlink" title="2.v-for遍历对象"></a>2.v-for遍历对象</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/f5b8575f146393f6d1e0025287f923c5.jpeg#pic_center"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/121a7311fa56fc2c4aa3691f6977a51a.jpeg#pic_center"></p>
+<h3 id="3-绑定key"><a href="#3-绑定key" class="headerlink" title="3.绑定key"></a>3.绑定key</h3><p>绑定key的好处是提高性能，在dom渲染前有个虚拟dom。key作用就是为了高效更新虚拟dom。假如一个插入操作，如果不绑定在修改时是从插入处一直往后改，如果绑定就会不改变以前的直接插入。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/0451eb6be8d43a7f39a2105e53577df0.jpeg#pic_center"><br>但是，绑定的东西要和插入的一样，比如下图如果key是index就没用。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/23be0963ae0c39154cb7a70c9a5d2586.jpeg#pic_center"></p>
+<h3 id="4-数组中有的方法不是响应式的"><a href="#4-数组中有的方法不是响应式的" class="headerlink" title="4.数组中有的方法不是响应式的"></a>4.数组中有的方法不是响应式的</h3><p>意思是，当数组值其实已经发生改变了，但是页面渲染却还是以前的样子。比如用索引值修改数组中的元素，当点击按钮是调用<code>this.letters[0]='bbbbbb';</code>就不是响应式的。换成<code>this.letters.splice(0,1,'bbbbbb');</code>就可以实现啦。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/a77f8b80302afde853e77251130e8316.jpeg#pic_center">还有一个Vue内部的函数，可以实现这件事set(要修改的对象，索引值，修改后的值)<code>Vue.set(this.letters, 0, 'bbbbbb')</code><br>响应式的函数：</p>
+<table>
+<thead>
+<tr>
+<th>函数用法</th>
+<th>函数作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>this.letters.pop()</td>
+<td>删除数组中最后一个元素</td>
+</tr>
+<tr>
+<td>this.letters.shift()</td>
+<td>删除数组中第一个元素</td>
+</tr>
+<tr>
+<td>this.letters.push(‘l’,’m’,’n’)</td>
+<td>可以一次性在数组后加多个元素</td>
+</tr>
+<tr>
+<td>this.letters.unshift(‘l’,’m’,’n’)</td>
+<td>可以一次性在数组前加多个元素</td>
+</tr>
+<tr>
+<td>this.letters.sort()</td>
+<td>排序</td>
+</tr>
+<tr>
+<td>this.letters.reverse()</td>
+<td>反转数组内容</td>
+</tr>
+<tr>
+<td>this.letters.splice(start，num)</td>
+<td>(从1开始数的)start元素(不包括它自己)删除之后的num个元素(不传入num则删除后面所有)</td>
+</tr>
+<tr>
+<td>this.letters.splice(start，num，’x’,’y’,’z’)</td>
+<td>删除之后再追加上xyz</td>
+</tr>
+<tr>
+<td>this.letters.splice(start，0，’x’,’y’,’z’)</td>
+<td>一个都不删而是插入xyz</td>
+</tr>
+</tbody></table>
+<h2 id="八、高阶函数（filter、map、reduce）"><a href="#八、高阶函数（filter、map、reduce）" class="headerlink" title="八、高阶函数（filter、map、reduce）"></a>八、高阶函数（filter、map、reduce）</h2><p>可以将一个函数作为参数传给高阶函数。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/4f8bf0368f252134e293a701de8c600c.jpeg#pic_center"><br>这里filter里的n是每次回调一个数组里的，如图来讲一共回调了七次，可以实现和注释部分一样的功能。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/4330e35b10dc08a9585cce494605c66d.jpeg#pic_center"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/8a3fe04414414bb256005ef18a28c393.jpeg#pic_center">map函数也能回调，而且不像filter有要求。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/af4e54fb17494d2477bad8a6fe9b19fa.jpeg#pic_center">这函数是初始值为0，每次回调会把上次的值保留下来<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/d70eb5a4621df08757164f2da0612751.jpeg#pic_center">于是乎，有了这三个函数，我们可以一个函数实现之前的三个功能(很装13呀）其实这种可读性强，还简洁。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/a7cc8e5cc2c4b4c232a3fff765e01cea.jpeg#pic_center"></p>
+<h2 id="九、v-model"><a href="#九、v-model" class="headerlink" title="九、v-model"></a>九、v-model</h2><h3 id="1-数据表单的双向绑定-textarea、input"><a href="#1-数据表单的双向绑定-textarea、input" class="headerlink" title="1.数据表单的双向绑定(textarea、input)"></a>1.数据表单的双向绑定(textarea、input)</h3><p>原本用v-bind可以单向的绑定：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/9a4084b3cd8f6849b58f51c087ae21b1.jpeg#pic_center">结果：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/9a9a65a510f2e52719edf0346cf4d776.jpeg#pic_center">在v-bind的基础上使用v-on获取输入的内容就可实现和v-model一样的双向绑定了：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/15c5cf29e70fd942858cc76228b10fa5.jpeg#pic_center">也可以不写方法直接写表达式<code>@input="message=$event.target.value"</code><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/f5f1105c9fe2cc4f8e5f5169171a47c8.jpeg#pic_center">message改变会改变input里的东西，在input写东西也能改变message的值除了用在input元素，textarea元素也能用。</p>
+<h3 id="2-radio类型的使用"><a href="#2-radio类型的使用" class="headerlink" title="2.radio类型的使用"></a>2.radio类型的使用</h3><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/2117997fd7eb9910d147be535b8b3bf2.jpeg#pic_center"><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/2105c14a87b035dd12d21309173fae5d.jpeg#pic_center"><br>如果不用v-model，加上相同的name属性才能互斥的选择性别，否则是两者都能点的。加上v-model后可以将需要的表单信息获取传给后台，name也可以不加上去。注意v-model绑定的还得是在data里面的同一个参数。</p>
+<h3 id="3-checkbox类型"><a href="#3-checkbox类型" class="headerlink" title="3.checkbox类型"></a>3.checkbox类型</h3><p>首先单选框，勾选同意才能点击下一步按钮<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/b9f2dbc358ef9bc60bff0dd2320c3da8.jpeg#pic_center">然后是多选框，单选和多选绑定就是一个值和一个数组的区别，都能把绑定的东西传回服务器。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/10ef86160b20e2c6dd64a68cefa57d8f.jpeg#pic_center">PS：checkbox就是多选框类型了，label的作用是让除了点击框能选中以外，点击文字也能选中。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/d14be96e73170232f4f506f77bdc3e52.jpeg#pic_center"></p>
+<h3 id="4-select类型使用"><a href="#4-select类型使用" class="headerlink" title="4.select类型使用"></a>4.select类型使用</h3><p>select的v-model不是绑在option上的，value才是对应每个option。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/5d1ade843daebb083713cf20066ce848.jpeg#pic_center"><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/2377e69760363934810d6347711aff4a.jpeg#pic_center"></p>
+<h3 id="5-v-model的修饰符"><a href="#5-v-model的修饰符" class="headerlink" title="5.v-model的修饰符"></a>5.v-model的修饰符</h3><p><strong>lazy修饰符:</strong><br>默认情况下, v-model默认是在input事件中同步输入框的数据的。也就是说, 一旦有数据发生改变对应的data中的数据就会自动发生改变。lazy修饰符可以让数据在失去焦点或者回车时才会更新；<br><strong>number修饰符:</strong><br>默认情况下,在输入框中无论我们输入的是字母还是数字,都会被当做字符串类型进行处理。但是如果我们希望处理的是数字类型,那么最好直接将内容当做数字处理。number修饰符可以让在输入框中输入的内容自动转成数字类型，但是必须输入数字，敲字母就没反应了；<br><strong>trim修饰符:</strong><br>如果输入的内容首尾有很多空格,通常我们希望将其去除。trim修饰符可以过滤内容左右两边的空格。浏览器显示时是自动去掉空格的，但是保存的值里面是有空格的。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/dddbbc8c7ddc1996f57c7efd436f7531.jpeg#pic_center"></p>
+<p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/8a849664ac1daf642c2ae9b0e8e1d30b.jpeg#pic_center"></p>
+<h2 id="十、v-input"><a href="#十、v-input" class="headerlink" title="十、v-input"></a>十、v-input</h2><h3 id="1-值绑定"><a href="#1-值绑定" class="headerlink" title="1.值绑定"></a>1.值绑定</h3><p>input中的值绑定，由服务器返回数据，动态去绑定，而不是像上面的例子写死了所有选择。用v-bind就可以实现了。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/0c2e1b1b9942b01c1e859290b18d133d.jpeg#pic_center"></p>
+<h3 id="2-key"><a href="#2-key" class="headerlink" title="2.key"></a>2.key</h3><p>以下例子在切换登录方式时保留输入框中的内容了，如果不加key的话。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/04fd5c090d0ac4a14bcbc8d4a6cefe1e.jpeg#pic_center">这是因为Vue在进行DOM渲染时,出于性能考虑,会尽可能的复用已经存在的元素,而不是重新创建新的元素。会保留input里的value，加个key，两个key不一样就会在切换时被清空了。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2022/09/21/Vue%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/">http://ytirus.github.io/2022/09/21/Vue%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/JavaScript/">
+                                    <span class="chip bg-color">JavaScript</span>
+                                </a>
+                            
+                                <a href="/tags/Vue/">
+                                    <span class="chip bg-color">Vue</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2022/09/21/Vue%E7%BB%84%E4%BB%B6%E5%8C%96%E5%BC%80%E5%8F%91/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/29.jpg" class="responsive-img" alt="Vue组件化开发">
+                        
+                        <span class="card-title">Vue组件化开发</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            将复杂的用户界面拆分成多个独立、可复用的组件
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2022-09-21
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/JavaScript/">
+                        <span class="chip bg-color">JavaScript</span>
+                    </a>
+                    
+                    <a href="/tags/Vue/">
+                        <span class="chip bg-color">Vue</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2022/09/21/Express%E6%A1%86%E6%9E%B6%E5%85%A5%E9%97%A8/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="Express框架入门">
+                        
+                        <span class="card-title">Express框架入门</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            Express是一个基于Node.js平台的web开发框架，主要用于构建服务器端应用程序
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2022-09-21
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Express/">
+                        <span class="chip bg-color">Express</span>
+                    </a>
+                    
+                    <a href="/tags/JavaScript/">
+                        <span class="chip bg-color">JavaScript</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2025</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">245.9k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

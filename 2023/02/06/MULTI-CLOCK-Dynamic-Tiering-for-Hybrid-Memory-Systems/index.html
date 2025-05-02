@@ -415,12 +415,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/Hybrid-Memory-Systems/">
-                                <span class="chip bg-color">Hybrid Memory Systems</span>
+                            <a href="/tags/CCFA/">
+                                <span class="chip bg-color">CCFA</span>
                             </a>
                         
-                            <a href="/tags/A/">
-                                <span class="chip bg-color">A</span>
+                            <a href="/tags/Hybrid-Memory/">
+                                <span class="chip bg-color">Hybrid-Memory</span>
                             </a>
                         
                     </div>
@@ -453,14 +453,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.2k
+                    5.7k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    7 分
+                    19 分
                 </div>
                 
 
@@ -488,7 +488,59 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="1-论文信息"><a href="#1-论文信息" class="headerlink" title="1. 论文信息"></a>1. 论文信息</h2><div class="note primary">
+                <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="1、存储金字塔"><a href="#1、存储金字塔" class="headerlink" title="1、存储金字塔"></a>1、存储金字塔</h3><ul>
+<li>Cache高速缓存（包括寄存器）都是临时缓存。</li>
+<li>随机存取存储器（英语：Random Access Memory，缩写：RAM），也叫主存，是<strong>与CPU直接交换数据的内部存储器</strong>。它可以随时读写（刷新时除外），而且速度很快，通常作为操作系统或其他正在运行中的程序的临时数据存储介质。DRAM用于管理一些进程临时存储。<strong>DRAM内存颗粒</strong>，其存储组织结构为深度（Depth）加上位宽（Width）。<strong>动态随机存取存储器（DRAM）</strong>一个电容器和一个晶体管组成一对叫储存单元，需要<strong>周期性补充电子保持状态故称“动态”存储器</strong>。静态随机存取存储器（SRAM）需要6个晶体管组成一个储存单元。SRAM 快、DRAM慢。SRAM 贵、DRAM便宜。平常的内存芯片的用就是DRAM。高端的内存条都会有外壳包裹着，其实那个壳是人家的散热片也叫马甲。越是高频率的内存条一般都会加壳，频率越高，宽带越大，发热量越大。<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/257999332">来自文章什么是内存颗粒？</a>三星，海力士，镁光是市场三大供商内存颗粒供应商，那些高质量半导体芯片没有坏块的被原厂家保留，淘汰的称为白片卖给其他厂家，其他厂家再挑剩下坏块较多的做成了U盘。（DDR=Double Data Rate双倍速率,DDR SDRAM=双倍速率同步动态随机存储器，人们习惯称为DDR，其中，SDRAM 是Synchronous Dynamic Random Access Memory的缩写，即同步动态随机存取存储器。）</li>
+<li>SSD、U盘，SD卡等都是Flash结构，但其主控电路不同。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/424bdae5b74cf9403556a05940f492ea.png#pic_center"></li>
+</ul>
+<h3 id="2、频率和带宽"><a href="#2、频率和带宽" class="headerlink" title="2、频率和带宽"></a>2、频率和带宽</h3><p>存储器的带宽指单位时间内从存储器进出信息的最大数量。若存储器的数据总线宽度为 32 位，存取周期为 200ns ，则存储器的带<br>宽 =1/200ns ×32bit= 5MHz×32bit = 160 Mb/s = 20MB/ s（1 MHz = $10^6 Hz$，1s = $10^6ns$ ）</p>
+<h3 id="3、Page-页"><a href="#3、Page-页" class="headerlink" title="3、Page 页"></a>3、Page 页</h3><p>逻辑内存称之为页，物理内存称之为帧（page frame），由页表做映射，每个进程独立维护。操作系统通过物理地址帧来判断属于哪一层的。有的页应映射去磁盘了，产生缺页异常由用户态变为内核态（申请外部资源时发生），就去磁盘找数据，涉及页迁移与替换。<br><img src="https://i-blog.csdnimg.cn/blog_migrate/ee994eaf4592ffce024e029e73ebd891.png#pic_center" alt="图片来自硬件茶谈"><br>图片来自<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1aF411u7Ct/?spm_id_from=333.999.0.0">硬件茶谈视频（固态硬盘的缓存）</a><br>再补充一下用户态到内核态的几个操作，后面论文会提到相关的。读写文件：先<code>open</code>，之后<code>read</code>或者<code>write</code>（这三个既是C内置函数名称，也是系统调用名称）；申请内存（堆内存）C用<code>malloc</code>，只是函数名，没有系统调用是这个名字，实际是通过<code>brk</code>小于128k内存时在edata游标下申请或者<code>mmap</code>，都申请的是虚拟内存空间。在第一次访问时，发现才申请的虚拟地址没有映射到物理地址，于是触发缺页中断（缺页异常）。cpp和java通过new一个对象也会经历类似过程，</p>
+<ul>
+<li>分页使得每个程序都有很大的逻辑地址空间,通过映射磁盘和高效的置换算法，使内存“无限大”。</li>
+<li>分页使不同的进程的内存隔离，保证了安全。</li>
+<li>分页降低了内存碎片问题。<br><img src="https://i-blog.csdnimg.cn/blog_migrate/4803dfd5a5189450d3ee346b0f5053de.png" alt="来自free-coder"><br>来自<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1u7411z7Sv/?spm_id_from=333.999.0.0&amp;vd_source=aba7551fbf58758a936846f0b926ddea">【OS】操作系统的内存管理简介</a></li>
+</ul>
+<h3 id="4、持久内存PM"><a href="#4、持久内存PM" class="headerlink" title="4、持久内存PM"></a>4、持久内存PM</h3><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/391089447">持久内存（PMem）科普来自 memark.io 技术社区</a><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/12b6822bd762632747a27dbf713ef8f2.png#pic_center"><br>允许应用程序直接从持久性内存中访问他们的数据，而不需要先分页到DRAM中。即可以当做内存使用，也可以当做持久化外存设备使用。<strong>对本篇文章来说有帮助的知识：</strong><br>正是因为持久内存具有传统内存的特性，又兼具有外存的持久化特性，造就了其特殊的双模式使用方式。注意，两种模式不能混合使用，并且模式之间切换具有一定成本，无法做到程序运行时动态切换。<strong>文章希望将DRAM和PM配置成多层次内存系统中的独立层。</strong></p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">简单粗暴的内存模式（Memory Mode）
+就是把持久内存直接当做内存使用，不利用其非易失特性。操作系统将会直接看到持久内存的容量，而原来的DRAM将会作为持久内存的一层cache。程序无需改动任何代码，可以直接利用持久内存的大内存优势来运行内存消耗大的应用。
+内存模式使用简单，但是也带来了一些问题：
+	由于DRAM被当做了PM的一层cache，并且被CPU自动管理，但是PM其在性能参数上是略低于DRAM的，所以在某些对于cache不友好的情况下，可能会带来性能较大的衰减。
+	无法使用持久化特性。内存模式丢失了内存数据持久化的特性，无法用作对数据持久化有要求的场景。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">App Direct 模式（AD Mode）
+AD Mode 实际上是把内存层级完全暴露给了应用。程序员需要自己控制将数据存放在DRAM或者持久内存，自己掌握是否要进行内存数据的持久化操作。
+其优势正好是克服了内存模式的两个问题：
+	存储层级对程序员可见，因此应用可以根据数据的特点进行存储性能优化，比如冷热数据的分级存储，以及使用缓存敏感的数据结构（cache conscious）
+	数据持久性在AD Mode下可用，程序员可以选择是否将数据在持久内存上做持久化操作。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="5、LRU等页面置换算法"><a href="#5、LRU等页面置换算法" class="headerlink" title="5、LRU等页面置换算法"></a>5、LRU等页面置换算法</h3><p>缺页中断发生时就要开始啦（本节摘取<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/553372876">一文看懂页面置换算法</a>）</p>
+<ul>
+<li><p>最优页面置换算法（OPT、optimal）对于保存在内存当中的每一个逻辑页面，<strong>计算在它的下一次访问之前，还需要等待多长时间</strong>，从中选择等待时间最长的那个，作为被置换的页面。<strong>属于理想状况，现实无法实现</strong>。</p>
+</li>
+<li><p>先进先出算法（FIFO）系统维护着一个链表，记录了所有位于内存当中的逻辑页面。从链表的排列顺序来看，链首页面的驻留时间最长，链尾页面的驻留时间最短。当发生一个缺页中断时，把链首页面淘汰出局，并把新的页面添加到链表的末尾。<strong>即使这个页面在内存被经常调用，但它来的早也会躺枪</strong>，所以性能差。</p>
+</li>
+<li><p>最近最久未使用算法（LRU,Least <strong>Recently</strong> Used）选择<strong>最久未使用</strong>的那个页面，并淘汰之。（实现方式就是最近使用过就放最前面，放在最后的自然就是最久没使用过的）。</p>
+</li>
+<li><p>时钟页面置换算法（Clock）① 需要用到页表项当中的访问位，当一个页面被装入内存时，把该位初始化为0。然后如果这个页面被访问（读/写），则把该位置置1。② 把各个页面组织形成环形链表（类似钟表面），把指针指向最老的页面（最先进来）。③ 当发生一个缺页中断时，考察指针所指向的最老页面。若它的访问位为0，立即淘汰；若访问位为1，则把该位置为0，然后指针往下移动一格。如此下去，直到找到被淘汰的页面，然后把指针移动到它的下一格。<strong>MULTI-CLOCK通过对每个内存层分别运行Linux的页框回收算法(PFRA)的修改版(该算法基于CLOCK算法)来确定各层内和各层间的页面的相对重要性。</strong><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/125a43e4774a32597da53d4651a81e7a.png"></p>
+</li>
+<li><p>最不常用算法（LFU，Least <strong>Frequently</strong> Used）当一个缺页中断发生时，选着访问次数最少的那个页面，并淘汰之。被访问的次数也会很少。<br>LRU考察的是多久未访问，时间越短越好；而LFU考察的是访问的次数或频度，访问次数越多越好。这也对应着文章多次提到的性能指标<strong>frequency &amp; recency</strong>的含义，前者指一段时间内的访问次数，后者指离上次访问过多久了。</p>
+</li>
+</ul>
+<h3 id="6、字节寻址"><a href="#6、字节寻址" class="headerlink" title="6、字节寻址"></a>6、字节寻址</h3><p><strong>内存的寻址粒度是Byte级别</strong>的 [<strong>字节, B</strong>，由<strong>8个位组成（bit</strong>，电子计算机中最小的数据单位。每一位的状态只有两种：0或1），<strong>字节是存储空间的基本计量单位</strong>] ，也就是说<strong>每个字节都有它的内存地址</strong>，CPU可以直接通过这个地址获取到相应的内容。对于SSD来说就不是这样了，SSD是以块的粒度来管理数据的，CPU没有办法直接访问文件中某个特定的字节。（混合内存还会用到NVM非易失性内存，人为啥有资格做内存，就是可以让软件以字节粒度进行寻址访问）<br>再补充一个小点：摘取自 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25297587/article/details/89818719">按字寻址和按字节寻址</a></p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">字一定为字节的整数倍，所以称之为字由若干个字节组成。
+字的位数称为字长（字不等于字长乘以字节！字<span class="token operator">=</span>字长×位）
+比如一个<span class="token number">8</span>位的CPU，这里的<span class="token number">8</span>位指其字长为<span class="token number">8</span>位，即单位时间内可以处理<span class="token number">8</span>位二进制数，即一个字节数。
+现在的CPU大部分为<span class="token number">64</span>位，即单位时间内可以处理<span class="token number">64</span>位二进制数，即<span class="token number">8</span>个字节数。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="7、预取Prefetching"><a href="#7、预取Prefetching" class="headerlink" title="7、预取Prefetching"></a>7、预取Prefetching</h3><p>现代处理器速度的快速发展和存储器速度的慢速发展导致处理器要花费大量的时间等待存储器数据的返回，这就是<strong>存储墙问题</strong>。为了解决这些问题，已提出多种技术方案， 其中最<strong>主要的有缓存和预取技术两种</strong>。</p>
+<p>缓存技术是利用局部性原理， 使速度更快的上层存储器成为下层存储器的缓冲。缓存技术能否通过较快的存储器屏蔽对较慢的存储器的访问， 完全取决于上层存储器的命中率。 提高相联度、Victim Cache、伪相联 Cache 等技术以及好的缓存替换算法都可降低缓存冲突失效，从而提高缓存命中率。 随着应用规模的不断扩大和上述技术的不断成熟， 容量失效和强制性失效在总的缓存失效次数当中所占的比例越来越大，成为影响缓存性能的主要因素。 </p>
+<p>预取技术可以通过计算和访存的重叠，隐藏因为缓存延时而引起的缓存失效，被认为是解决容量失效和强制性失效的有效手段。 <strong>硬件预取</strong>是由硬件根据访存的历史信息，对未来可能的访存单元预先取入Cache，从而在数据真正被用到时不会造成Cache失效。但是由于只是基于访存的历史信息，硬件预取会取回大量无用的Cache块，占用访存带宽，还会导致严重的Cache污染问题。由于硬件预取是基于访存的历史信息来预测未来的访存模式，从而<strong>可以在数据使用之前将其从下一级的存储器中取回</strong>。<strong>软件预取</strong>是指在编译时由编译器显示加入预取指令，提前将下一级存储器中的数据取回。因为加入了大量的预取指令，同时显示的预取指令需要计算出准确的预取地址，从而导致不能及时的发出预取指令以足够隐藏访存延时，影响了性能的提高。并且必须使额外的预取指令开销不能超过预取所能带来的效益， 否则得不偿失。</p>
+<h3 id="8、UMA与NUMA"><a href="#8、UMA与NUMA" class="headerlink" title="8、UMA与NUMA"></a>8、UMA与NUMA</h3><p>UMA是指多个cpu通过一个总线去访问内存，存在内存访问冲突，cpu资源浪费在争用地址上。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/2097f1778ae3dde82e27eb994bb1d121.png#pic_center"><br>Non Uniform Memory Access 非统一内存访问架构NUMA，主板会分成不同的插槽，每一个插槽一组cpu，以及和这组cpu离得近的内存。在这种设计里面存在和处理器相近的内存，通常称作本地内存；还有和处理器相对远的内存，通常称之为远端内存。优先访问离得近的，也能访问离得远的。把CPU+RAM+BUS+其他=一个NUMA节点。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/39bf2533d52a7d07c3a2dc670a8d8b09.png#pic_center"><br>每个CPU核独享L1、L2级缓存，L3级缓存为共享缓存。一个SOCKET称之为一个NUMA结点，不同NUMA节点之间通过总线连接。NUMA结点的内存分配方式</p>
+<ul>
+<li>Local分配：分配本地内存，就是指分在最靠近他的那里；</li>
+<li>InterLeaved分配：交错分配内存，指的是当前进程需要48G但是我的本地内存只有32G，那我可以放在远端一部分，而不是直接放入硬盘这样会缺页中断浪费很多时间。</li>
+</ul>
+<h3 id="9、持久化指令"><a href="#9、持久化指令" class="headerlink" title="9、持久化指令"></a>9、持久化指令</h3><p>应该是intel公司提供的包里面可以用的，这些指令直接从缓存写回PM。<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/519760491">持久化内存</a><br>模拟PM的主流方法包括在软件中添加内存访问延迟，使用软硬件仿真器，比如 Intel 的PMEP，通过限制延迟和带宽来模拟PM</p>
+<h2 id="1-论文信息"><a href="#1-论文信息" class="headerlink" title="1. 论文信息"></a>1. 论文信息</h2><div class="note primary">
 
 <ul>
 <li>文章来自IEEE International Symposium on High-Performance Computer Architecture, (HPCA), 2022</li>
@@ -609,12 +661,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/Hybrid-Memory-Systems/">
-                                    <span class="chip bg-color">Hybrid Memory Systems</span>
+                                <a href="/tags/CCFA/">
+                                    <span class="chip bg-color">CCFA</span>
                                 </a>
                             
-                                <a href="/tags/A/">
-                                    <span class="chip bg-color">A</span>
+                                <a href="/tags/Hybrid-Memory/">
+                                    <span class="chip bg-color">Hybrid-Memory</span>
                                 </a>
                             
                         </div>
@@ -695,16 +747,12 @@
                 
                 <div class="card-action article-tags">
                     
+                    <a href="/tags/Hybrid-Memory/">
+                        <span class="chip bg-color">Hybrid-Memory</span>
+                    </a>
+                    
                     <a href="/tags/Review/">
                         <span class="chip bg-color">Review</span>
-                    </a>
-                    
-                    <a href="/tags/B/">
-                        <span class="chip bg-color">B</span>
-                    </a>
-                    
-                    <a href="/tags/Hybrid-Memory-Systems/">
-                        <span class="chip bg-color">Hybrid Memory Systems</span>
                     </a>
                     
                 </div>
@@ -718,31 +766,31 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2021/06/06/Time-Complexity-Calculation/">
+                <a href="/2022/11/09/BGP%E5%9F%BA%E7%A1%80/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/9.jpg" class="responsive-img" alt="Time Complexity Calculation">
+                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="BGP基础">
                         
-                        <span class="card-title">Time Complexity Calculation</span>
+                        <span class="card-title">BGP基础</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            求时间复杂度会用到的公式，算法复杂性估计函数，还有递归方程的解法。从自己以前的博客搬运。
+                            Border Gateway Protocol边界网关协议是核心的动态路由协议，主要用于自治系统AS之间的路由选择
                         
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-06-06
+                                <i class="far fa-clock fa-fw icon-date"></i>2022-11-09
                             </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Algorithm/" class="post-category">
-                                    Algorithm
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
                                 </a>
                             
                             
@@ -752,8 +800,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Advanced-Mathematics/">
-                        <span class="chip bg-color">Advanced Mathematics</span>
+                    <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+                        <span class="chip bg-color">计算机网络</span>
                     </a>
                     
                 </div>
@@ -900,7 +948,7 @@
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2024</span>
+                <span id="year">2019-2025</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -909,7 +957,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">175.9k</span>&nbsp;字
+                class="white-color">245.9k</span>&nbsp;字
             
             
             

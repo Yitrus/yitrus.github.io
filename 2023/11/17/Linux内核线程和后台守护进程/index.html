@@ -415,6 +415,10 @@
                     
                     <div class="article-tag">
                         
+                            <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
+                                <span class="chip bg-color">虚拟文件系统</span>
+                            </a>
+                        
                             <a href="/tags/%E5%90%8E%E5%8F%B0%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B/">
                                 <span class="chip bg-color">后台守护进程</span>
                             </a>
@@ -427,10 +431,6 @@
                                 <span class="chip bg-color">文件系统</span>
                             </a>
                         
-                            <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
-                                <span class="chip bg-color">虚拟文件系统</span>
-                            </a>
-                        
                     </div>
                     
                 </div>
@@ -439,8 +439,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/Basics/" class="post-category">
-                                Basics
+                            <a href="/categories/OS/" class="post-category">
+                                OS
                             </a>
                         
                     </div>
@@ -461,14 +461,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    964
+                    1k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    4 分
+                    5 分
                 </div>
                 
 
@@ -505,7 +505,7 @@
 <p><img src="https://images.weserv.nl/?url=https://img-blog.csdnimg.cn/fe5bb756987a4b1ca6fcf7fb398991a9.jpeg"></p>
 <hr>
 <p>内核线程和后台守护进程被广泛用在分层内存的一些创新策略上，那么这些创建的一般流程是怎样的？</p>
-<h2 id="内核线程"><a href="#内核线程" class="headerlink" title="内核线程"></a>内核线程</h2><p>内核线程其实是运行在内核地址空间中的进程，没有独立的地址空间，共享内核的地址空间。Linux内核其实没有专门的线程，线程都当作普通的进程。<code>task_struct-&gt;mm == NULL</code></p>
+<h2 id="内核线程"><a href="#内核线程" class="headerlink" title="内核线程"></a>内核线程</h2><p>内核线程其实是运行在内核地址空间中的进程，没有独立的地址空间，共享内核的地址空间。Linux内核其实没有专门的线程，线程都当作普通的进程。<code>task_struct-&gt;mm == NULL</code>（在UNIX系统中，后台进程都按照惯例以d结尾，因此当你看到一个进程的名字以d结尾，那它极有可能是一个后台进程）</p>
 <p>Linux内核有多个函数接口创建内核线程，<code>kthread_create()</code>新创建的不能运行，还需要手动调用<code>wake_up_process</code>唤醒进程加入就绪队列。<code>kthread_run()</code>创建的马上就能直接运行。</p>
 <p>下面这个模块，每个CPU一个内核线程，输出当前CPU状态，以及当前进程的优先级等信息。</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;linux/module.h&gt;</span></span>
@@ -784,6 +784,10 @@ done<span class="token operator">:</span>
                     
                         <div class="article-tag">
                             
+                                <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
+                                    <span class="chip bg-color">虚拟文件系统</span>
+                                </a>
+                            
                                 <a href="/tags/%E5%90%8E%E5%8F%B0%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B/">
                                     <span class="chip bg-color">后台守护进程</span>
                                 </a>
@@ -794,10 +798,6 @@ done<span class="token operator">:</span>
                             
                                 <a href="/tags/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
                                     <span class="chip bg-color">文件系统</span>
-                                </a>
-                            
-                                <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
-                                    <span class="chip bg-color">虚拟文件系统</span>
                                 </a>
                             
                         </div>
@@ -857,7 +857,7 @@ done<span class="token operator">:</span>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            持续补充完善各种内核中内存相关数据统计收集方式、调试技巧。
+                            持续补充完善各种内核中内存相关数据统计收集方式、调试技巧
                         
                     </div>
                     <div class="publish-info">
@@ -868,8 +868,8 @@ done<span class="token operator">:</span>
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/Basics/" class="post-category">
-                                    Basics
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
                                 </a>
                             
                             
@@ -879,16 +879,24 @@ done<span class="token operator">:</span>
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
-                        <span class="chip bg-color">虚拟文件系统</span>
+                    <a href="/tags/Hybrid-Memory/">
+                        <span class="chip bg-color">Hybrid-Memory</span>
+                    </a>
+                    
+                    <a href="/tags/NUMA/">
+                        <span class="chip bg-color">NUMA</span>
                     </a>
                     
                     <a href="/tags/proc/">
                         <span class="chip bg-color">proc</span>
                     </a>
                     
-                    <a href="/tags/memoey/">
-                        <span class="chip bg-color">memoey</span>
+                    <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
+                        <span class="chip bg-color">虚拟文件系统</span>
+                    </a>
+                    
+                    <a href="/tags/Kernel-Crashed/">
+                        <span class="chip bg-color">Kernel-Crashed</span>
                     </a>
                     
                 </div>
@@ -935,20 +943,20 @@ done<span class="token operator">:</span>
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Hybrid-Memory-Systems/">
-                        <span class="chip bg-color">Hybrid Memory Systems</span>
+                    <a href="/tags/Disaggregated/">
+                        <span class="chip bg-color">Disaggregated</span>
                     </a>
                     
-                    <a href="/tags/A/">
-                        <span class="chip bg-color">A</span>
+                    <a href="/tags/CCFA/">
+                        <span class="chip bg-color">CCFA</span>
                     </a>
                     
-                    <a href="/tags/Memory-Pool/">
-                        <span class="chip bg-color">Memory Pool</span>
+                    <a href="/tags/Hybrid-Memory/">
+                        <span class="chip bg-color">Hybrid-Memory</span>
                     </a>
                     
-                    <a href="/tags/Disaggregated-Memory/">
-                        <span class="chip bg-color">Disaggregated Memory</span>
+                    <a href="/tags/MemoryPool/">
+                        <span class="chip bg-color">MemoryPool</span>
                     </a>
                     
                 </div>
@@ -1095,7 +1103,7 @@ done<span class="token operator">:</span>
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2024</span>
+                <span id="year">2019-2025</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -1104,7 +1112,7 @@ done<span class="token operator">:</span>
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">175.9k</span>&nbsp;字
+                class="white-color">245.9k</span>&nbsp;字
             
             
             

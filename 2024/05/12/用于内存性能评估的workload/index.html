@@ -1,0 +1,1359 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="用于内存性能评估的workload, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>用于内存性能评估的workload | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/31.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">用于内存性能评估的workload</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Machine-learning/">
+                                <span class="chip bg-color">Machine-learning</span>
+                            </a>
+                        
+                            <a href="/tags/Cloud/">
+                                <span class="chip bg-color">Cloud</span>
+                            </a>
+                        
+                            <a href="/tags/High-Performance-Computing/">
+                                <span class="chip bg-color">High-Performance-Computing</span>
+                            </a>
+                        
+                            <a href="/tags/Redis/">
+                                <span class="chip bg-color">Redis</span>
+                            </a>
+                        
+                            <a href="/tags/YCSB/">
+                                <span class="chip bg-color">YCSB</span>
+                            </a>
+                        
+                            <a href="/tags/TPCC/">
+                                <span class="chip bg-color">TPCC</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/DB/" class="post-category">
+                                DB
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-05-12
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    6.5k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    25 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><h3 id="性能参数"><a href="#性能参数" class="headerlink" title="性能参数"></a>性能参数</h3><p><strong>p99 latency：</strong><br>99th percentile latency 是一种用于衡量系统性能的指标，特别是在网络、计算和存储领域。它表示系统在一定时间范围内，例如一秒钟或一分钟内，对请求的响应时间进行排序后，取排在第99%位置的值作为度量标准。</p>
+<p>换句话说，p99 latency表示在一定时间内，99%的请求都能够在这个时间之内得到响应，而有1%的请求的响应时间超过了这个值。因此，p99 latency是一种反映系统性能的高百分位数指标，它关注的是在绝大多数情况下系统的表现，而忽略了一小部分可能出现的极端情况。</p>
+<p>对于一个服务而言，p99 latency通常比平均值更能反映系统的真实性能，因为平均值容易受到极端值的影响。如果p99 latency较高，说明系统中有一小部分请求的响应时间相对较长，可能需要进一步优化以提高整体性能。</p>
+<p><strong>QPS：</strong><br>QPS代表”Queries Per Second”，即每秒查询数。这是衡量系统性能的一个指标，尤其常用于描述数据库、网络服务和其他计算系统的吞吐量。</p>
+<p>QPS表示在每秒内系统能够处理的查询或请求的数量。这个指标对于评估系统的性能、稳定性和容量有重要意义。高QPS通常表示系统具有较高的吞吐量，能够处理大量的请求，而低QPS则可能暗示系统性能不足或者存在瓶颈。</p>
+<p>需要注意的是，QPS是一个宽泛的指标，具体的应用场景可能需要考虑响应时间、并发性等其他因素。在一些高并发的系统中，除了QPS外，还可能关注每个请求的响应时间以及系统的可靠性。</p>
+<h3 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h3><ol>
+<li>安装：<a target="_blank" rel="noopener" href="https://blog.csdn.net/shuryuu/article/details/111950157">https://blog.csdn.net/shuryuu/article/details/111950157</a></li>
+<li>自带的工作负载是redis上线前对redis单机、哨兵、cluster的压力测试————redis-benchmark.不用下载直接都自带<a target="_blank" rel="noopener" href="https://www.cnblogs.com/haha029/p/15610140.html">https://www.cnblogs.com/haha029/p/15610140.html</a></li>
+<li>memtier_benchmark是基于Redis Labs推出的多线程压测工具。<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010503464/article/details/129855319(%E4%B9%9F%E5%8C%85%E5%90%AB%E4%B8%80%E4%BA%9Bredis%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%8C%E5%BE%88%E8%AF%A6%E7%BB%86)">https://blog.csdn.net/u010503464/article/details/129855319(也包含一些redis基本操作，很详细)</a></li>
+<li>在第3步中的生成配置文件时报错：<code>configure: error: Package requirements (libssl) were not met:No package 'libssl' found</code>等后面部分报错让你自己把libssl路径加上去。but我找不到我的，甚至都不知道安装没有，sudo apt-get install libssl-dev会安装libssl-doc，libssl1.0.0，zlib1g，zlib1g-dev再次运行就OK了。</li>
+<li>在make install的时候会在/user下创建以一些文件，报错说权限不够，加上sudo就没有报错了。</li>
+<li>验证表示安装成功。<br>测试案例可以参照：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/haha029/p/15610140.html">https://www.cnblogs.com/haha029/p/15610140.html</a></li>
+</ol>
+<h3 id="Memcached"><a href="#Memcached" class="headerlink" title="Memcached"></a>Memcached</h3><p>转载自<a target="_blank" rel="noopener" href="https://www.lxlinux.net/5406.html">https://www.lxlinux.net/5406.html</a></p>
+<ol>
+<li>安装Memcached<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> memcached libmemcached-tools<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li>查看memcached服务状态<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> systemctl status memcached<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+</ol>
+<h3 id="YCSB"><a href="#YCSB" class="headerlink" title="YCSB"></a>YCSB</h3><p>YCSB：雅虎推出的云数据库基准测试套件。<br>参考论文[MULTI-CLOCK: Dynamic Tiering for Hybrid Memory Systems]使用的数据库是Memcached，测量内存吞吐量和延时。<br><a target="_blank" rel="noopener" href="https://github.com/brianfrankcooper/YCSB/wiki/Running-a-Workload">运行工作负载 6 个步骤</a><br><a target="_blank" rel="noopener" href="https://github.com/brianfrankcooper/YCSB/wiki/Core-Properties">核心工作负载包属性</a><br><a target="_blank" rel="noopener" href="https://github.com/brianfrankcooper/YCSB">下载工作包</a></p>
+<h4 id="配置和性能开销"><a href="#配置和性能开销" class="headerlink" title="配置和性能开销"></a>配置和性能开销</h4><pre class="line-numbers language-none"><code class="language-none">ycsb-0.15.0/bin/ycsb load memcached -s -P ycsb-0.15.0/workloads/workloada -p "memcached.hosts=127.0.0.1" -p "memcached.port=11211" -p recordcount=1000000000 -threads 64<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<ul>
+<li><p>ycsb load memcached：指示 YCSB 工具加载数据到 memcached 数据库中。</p>
+</li>
+<li><p>s：指示 YCSB 工具以同步模式执行操作。</p>
+</li>
+<li><p>ycsb-0.15.0/workloads/workloada：指定要使用的工作负载配置文件。</p>
+</li>
+<li><p>“memcached.hosts=127.0.0.1”：指定 memcached 服务器的主机地址。</p>
+</li>
+<li><p>“memcached.port=11211”：指定 memcached 服务器的端口号。</p>
+</li>
+<li><p>recordcount=1000000000：指定要加载到数据库中的记录数量，这里是 10 亿条记录。</p>
+</li>
+<li><p>threads 64：指定加载数据时使用的线程数量为 64。</p>
+</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">ycsb-0.15.0/bin/ycsb run memcached -s -P ycsb-0.15.0/workloads/workloada -p "memcached.hosts=127.0.0.1" -p "memcached.port=11211" -p recordcount=1000000000 -p operationcount=666666667 -threads 64<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<ul>
+<li>operationcount：指定要执行的操作数量。在这个命令中，operationcount=666666667 表示要执行大约 6.67 亿个操作。<br>考虑<strong>适当增大recordcount和operationcount</strong>,以更全面地测试Memcached在当前操作系统上的性能表现。但需要注意,如果设置太大可能会耗尽系统内存导致测试结束。threads可以适当增大,比如从64增到128或256线程。在增大测试负载的参数时,需要<strong>留意系统的CPU和内存使用情况。如果CPU使用率已接近100%,或者内存使用量已接近操作系统总容量,则继续增大参数意义不大</strong>,对测试结果也没有帮助。</li>
+</ul>
+<p>对于内存数据库如Memcached来说,其性能瓶颈主要存在以下几个方面:</p>
+<ol>
+<li><strong>内存容量瓶颈</strong>。当数据库中的数据量大于系统可用内存时,会<strong>频繁触发淘汰机制(swap),导致性能下降</strong>。</li>
+<li><strong>内存带宽瓶颈</strong>。如果内存读写带宽不能满足数据库的需求,也会限制数据库的性能。</li>
+<li><strong>锁争用</strong>。高并发场景下数据库内部的数据结构和访问存在争用,可能会引起线程阻塞。</li>
+<li>缓存击穿、穿透。<strong>缓存未命中</strong>可能导致数据库压力剧增。<h4 id="设计原理"><a href="#设计原理" class="headerlink" title="设计原理"></a>设计原理</h4>目标是检查广泛的工作负载特征，以便了解工作负载系统的哪些部分表现良好或较差。例如，某些系统可能针对读取进行了高度优化，但不针对写入进行高度优化，或者针对插入进行了高度优化，但不针对更新进行了优化，或者针对扫描进行了高度优化，但不针对点查找进行了高度优化。选择核心包中的工作负载是为了直接探索这些权衡。</li>
+</ol>
+<ul>
+<li>Insert：插入一条新记录</li>
+<li> Update：通过替换一个字段的值来更新记录</li>
+<li>Read：读取一条记录，随机选择一个字段或所有字段</li>
+<li> Scan：从随机选择的记录键开始按顺序扫描记录。要扫描的记录数是随机选择的</li>
+</ul>
+<p> 执行以上操作的随机分布情况：</p>
+<ul>
+<li>统一：随机统一选择一个项目。例如，当选择一条记录时，数据库中的所有记录都有同等可能被选择。 </li>
+<li>Zipfian：根据Zipfian 分布选择一个项目。例如，在选择记录时，某些记录将非常受欢迎（分布的头部），而大多数记录将不受欢迎（分布的尾部）。 </li>
+<li>最新：与Zipfian 分布类似，只不过最近插入的记录位于分布的头部。 </li>
+<li>多项式：可以指定每个项目的概率。例如，我们可以为读取操作分配 0.95 的概率，为更新操作分配 0.05 的概率，为扫描和插入分配 0 的概率。结果将是读取繁重的工作负载。<img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/1e9a4e08b09bab6173f6d76774a5086e.png"><br>提供的工作负载基准的区别：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/a50c00f7773b7847b48682ff656251ea.png#pic_center"><h4 id="安装和运行"><a href="#安装和运行" class="headerlink" title="安装和运行"></a>安装和运行</h4></li>
+</ul>
+<p><strong>安装Java</strong><br>总的一句命令可以直接<code>sudo apt install openjdk-8-jdk</code>直接用安装JDK的命令也行，会把JRE也安装上的。8版本兼容会好一些，11版本是最新的。</p>
+<ol>
+<li>检查是否已安装Java<code>java -version</code> </li>
+<li>如果没有执行安装命令<code>apt install openjdk-11-jre-headless</code>命令安装Java运行时环境（JRE）这将允许运行几乎所有Java软件。</li>
+<li>验证一下安装上了没<code>java -version</code> </li>
+<li>还需要Java DevelopmentKit（JDK）才能编译和运行某些特定的基于Java的软件，验证是否已安装JDK<code>javac -version</code> </li>
+<li>安装JDK命令<code>apt install openjdk-11-jdk-headless</code> </li>
+<li>再次检查Java编译器的javac版本，来验证是否已安装JDK <code>javac -version</code></li>
+<li>设置JAVA_HOME环境变量，许多使用Java编写的程序使用JAVA_HOME环境变量来确定Java安装位置。首先确定Java的安装位置。使用update-alternatives命令：<code>sudo update-alternatives --config java</code>此命令显示Java的每个安装及其安装路径</li>
+<li>复制路径然后使用文本编辑器打开<code>sudo gedit /etc/environment</code></li>
+<li>在此文件的末尾，添加以下行或者替换已有路径，修改此文件将为系统上的所有用户设置JAVA_HOME路径。<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">JAVA_HOME</span><span class="token operator">=</span><span class="token string">"/usr/lib/jvm/java-11-openjdk-amd64/bin/java"</span> <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+但是可能会出现如下报错，在运行脚本时，通过最后一项报错，可以发现最后两段路径/bin/java可能是脚本自己加上去的或者这个工作负载某处规定的，所以这里我们在文件里只添加前半部分。<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">JAVA_HOME</span><span class="token operator">=</span><span class="token string">"/usr/lib/jvm/java-11-openjdk-amd64"</span> <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/07d30fd2cea631ce09ca9f7bca6051ad.png"></li>
+<li>保存文件并退出编辑器。</li>
+<li>重新加载此文件<code>source /etc/environment</code></li>
+<li>验证是否已设置环境变量<code>echo $JAVA_HOME</code><br>这部分转载自<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/5a25b9535016">https://www.jianshu.com/p/5a25b9535016</a></li>
+</ol>
+<p>如果不小心装错了，可以参照如下方式卸载：</p>
+<ol>
+<li>首先，检查是安装的哪个 OpenJDK包<code>dpkg --list | grep -i jdk</code></li>
+<li>移除 openjdk包<code>apt-get purge openjdk*</code></li>
+<li>卸载 OpenJDK 相关包<code>apt-get purge icedtea-* openjdk-*</code></li>
+<li>检查所有 OpenJDK包是否都已卸载完毕<code>dpkg --list | grep -i jdk</code><br>这部分转载自<a target="_blank" rel="noopener" href="https://www.cnblogs.com/jaysonteng/p/13453244.html">https://www.cnblogs.com/jaysonteng/p/13453244.html</a></li>
+</ol>
+<p><strong>修改YCSB脚本文件</strong><br>在这篇论文的<a target="_blank" rel="noopener" href="https://github.com/brianfrankcooper/YCSB/releases/">仓库</a>里其实已经有脚本了，但是由于multi-clock内核的Python版本问题，要想运行需要做一些修改。在正常的内核上面运行整个程序是不用改的。通过报错信息可以看到文件位于路径：ycsb-0.15.0/bin/ycsb<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/73a936775806e606ac168614327d5d62.png"><br>第一句，改为python3：<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/2569bc7efe34adf009a5c8f25e416dc8.png"><br>全局查找&gt;&gt;替换为括号<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/4f59546db76a70152ab453794e158dac.png"><br>抛出错误的逗号分隔改为as<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/099bd98c9a29db726bcb92a3bae45dd8.png"><br><strong>运行YCSB脚本</strong><br><a target="_blank" rel="noopener" href="https://github.com/sylab/multi-clock/blob/main/scripts/run_ycsb_workloads.sh">原论文的路径</a>看一看，脚本应该放在放ycsb-0.15.0文件夹的地方，和它同级。<br>脚本第一句<code>#! /bin/sh</code>有的脚本第一句是不完整的<br>运行该脚本的命令<code>./run_ycsb_workloads.sh</code></p>
+<h2 id="图计算"><a href="#图计算" class="headerlink" title="图计算"></a>图计算</h2><h3 id="GAPBS"><a href="#GAPBS" class="headerlink" title="GAPBS"></a>GAPBS</h3><p>GAP基准测试套件旨在通过标准化评估来帮助图形处理研究。图形处理评估之间的差异越小，就越容易比较不同的研究工作和量化改进。构建图形最多可能需要 8 小时。构建输入图形后，您可以删除以释放一些磁盘空间。执行基准测试本身只需要几个小时。<a target="_blank" rel="noopener" href="https://github.com/sbeamer/gapbs">github下载工作负载和快速入门</a></p>
+<h4 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h4><p>下载：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> https://github.com/sbeamer/gapbs/archive/refs/heads/master.zip
+<span class="token function">unzip</span> master.zip<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>单独来跑的话：</p>
+<ol>
+<li>构建项目：<code>make</code></li>
+<li>覆盖默认C++编译器：<code>CXX=g++-8 make</code></li>
+<li>测试构建：<code>make test</code></li>
+<li>在 1，024 个顶点上运行 BFS 进行 1 次迭代： <code>./bfs -g 10 -n 1</code></li>
+</ol>
+<p>自动执行基准测试：</p>
+<ol>
+<li>构建输入图：<code>make bench-graphs</code></li>
+<li>执行基准测试套件：<code>make bench-run</code></li>
+</ol>
+<p>从<a target="_blank" rel="noopener" href="https://github.com/sbeamer/gapbs">发布官网</a>上看具体图的数据<strong>The graph loading infrastructure understands the following formats:</strong></p>
+<ul>
+<li>.el plain-text edge-list with an edge per line as node1 node2每行包含一个边，格式为 <code>node1 node2</code>，这种格式通常用于无向图，因为它没有指定边的方向。</li>
+<li>.wel plain-text weighted edge-list with an edge per line as node1 node2 weight每行包含一个边，格式为 <code>node1 node2 weight</code>，其中 <code>weight</code> 表示边的权重。</li>
+<li>.gr 9th DIMACS Implementation Challenge format这种格式可以用于无向图，但具体是否无向取决于文件内容和DIMACS挑战的具体实现。</li>
+<li>.graph Metis format (used in 10th DIMACS Implementation Challenge)这种格式通常用于无向图，但同样，是否无向取决于文件的具体内容和实现。</li>
+<li>.mtx Matrix Market format</li>
+<li>.sg serialized pre-built graph (use converter to make)</li>
+<li>.wsg weighted serialized pre-built graph (use converter to make)格式是序列化预构建图的格式，它们可能包含权重信息（在 <code>.wsg</code> 中），但不一定是无向图，这取决于原始图的结构。</li>
+</ul>
+<p><strong>在bench.mk的文件中加载新增的命令格式构建出需要的图：</strong></p>
+<pre class="line-numbers language-makefile" data-language="makefile"><code class="language-makefile"><span class="token builtin-target builtin">.PHONY</span><span class="token punctuation">:</span> gen-twitter
+<span class="token target symbol">gen-twitter</span><span class="token punctuation">:</span> <span class="token variable">$</span><span class="token punctuation">{</span>RAW_GRAPH_DIR<span class="token punctuation">}</span> <span class="token variable">$</span><span class="token punctuation">{</span>GRAPH_DIR<span class="token punctuation">}</span>/twitter.sg
+<span class="token builtin-target builtin">.PHONY</span><span class="token punctuation">:</span> gen-web
+<span class="token target symbol">gen-web</span><span class="token punctuation">:</span> <span class="token variable">$</span><span class="token punctuation">{</span>RAW_GRAPH_DIR<span class="token punctuation">}</span> <span class="token variable">$</span><span class="token punctuation">{</span>GRAPH_DIR<span class="token punctuation">}</span>/web.wsg
+<span class="token builtin-target builtin">.PHONY</span><span class="token punctuation">:</span> gen-road
+<span class="token target symbol">gen-road</span><span class="token punctuation">:</span> <span class="token variable">$</span><span class="token punctuation">{</span>RAW_GRAPH_DIR<span class="token punctuation">}</span> <span class="token variable">$</span><span class="token punctuation">{</span>GRAPH_DIR<span class="token punctuation">}</span>/road.wsg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h4><p>不同类型的图算法支持的输入图和操作有些不一样：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@PowerEdge-R750:/home/ssd/workloads/gapbs<span class="token comment"># ./bfs --help</span>
+./bfs: invalid option -- <span class="token string">'-'</span>
+breadth-first search
+ <span class="token parameter variable">-h</span>          <span class="token builtin class-name">:</span> print this <span class="token builtin class-name">help</span> message                                         
+ <span class="token parameter variable">-f</span> <span class="token operator">&lt;</span>file<span class="token operator">&gt;</span>   <span class="token builtin class-name">:</span> load graph from <span class="token function">file</span>                                            
+ <span class="token parameter variable">-s</span>          <span class="token builtin class-name">:</span> symmetrize input edge list                               <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-g</span> <span class="token operator">&lt;</span>scale<span class="token operator">&gt;</span>  <span class="token builtin class-name">:</span> generate <span class="token number">2</span>^scale kronecker graph                                
+ <span class="token parameter variable">-u</span> <span class="token operator">&lt;</span>scale<span class="token operator">&gt;</span>  <span class="token builtin class-name">:</span> generate <span class="token number">2</span>^scale uniform-random graph                           
+ <span class="token parameter variable">-k</span> <span class="token operator">&lt;</span>degree<span class="token operator">&gt;</span> <span class="token builtin class-name">:</span> average degree <span class="token keyword">for</span> synthetic graph                          <span class="token punctuation">[</span><span class="token number">16</span><span class="token punctuation">]</span>
+ <span class="token parameter variable">-m</span>          <span class="token builtin class-name">:</span> reduces memory usage during graph building               <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-a</span>          <span class="token builtin class-name">:</span> output analysis of last run                              <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-n</span> <span class="token operator">&lt;</span>n<span class="token operator">&gt;</span>      <span class="token builtin class-name">:</span> perform n trials                                            <span class="token punctuation">[</span><span class="token number">16</span><span class="token punctuation">]</span>
+ <span class="token parameter variable">-r</span> <span class="token operator">&lt;</span>node<span class="token operator">&gt;</span>   <span class="token builtin class-name">:</span> start from <span class="token function">node</span> r                                         <span class="token punctuation">[</span>rand<span class="token punctuation">]</span>
+ <span class="token parameter variable">-v</span>          <span class="token builtin class-name">:</span> verify the output of each run                            <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-l</span>          <span class="token builtin class-name">:</span> log performance within each trial                        <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+-h：打印帮助信息。
+<span class="token parameter variable">-f</span> <span class="token operator">&lt;</span>file<span class="token operator">&gt;</span>：从指定的文件加载图。这个文件应该包含图的结构信息。
+-s：将输入的边列表对称化。如果图不是对称的，这个选项会生成一个对称的图。
+<span class="token parameter variable">-g</span> <span class="token operator">&lt;</span>scale<span class="token operator">&gt;</span>：生成一个2^scale阶的Kronecker图。Kronecker图是一种多尺度的随机图模型，常用于模拟现实世界中的网络。
+<span class="token parameter variable">-u</span> <span class="token operator">&lt;</span>scale<span class="token operator">&gt;</span>：生成一个2^scale阶的均匀随机图。均匀随机图是一种每个节点都以相同概率连接到其他节点的图。
+<span class="token parameter variable">-k</span> <span class="token operator">&lt;</span>degree<span class="token operator">&gt;</span>：为合成图设置平均度数。这个参数用于控制生成的随机图的平均连接度数。
+-m：在构建图时减少内存使用。这个选项可能会牺牲一些性能以节省内存。
+-a：输出最后一次运行的分析。这可能包括搜索过程中的一些统计信息。
+<span class="token parameter variable">-n</span> <span class="token operator">&lt;</span>n<span class="token operator">&gt;</span>：执行n次试验。这个选项允许程序运行多次搜索，以获取平均性能或结果。
+<span class="token parameter variable">-r</span> <span class="token operator">&lt;</span>node<span class="token operator">&gt;</span>：从指定的节点r开始搜索。如果不设置，程序可能会随机选择一个起始节点。
+-v：验证每次运行的输出。这个选项可能用于确保搜索结果的正确性。
+-l：在每次试验中记录性能。这可能包括记录搜索的时间、节点访问次数等。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@PowerEdge-R750:/home/ssd/workloads/gapbs<span class="token comment"># ./pr -h</span>
+pagerank
+ <span class="token parameter variable">-h</span>          <span class="token builtin class-name">:</span> print this <span class="token builtin class-name">help</span> message                                         
+ <span class="token parameter variable">-f</span> <span class="token operator">&lt;</span>file<span class="token operator">&gt;</span>   <span class="token builtin class-name">:</span> load graph from <span class="token function">file</span>                                            
+ <span class="token parameter variable">-s</span>          <span class="token builtin class-name">:</span> symmetrize input edge list                               <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-g</span> <span class="token operator">&lt;</span>scale<span class="token operator">&gt;</span>  <span class="token builtin class-name">:</span> generate <span class="token number">2</span>^scale kronecker graph                                
+ <span class="token parameter variable">-u</span> <span class="token operator">&lt;</span>scale<span class="token operator">&gt;</span>  <span class="token builtin class-name">:</span> generate <span class="token number">2</span>^scale uniform-random graph                           
+ <span class="token parameter variable">-k</span> <span class="token operator">&lt;</span>degree<span class="token operator">&gt;</span> <span class="token builtin class-name">:</span> average degree <span class="token keyword">for</span> synthetic graph                          <span class="token punctuation">[</span><span class="token number">16</span><span class="token punctuation">]</span>
+ <span class="token parameter variable">-m</span>          <span class="token builtin class-name">:</span> reduces memory usage during graph building               <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-a</span>          <span class="token builtin class-name">:</span> output analysis of last run                              <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-n</span> <span class="token operator">&lt;</span>n<span class="token operator">&gt;</span>      <span class="token builtin class-name">:</span> perform n trials                                            <span class="token punctuation">[</span><span class="token number">16</span><span class="token punctuation">]</span>
+ <span class="token parameter variable">-r</span> <span class="token operator">&lt;</span>node<span class="token operator">&gt;</span>   <span class="token builtin class-name">:</span> start from <span class="token function">node</span> r                                         <span class="token punctuation">[</span>rand<span class="token punctuation">]</span>
+ <span class="token parameter variable">-v</span>          <span class="token builtin class-name">:</span> verify the output of each run                            <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-l</span>          <span class="token builtin class-name">:</span> log performance within each trial                        <span class="token punctuation">[</span>false<span class="token punctuation">]</span>
+ <span class="token parameter variable">-i</span> <span class="token operator">&lt;</span>i<span class="token operator">&gt;</span>      <span class="token builtin class-name">:</span> perform at <span class="token function">most</span> i iterations                                <span class="token punctuation">[</span><span class="token number">20</span><span class="token punctuation">]</span>
+ <span class="token parameter variable">-t</span> <span class="token operator">&lt;</span>t<span class="token operator">&gt;</span>      <span class="token builtin class-name">:</span> use tolerance t                                       <span class="token punctuation">[</span><span class="token number">0.000100</span><span class="token punctuation">]</span>
+ <span class="token parameter variable">-i</span> <span class="token operator">&lt;</span>i<span class="token operator">&gt;</span>：执行最多i次迭代。PageRank计算通常会迭代直到收敛，但这个选项允许你限制迭代的次数。
+
+<span class="token parameter variable">-t</span> <span class="token operator">&lt;</span>t<span class="token operator">&gt;</span>：使用容差t。这是PageRank算法中判断是否收敛的容差值。当变化小于这个值时，算法可能会停止迭代。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@PowerEdge-R750:/home/ssd/workloads/gapbs<span class="token comment"># ./cc -h</span>
+connected-components-afforest
+<span class="token comment"># 和bfs一样</span>
+<span class="token comment"># tc参数同上</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">/home/ssd/workloads/gapbs$ ./bc <span class="token parameter variable">-h</span>
+betweenness-centrality
+ <span class="token comment"># 同上</span>
+ <span class="token parameter variable">-i</span> <span class="token operator">&lt;</span>i<span class="token operator">&gt;</span>      <span class="token builtin class-name">:</span> perform i iterations                                         <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+ 
+ <span class="token comment"># sssp参数</span>
+ <span class="token parameter variable">-d</span> <span class="token operator">&lt;</span>d<span class="token operator">&gt;</span>      <span class="token builtin class-name">:</span> delta parameter                                              <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="graph500"><a href="#graph500" class="headerlink" title="graph500"></a>graph500</h3><p><a target="_blank" rel="noopener" href="https://github.com/graph500/graph500">下载源码</a><br><a target="_blank" rel="noopener" href="https://graph500.org/?page_id=12">这里有介绍一些规模之类的信息</a></p>
+<ul>
+<li>只要您的PATH中加载了有效的 MPI-3 库，编译就应该非常简单。不再有OpenMP、Sequential和XMT版本的基准测试。</li>
+<li>要构建二进制文件，请将目录更改为src并执行make。</li>
+<li><code>graph500_reference_bfs</code>运行BFS内核（并跳过权重生成）；<code>graph500_reference_bfs_sssp</code>同时运行BFS和SSSP内核。</li>
+<li>如果您的环境中存在SKIP_BFS=1，bfs_sssp二进制文件将跳过BFS部分。</li>
+<li>如果要在文件中存储/读取生成的图形，请使用环境变量<code>TMPFILE=&lt;文件名&gt;</code>以及<code>REUSEFILE=1</code> 来保留文件。</li>
+<li>建议使用<code>bfs_sssp</code>二进制文件生成图形文件，因为它会生成边和权重文件（文件名.权重）。<code>bfs</code>二进制文件只会使用/写入边缘文件。一旦<code>bfs_sssp</code>无法打开权重文件，即使存在边文件，它也会生成这两个文件。</li>
+</ul>
+<blockquote>
+<p>当前设置假设您使用 2 的幂：核心总数和每个节点的核心数量。<br>如果您注释 common.h SIZE_MUST_BE_POWER_OF_TWO 中定义的宏，则可能使用非2的幂节点数。<br>请注意，通常这会使您的性能下降 20% 以上。<br>如果要在每个节点使用两个进程的非幂，则应将 -DPROCS_PER_NODE_NOT_POWER_OF_TWO 添加到 src/Makefile 中的 CFLAGS，这将自动启用 SIZE_MUST_BE_POWER_OF_TWO。<br>对于 GreenGraph500 运行，定义编译时宏 ENERGYLOOP_BFS 或 ENERGYLOOP_SSSP 来测量足够长的循环中的能量以测量平均功率。</p>
+</blockquote>
+<blockquote>
+<p>AML 是建立在 MPI3 基础上的 SPMD 通信库</p>
+</blockquote>
+<blockquote>
+<p>bfs_custom.c 是使用参考数据结构和基础架构编写自己的 BFS 的模板。您可以就地修改该文件，或复制它（调整 Makefile）创建自己的版本。复制它（调整 Makefile）以创建自己的版本。 文档中的注释，说明有哪些数据结构可用以及如何使用它们。</p>
+</blockquote>
+<ul>
+<li>生成的程序名为<code>graph500_mpi_*</code>，最多采用两个参数：问题的规模和边缘因素，问题的尺度是对数以 2 为底，图中的顶点数；仅具有2次幂的图无需修改源代码即可支持顶点计数。</li>
+<li>边缘因子是边数与顶点数的比率；即，它是一半图中的平均顶点度数。比例参数为必填项；这边缘因子是可选的，默认为16。运行任何不带任何参数的<code>graph500_*</code> 程序都会产生使用消息。<br>mpicc编译src里面的文件，生成可运行的文件。<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/8/<span class="token punctuation">..</span>/<span class="token punctuation">..</span>/<span class="token punctuation">..</span>/x86_64-linux-gnu/libpthread.so: error adding symbols: DSO missing from <span class="token builtin class-name">command</span> line
+<span class="token comment"># makefile:</span>
+LDFLAGS <span class="token operator">=</span> <span class="token string">"-Wl,--copy-dt-needed-entries,-lpthread"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+运行时直接使用那个文件，同时加上规模和边的参数比如<code>-s 22 -e 16</code><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">mpiexec <span class="token parameter variable">-n</span> <span class="token number">32</span> ./graph500_reference_bfs <span class="token number">32</span> <span class="token number">16</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+一个可以参考的脚本：<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token builtin class-name">set</span> <span class="token parameter variable">-e</span>
+<span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token operator">=</span> <span class="token string">'graph500_reference_bfs'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+	/root/graph500/src/graph500_reference_bfs <span class="token variable">$2</span> <span class="token variable">$3</span>
+<span class="token keyword">elif</span> <span class="token punctuation">[</span> <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token operator">=</span> <span class="token string">'graph500_reference_bfs_sssp'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+	/root/graph500/src/graph500_reference_bfs_sssp <span class="token variable">$2</span> <span class="token variable">$3</span>
+<span class="token keyword">else</span>
+	<span class="token builtin class-name">exec</span> <span class="token string">"<span class="token variable">$@</span>"</span>
+<span class="token keyword">fi</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+</ul>
+<h2 id="HPC"><a href="#HPC" class="headerlink" title="HPC"></a>HPC</h2><p>一些高性能计算workload也是需要很多内存。</p>
+<h3 id="NAS-并行基准测试-（NPB）"><a href="#NAS-并行基准测试-（NPB）" class="headerlink" title="NAS 并行基准测试 （NPB）"></a>NAS 并行基准测试 （NPB）</h3><blockquote>
+<p>0.NPB中每个基准测试程序有7类问题规模，分别为S、WA、B、C、D和E。其中A类规模最小，S（Sample）类是样例程序，W（Workstation）类通常用于工作站。<br>1.EP（Embarrassingly parallel），繁杂并行，用于计算Gauss伪随机数，主要执行浮点数计算，EP的显著特点是不执行任何处理器间的通信，因此用不同的互相连接得到的结果显示同样的执行特点。(但是属于计算密集，内存)<br>2.快速Fourier转换（FT）检测长距离通信，利用快速傅里叶变换来解决3维的偏微分方程。<br>3.CG（Conjugate Gradient）用于求解大型稀疏对称正定矩阵的最小特征值的近似值。<br>4.LU（Lower upper triangular）用于基于对称超松弛法求解块稀疏方程组。<br>5.SP（scalar penta-diagonal）用于求解5对角线方程组（特别慢，放最后）<br>6.BT（Block Tri-Diagonal）用于求解3对角线方程组（特别慢，放最后）</p>
+</blockquote>
+<h4 id="算法概述"><a href="#算法概述" class="headerlink" title="算法概述"></a>算法概述</h4><p><strong>CG - 共轭梯度</strong><br>在CG算法中，由于问题的稀疏性质，存在不规则的内存访问和通信模式。这意味着<strong>不同计算节点在访问和处理矩阵数据时可能需要跨越不同的内存位置</strong>，并且节点之间的通信操作可能会涉及不同数量的数据传输。CG算法的性能评估主要关注<strong>并行计算和通信的效率</strong>，以及处理<strong>不规则访问</strong>模式的能力。</p>
+<p>CG算法在迭代过程中涉及矩阵向量乘法和内积计算。这些操作通常具有较好的局部性特征，尤其是空间局部性。在矩阵向量乘法中，由于<strong>稀疏矩阵</strong>的性质，只有非零元素才会被访问和处理。<strong>这种局部性使得算法能够有效地利用缓存</strong>，因为只有涉及到非零元素的内存位置才会被频繁访问。在内积计算中，通常需要对向量进行元素的逐个相乘，并对结果进行累加。这种操作模式充分利用了时间局部性，因为<strong>计算的结果可以在寄存器或高速缓存中重复使用</strong>，而不需要频繁地从内存中加载数据。</p>
+<p><strong>BT - 三对角矩阵的分块求解</strong><br><strong>三对角矩阵分块分配给不同的计算节点</strong>。每个节点负责处理一个或多个矩阵块，并在计算过程中与其他节点进行通信以满足数据依赖关系。分块矩阵求解：在BT算法中，<strong>每个计算节点需要对其分配的矩阵块进行求解。这涉及到对每个块矩阵进行扫描</strong>，按照三对角矩阵求解的方法，更新块矩阵中的值。边界值更新：在<strong>每个迭代步骤中，节点之间需要进行通信以更新边界值</strong>。这是因为块矩阵之间的边界值在求解过程中会相互影响。节点之间通过消息传递来交换边界值，并保持数据的一致性。收敛判据：在<strong>每次迭代之后，需要检查解向量的收敛情况</strong>。通常，会计算残差向量的范数，并与预先定义的收敛阈值进行比较，以确定是否终止迭代。更新解向量：根据求解过程的结果，使用先前计算得到的值更新解向量。</p>
+<p>在每个节点上，块矩阵的元素在内存中是<strong>连续存储</strong>的。边界值的交换这种通信操作通常是局部的，即<strong>只涉及节点之间的边界区域数据的传输</strong>。</p>
+<h4 id="运行-1"><a href="#运行-1" class="headerlink" title="运行"></a>运行</h4><ol>
+<li>下载方式：<a target="_blank" rel="noopener" href="https://www.nas.nasa.gov/software/npb.html%E5%BE%80%E4%B8%8B%E5%88%92">https://www.nas.nasa.gov/software/npb.html往下划</a></li>
+<li>安装对应的编译器呀, MPI安装：<a target="_blank" rel="noopener" href="https://www.likecs.com/show-204196788.html">这个相当于把readme翻译了</a>。遇到没有fortran的报错时也再安装一个：<a target="_blank" rel="noopener" href="https://www.zoneidc.com/news/6756.html">最简单的安装步骤</a>。</li>
+<li>在进入NPB3.4-MPI/OMP后在readme.install中有编译和运行的介绍，还会发现有测试脚本可以参考，config文件夹放的是参考的配置。</li>
+<li>编译，首先需要一个make.def的配置文件可以从模板里拿一个。<a target="_blank" rel="noopener" href="https://blog.csdn.net/TodLeigh/article/details/2027857?spm=1001.2101.3001.6650.5&amp;utm_medium=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-5-2027857-blog-79315197.235%5Ev33%5Epc_relevant_default_base3&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-5-2027857-blog-79315197.235%5Ev33%5Epc_relevant_default_base3&amp;utm_relevant_index=6">这里的参考是对MPI的使用</a>。</li>
+<li>运行指令，在使用时，先编译指定用哪个程序算法、问题规模和处理器个数，之后会在bin文件下生成可执行文件，直接跑就行。比如SWABCDE是指问题规模，EP，MG，IS，CG是指要运行的程序算法。<br>执行的时候选择工作负载，详细参考官方：<a target="_blank" rel="noopener" href="https://www.nas.nasa.gov/software/npb.html">https://www.nas.nasa.gov/software/npb.html</a></li>
+</ol>
+<p><strong>编译：</strong></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> NPB2.4.1
+<span class="token function">make</span> IS <span class="token assign-left variable">CLASS</span><span class="token operator">=</span>A <span class="token assign-left variable">NPROCS</span><span class="token operator">=</span><span class="token number">2</span> <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p><strong>执行：</strong></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> NPB2.4.1/bin
+	<span class="token assign-left variable">HUGETLB_MORECORE</span><span class="token operator">=</span>yes <span class="token assign-left variable">LD_PRELOAD</span><span class="token operator">=</span>libhugetlbfs.so ./cg.D.x <span class="token operator">&gt;&gt;</span> ./cgd.out
+	<span class="token comment"># 或者</span>
+	mpirun <span class="token parameter variable">-np</span> <span class="token number">4</span> ./cg.D.x<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>测试：</strong></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> perf <span class="token function">stat</span> <span class="token parameter variable">-e</span> cpu-cycles,cache-misses,cache-references,page-faults,major-faults,minor-faults <span class="token parameter variable">-a</span> <span class="token parameter variable">-p</span>
+<span class="token function">sh</span> ./mem.sh
+<span class="token function">cat</span> /proc/5852/status <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-A</span> <span class="token number">1</span> VmHWM<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+
+<h3 id="PARSEC"><a href="#PARSEC" class="headerlink" title="PARSEC"></a>PARSEC</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43124861/article/details/102913343">https://blog.csdn.net/weixin_43124861/article/details/102913343</a><br>官方的下载安装方法：<a target="_blank" rel="noopener" href="https://parsec.cs.princeton.edu/parsec3-doc.htm">https://parsec.cs.princeton.edu/parsec3-doc.htm</a><br>配置环境：<br>    <code>source env.sh</code> 每次关机后都要设置一下<br>    麻烦的在于native模式的输入要额外移动过去<br>    要做的测试SPLASH-2 高性能测试用的，运行了这下面所有的工作负载（只能运行test）SPLASH-2X部分有native<br>安装：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">parsecmgmt <span class="token parameter variable">-a</span> build <span class="token parameter variable">-p</span> bodytrack <span class="token parameter variable">-c</span> gcc-tbb
+parsecmgmt <span class="token parameter variable">-a</span> build <span class="token parameter variable">-p</span> blackscholes<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>有的时候编译报错，是缺库</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> <span class="token parameter variable">-y</span> libtbb2 tbb-examples <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>执行：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 参数 -p 是指明 -a 操作的模块 ， 当前是 blackscholes 模块, 和图像有关的工作负载用gcc-tbb编译,-c gcc-serial 编译加了运行也要加</span>
+<span class="token assign-left variable">HUGETLB_MORECORE</span><span class="token operator">=</span>yes <span class="token assign-left variable">LD_PRELOAD</span><span class="token operator">=</span>libhugetlbfs.so parsecmgmt <span class="token parameter variable">-a</span> run <span class="token parameter variable">-p</span> splash2x.radiosity <span class="token parameter variable">-i</span> native <span class="token operator">&gt;&gt;</span> ./parsec1GB/radiosity.out
+<span class="token comment"># -i 是输入参数，输入有test ,simdev ,simlarge ,native ,...</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>工作负载类型参考：<a target="_blank" rel="noopener" href="https://parsec.cs.princeton.edu/parsec3-doc.htm">https://parsec.cs.princeton.edu/parsec3-doc.htm</a><br>    <a target="_blank" rel="noopener" href="https://parsec.cs.princeton.edu/download/tutorial/3.0/parsec-tutorial.pdf">https://parsec.cs.princeton.edu/download/tutorial/3.0/parsec-tutorial.pdf</a></p>
+<p>MG（MultiGrid）多栅格基准测试，监测短距和长距离通信。MG是一个简化的多栅格核心。IS（Integer sort）用于求解基于桶排序的二维大整数排序。</p>
+<h3 id="SPEC"><a href="#SPEC" class="headerlink" title="SPEC"></a>SPEC</h3><p>首先是向这个组织申请，然后获得权限下载4组workoad，但是有时间限制要在一个月内装好。<br><strong>SPEC ACCEL</strong><br>重点关注使用硬件加速（此处称为“加速器”）的高度并行计算密集型应用程序的性能。这些基准测试强调以下性能：</p>
+<ul>
+<li>加速器 </li>
+<li>主机CPU </li>
+<li>主机和加速器之间的内存传输 </li>
+<li>支持库和驱动程序 </li>
+<li>编译器<br>SPEC ACCEL 包含一个专注于使用 OpenCL 1.1、OpenMP 4.5 和 OpenACC 1.0 标准的并行计算性能的套件。SPEC ACCEL 用户文档详细介绍了安装和使用。readme会告诉基本步骤。</li>
+</ul>
+<h3 id="XSBench"><a href="#XSBench" class="headerlink" title="XSBench"></a>XSBench</h3><p>蒙特卡罗中子传输算法的一个关键计算内核，是在高性能计算架构上进行性能分析的有用工具。<br>配置还挺简单的：<a target="_blank" rel="noopener" href="https://github.com/ANL-CESAR/XSBench">https://github.com/ANL-CESAR/XSBench</a></p>
+<h2 id="CloudSuite-4-0"><a href="#CloudSuite-4-0" class="headerlink" title="CloudSuite 4.0"></a>CloudSuite 4.0</h2><p><a target="_blank" rel="noopener" href="https://github.com/parsa-epfl/cloudsuite">CloudSuite 4.0安装地址</a><br>按照readme的命令运行，如果没有镜像会自动去下载<br><code>docker container ls -a</code> 命令可以查看所有已经创建的包括终止状态的容器。</p>
+<h4 id="运行data-analysis"><a href="#运行data-analysis" class="headerlink" title="运行data-analysis"></a>运行data-analysis</h4><p>直接网上pull的镜像有点问题，会报错因为没有java库等原因<br>下载压缩包后里面的Dockerfile是定制镜像，可以自己构建镜像</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> build <span class="token parameter variable">-t</span> cloudsuite/data-analytics:latest <span class="token builtin class-name">.</span>
+<span class="token function">docker</span> build <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> <span class="token operator">&lt;</span>上下文路径/URL/-<span class="token operator">&gt;</span>
+<span class="token comment"># 镜像的名称 -t cloudsuite/data-analytics，latest是个tag</span>
+<span class="token comment"># 用户会指定构建镜像上下文的路径，build将路径下的所有内容打包，然后上传给Docker引擎</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/casys-kaist/cloudsuite/blob/243de62611a302f2ca5f9d31ab26469378dfc6f2/scripts/data-analytics/start.sh">https://github.com/casys-kaist/cloudsuite/blob/243de62611a302f2ca5f9d31ab26469378dfc6f2/scripts/data-analytics/start.sh</a></p>
+<h2 id="DLRM"><a href="#DLRM" class="headerlink" title="DLRM"></a>DLRM</h2><p>推荐系统也是耗费内存的一直常见应用，这个配置和运行也比较简单。<br><a target="_blank" rel="noopener" href="https://github.com/facebookresearch/dlrm">facebookresearch/dlrm: An implementation of a deep learning recommendation model (DLRM)</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2024/05/12/%E7%94%A8%E4%BA%8E%E5%86%85%E5%AD%98%E6%80%A7%E8%83%BD%E8%AF%84%E4%BC%B0%E7%9A%84workload/">http://ytirus.github.io/2024/05/12/%E7%94%A8%E4%BA%8E%E5%86%85%E5%AD%98%E6%80%A7%E8%83%BD%E8%AF%84%E4%BC%B0%E7%9A%84workload/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Machine-learning/">
+                                    <span class="chip bg-color">Machine-learning</span>
+                                </a>
+                            
+                                <a href="/tags/Cloud/">
+                                    <span class="chip bg-color">Cloud</span>
+                                </a>
+                            
+                                <a href="/tags/High-Performance-Computing/">
+                                    <span class="chip bg-color">High-Performance-Computing</span>
+                                </a>
+                            
+                                <a href="/tags/Redis/">
+                                    <span class="chip bg-color">Redis</span>
+                                </a>
+                            
+                                <a href="/tags/YCSB/">
+                                    <span class="chip bg-color">YCSB</span>
+                                </a>
+                            
+                                <a href="/tags/TPCC/">
+                                    <span class="chip bg-color">TPCC</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2024/06/02/CPU%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%E6%9F%A5%E7%9C%8B/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="CPU相关信息查看">
+                        
+                        <span class="card-title">CPU相关信息查看</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            实验中发现由于权限以及主板版本不同有的信息没法获取，收集了通用的CPU信息有关的命令
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-06-02
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/CPU%E6%8B%93%E6%89%91/">
+                        <span class="chip bg-color">CPU拓扑</span>
+                    </a>
+                    
+                    <a href="/tags/LLC/">
+                        <span class="chip bg-color">LLC</span>
+                    </a>
+                    
+                    <a href="/tags/Cache/">
+                        <span class="chip bg-color">Cache</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2024/05/04/%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%AF%8F%E4%B8%AA%E5%86%85%E6%A0%B8%E9%83%BD%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="服务器每个内核都无法启动">
+                        
+                        <span class="card-title">服务器每个内核都无法启动</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            当重启服务器后发现服务器每个内核都无法进入系统
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-05-04
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Kernel-Crashed/">
+                        <span class="chip bg-color">Kernel-Crashed</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2025</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">245.9k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

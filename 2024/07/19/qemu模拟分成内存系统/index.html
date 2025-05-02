@@ -1,0 +1,1417 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="qemu模拟分成内存系统, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>qemu模拟分成内存系统 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/27.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">qemu模拟分成内存系统</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Hybrid-Memory/">
+                                <span class="chip bg-color">Hybrid-Memory</span>
+                            </a>
+                        
+                            <a href="/tags/qemu/">
+                                <span class="chip bg-color">qemu</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/OS/" class="post-category">
+                                OS
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-07-19
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    14 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>流程简述：<br>（镜像基本的文件系统配置）<br>1、下载ubuntu-base的镜像<br>2、挂载镜像，配置镜像的网络，并安装各类软件<br>（PM模块配置）<br>3、编译内核模块，并拷贝到镜像中<br>4、启动qemu<br>5、安装内核模块，并配置相关软件</p>
+<h2 id="一、配置镜像"><a href="#一、配置镜像" class="headerlink" title="一、配置镜像"></a>一、配置镜像</h2><p>1、使用<code>qemu-img</code>创建image镜像（此处起名为<code>ubuntu-rootfs-raw-20G.image</code>）</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># [可选] sudo apt install qemu</span>
+qemu-img create <span class="token parameter variable">-f</span> raw ubuntu-rootfs-raw-20G.image 20G<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<blockquote>
+<p>注意：此处需要是<code>raw</code>类型，否则后续无法正常格式化（因为qcow2类型没有预先分配空间）。报错信息如下</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> mkfs.ext4 ubuntu-rootfs-qcow2-20G.image
+<span class="token function">mke2fs</span> <span class="token number">1.45</span>.5 <span class="token punctuation">(</span>07-Jan-2020<span class="token punctuation">)</span>
+ubuntu-rootfs-qcow2-20G.image: Not enough space to build proposed filesystem <span class="token keyword">while</span> setting up superblock<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+</blockquote>
+<p>2、格式化镜像文件为ext4的文件系统</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 格式化</span>
+<span class="token function">sudo</span> mkfs.ext4 ubuntu-rootfs-raw-20G.image
+<span class="token comment"># 检查</span>
+<span class="token function">file</span> ubuntu-rootfs-raw-20G.image<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>3、创建一个空目录，镜像的挂载点；然后将镜像挂载上去</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> ubuntu-rootfs-dir
+<span class="token function">sudo</span> <span class="token function">mount</span> ubuntu-rootfs-raw-20G.image ubuntu-rootfs-dir<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>4、下载<code>ubuntu-base-20.04.1-base-amd64.tar.gz</code>镜像，并将其解压到<code>ubuntu-rootfs-dir</code>文件夹中（实质就是向镜像中塞文件，因为当前镜像已经被挂载到文件夹了）<br>（1）下载地址，<a target="_blank" rel="noopener" href="https://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.1-base-amd64.tar.gz">https://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.1-base-amd64.tar.gz</a>。<br>也可以自行选择其他版本：<a target="_blank" rel="noopener" href="https://cdimage.ubuntu.com/ubuntu-base/releases/">https://cdimage.ubuntu.com/ubuntu-base/releases/</a>，</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> https://cdimage.ubuntu.com/ubuntu-base/releases/20.04/release/ubuntu-base-20.04.1-base-amd64.tar.gz<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>（2）解压到<code>ubuntu-rootfs-dir</code></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">tar</span> <span class="token parameter variable">-xzvf</span> ubuntu-base-20.04.1-base-amd64.tar.gz <span class="token parameter variable">-C</span> ubuntu-rootfs-dir<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>5、拷贝主机中的网络配置信息到镜像中，方便后续用apt安装软件</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">cp</span> /etc/resolv.conf ubuntu-rootfs-dir/etc/<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>6、自行修改source.list文件，设置apt镜像进行加速</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">假设主机与客服机都是基于ubuntu <span class="token number">20.04</span>，则可以直接拷贝主机的source.list,
+否则需要自行配置
+<span class="token function">sudo</span> <span class="token function">cp</span> /etc/apt/source.list ubuntu-rootfs-dir/etc/apt/source.list <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>7、使用<code>chroot</code>将<code>ubuntu-rootfs-dir</code>暂时设置为根目录（与docker类似），并启动终端</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">chroot</span> ubuntu-rootfs-dir<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>8、安装软件</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> update<span class="token punctuation">\</span>
+<span class="token operator">&amp;&amp;</span> <span class="token function">apt</span> upgrade<span class="token punctuation">\</span>
+<span class="token operator">&amp;&amp;</span> <span class="token function">apt</span> <span class="token function">install</span> linux-image-kvm init <span class="token function">vim</span> <span class="token parameter variable">-y</span> <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>9、设置密码之类的</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">update-initramfs <span class="token parameter variable">-u</span>
+<span class="token builtin class-name">echo</span> root:root <span class="token operator">|</span> chpasswd
+<span class="token builtin class-name">echo</span> ttyS0 <span class="token operator">&gt;</span> /etc/securetty
+systemctl <span class="token builtin class-name">enable</span> serial-getty@ttyS0.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>10、退出并卸载</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">umount</span> ubuntu-rootfs-dir<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>11、后续扩展<br>（1）如果需要重新安装软件，可以重复第7步骤，挂载镜像，然后<code>chroot</code>进去。<br>（2）镜像扩容操作</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">qemu-img resize ubuntu-rootfs-raw-20G.image +10G<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+
+<h2 id="二、使用qemu模拟nvdimm（安装PM相关内核模块）"><a href="#二、使用qemu模拟nvdimm（安装PM相关内核模块）" class="headerlink" title="二、使用qemu模拟nvdimm（安装PM相关内核模块）"></a>二、使用qemu模拟nvdimm（安装PM相关内核模块）</h2><p>如果要运行PM<br>1、安装软件包（安装到镜像里面）</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt</span> <span class="token function">install</span> <span class="token parameter variable">-y</span> systemd numactl ndctl daxctl<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>2、编译内核时，编译相关模块</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">make</span> <span class="token parameter variable">-j</span> <span class="token variable"><span class="token variable">$(</span>nproc<span class="token variable">)</span></span> vmlinux bzImage
+<span class="token function">make</span> <span class="token parameter variable">-j</span> <span class="token variable"><span class="token variable">$(</span>nproc<span class="token variable">)</span></span> <span class="token assign-left variable">M</span><span class="token operator">=</span>drivers/dax
+<span class="token function">make</span> <span class="token parameter variable">-j</span> <span class="token variable"><span class="token variable">$(</span>nproc<span class="token variable">)</span></span> <span class="token assign-left variable">M</span><span class="token operator">=</span>drivers/nvdimm/
+<span class="token function">make</span> <span class="token parameter variable">-j</span> <span class="token variable"><span class="token variable">$(</span>nproc<span class="token variable">)</span></span> <span class="token assign-left variable">M</span><span class="token operator">=</span>drivers/dax/pmem<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>3、将编译好的模块复制到镜像中</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1、挂载镜像</span>
+<span class="token comment"># 略</span>
+
+<span class="token comment"># 2、设置路径（路径根据需要进行修改）</span>
+<span class="token assign-left variable">image_dir_path</span><span class="token operator">=</span>/home/my/my_images/ubuntu-base/ubuntu-rootfs-dir
+<span class="token assign-left variable">module_path</span><span class="token operator">=</span><span class="token variable">$image_dir_path</span>/root/my_modules
+<span class="token function">sudo</span> <span class="token function">mkdir</span> <span class="token variable">$module_path</span>
+
+<span class="token comment"># 3、拷贝编译的内核模块到镜像中</span>
+<span class="token builtin class-name">cd</span> linux-5.15.114
+<span class="token function">sudo</span> <span class="token function">cp</span> <span class="token parameter variable">-r</span> ./drivers/dax <span class="token variable">$module_path</span>/drivers/dax
+<span class="token function">sudo</span> <span class="token function">cp</span> <span class="token parameter variable">-r</span> ./drivers/nvdimm <span class="token variable">$module_path</span>/drivers/nvdimm
+
+<span class="token comment"># 4、卸载镜像</span>
+<span class="token comment"># 略</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>3、运行qemu</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">qemu-system-x86_64 <span class="token punctuation">\</span>
+    <span class="token parameter variable">-machine</span> pc,nvdimm<span class="token operator">=</span>on <span class="token punctuation">\</span>
+    <span class="token parameter variable">-m</span> 2G,slots<span class="token operator">=</span><span class="token number">4</span>,maxmem<span class="token operator">=</span>32G <span class="token punctuation">\</span>
+    <span class="token parameter variable">-nographic</span> <span class="token parameter variable">-kernel</span> bzImage <span class="token punctuation">\</span>
+    <span class="token parameter variable">-smp</span> <span class="token assign-left variable">cores</span><span class="token operator">=</span><span class="token number">4</span>,threads<span class="token operator">=</span><span class="token number">1</span>,sockets<span class="token operator">=</span><span class="token number">2</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-hda</span> ubuntu_rootfs.ext4 <span class="token punctuation">\</span>
+    <span class="token parameter variable">-object</span> memory-backend-ram,id<span class="token operator">=</span>mem0,size<span class="token operator">=</span>1G  <span class="token punctuation">\</span>
+    <span class="token parameter variable">-object</span> memory-backend-ram,id<span class="token operator">=</span>mem1,size<span class="token operator">=</span>1G  <span class="token punctuation">\</span>
+    <span class="token parameter variable">-numa</span> node,memdev<span class="token operator">=</span>mem0,cpus<span class="token operator">=</span><span class="token number">0</span>-3,nodeid<span class="token operator">=</span><span class="token number">0</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-numa</span> node,memdev<span class="token operator">=</span>mem1,cpus<span class="token operator">=</span><span class="token number">4</span>-7,nodeid<span class="token operator">=</span><span class="token number">1</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-numa</span> node,nodeid<span class="token operator">=</span><span class="token number">2</span> <span class="token parameter variable">-numa</span> node,nodeid<span class="token operator">=</span><span class="token number">3</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-object</span> memory-backend-ram,id<span class="token operator">=</span>nvdimm1,size<span class="token operator">=</span>4G<span class="token punctuation">\</span>
+    <span class="token parameter variable">-device</span> nvdimm,memdev<span class="token operator">=</span>nvdimm1,id<span class="token operator">=</span>nv1,unarmed<span class="token operator">=</span>off,node<span class="token operator">=</span><span class="token number">2</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-object</span> memory-backend-ram,id<span class="token operator">=</span>nvdimm2,size<span class="token operator">=</span>4G<span class="token punctuation">\</span>
+    <span class="token parameter variable">-device</span> nvdimm,memdev<span class="token operator">=</span>nvdimm2,id<span class="token operator">=</span>nv2,unarmed<span class="token operator">=</span>off,node<span class="token operator">=</span><span class="token number">3</span> <span class="token punctuation">\</span>
+    <span class="token parameter variable">-append</span> <span class="token string">"console=ttyS0 crashkernel=256M root=/dev/sda rootfstype=ext4 rw loglevel=8"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>4、安装模块（注意模块之间的依赖）</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">insmod /root/my_modules/drivers/dax/device_dax.ko
+insmod /root/my_modules/drivers/dax/kmem.ko
+
+insmod /root/my_modules/drivers/dax/pmem/dax_pmem_core.ko
+insmod /root/my_modules/drivers/dax/pmem/dax_pmem.ko
+insmod /root/my_modules/drivers/dax/pmem/dax_pmem_compat.ko
+
+insmod /root/my_modules/drivers/nvdimm/nd_btt.ko
+insmod /root/my_modules/drivers/nvdimm/nd_blk.ko
+insmod /root/my_modules/drivers/nvdimm/nd_pmem.ko
+insmod /root/my_modules/drivers/nvdimm/nd_virtio.ko
+insmod /root/my_modules/drivers/nvdimm/virtio_pmem.ko
+
+<span class="token comment"># check</span>
+lsmod<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<blockquote>
+<p>此处注意：模块之间可能存在依赖，需要按照一定的顺序。如果顺序不对，可能出现如下报错信息<code>insmod: ERROR: could not insert module device_dax.mod: Invalid module format</code>。此时，使用<code>dmesg | tail</code>可以查看详细日志信息，使用<code>modinfo ./dax_pmem.ko | grep depend </code>可以查看模块的依赖。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ modinfo ./dax_pmem.ko <span class="token operator">|</span> <span class="token function">grep</span> depend 
+depends:        dax_pmem_core
+<span class="token comment"># 可以看到dax_pmem.ko依赖dax_pmem_core模块</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>5、配置nvdimm</p>
+</blockquote>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首次配置</span>
+daxctl migrate-device-model
+<span class="token builtin class-name">echo</span> offline <span class="token operator">&gt;</span> /sys/devices/system/memory/auto_online_blocks
+ndctl create-namespace <span class="token parameter variable">-f</span> <span class="token parameter variable">--mode</span> devdax <span class="token parameter variable">--continue</span>
+daxctl reconfigure-device <span class="token parameter variable">--mode</span><span class="token operator">=</span>system-ram all
+
+<span class="token comment"># 重启后重新配置</span>
+<span class="token builtin class-name">echo</span> offline <span class="token operator">&gt;</span> /sys/devices/system/memory/auto_online_blocks
+ndctl disable-namespace all
+ndctl destroy-namespace all
+ndctl create-namespace <span class="token parameter variable">-f</span> <span class="token parameter variable">--mode</span> devdax <span class="token parameter variable">--continue</span>
+daxctl reconfigure-device <span class="token parameter variable">--mode</span><span class="token operator">=</span>system-ram all<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>6、合并四五步<br>后续可以创建一个init.sh文件放到镜像中，启动时自动运行</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># init.sh</span>
+<span class="token comment"># 用于image镜像中挂载内核模块等</span>
+
+insmod /root/my_modules/drivers/dax/device_dax.ko
+insmod /root/my_modules/drivers/dax/kmem.ko
+
+insmod /root/my_modules/drivers/dax/pmem/dax_pmem_core.ko
+insmod /root/my_modules/drivers/dax/pmem/dax_pmem.ko
+insmod /root/my_modules/drivers/dax/pmem/dax_pmem_compat.ko
+
+insmod /root/my_modules/drivers/nvdimm/nd_btt.ko
+insmod /root/my_modules/drivers/nvdimm/nd_blk.ko
+insmod /root/my_modules/drivers/nvdimm/nd_pmem.ko
+insmod /root/my_modules/drivers/nvdimm/nd_virtio.ko
+insmod /root/my_modules/drivers/nvdimm/virtio_pmem.ko
+
+
+<span class="token comment"># 首次配置</span>
+<span class="token comment"># daxctl migrate-device-model</span>
+<span class="token comment"># echo offline &gt; /sys/devices/system/memory/auto_online_blocks</span>
+<span class="token comment"># ndctl create-namespace -f --mode devdax --continue</span>
+<span class="token comment"># daxctl reconfigure-device --mode=system-ram all</span>
+
+<span class="token comment"># 重启后重新配置</span>
+<span class="token builtin class-name">echo</span> offline <span class="token operator">&gt;</span> /sys/devices/system/memory/auto_online_blocks
+ndctl disable-namespace all
+ndctl destroy-namespace all
+ndctl create-namespace <span class="token parameter variable">-f</span> <span class="token parameter variable">--mode</span> devdax <span class="token parameter variable">--continue</span>
+daxctl reconfigure-device <span class="token parameter variable">--mode</span><span class="token operator">=</span>system-ram all<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="运行记录"><a href="#运行记录" class="headerlink" title="运行记录"></a>运行记录</h3><pre class="line-numbers language-shell\" data-language="shell\"><code class="language-shell\">root@localhost:~/my_modules/drivers/nvdimm/nvdimm# echo offline &gt; /sys/devices/system/memory/auto_online_blocks
+root@localhost:~/my_modules/drivers/nvdimm/nvdimm# ndctl create-namespace -f --mode devdax --continue
+{
+  "dev":"namespace1.0",
+  "mode":"devdax",
+  "map":"dev",
+  "size":"3.94 GiB (4.23 GB)",
+  "uuid":"12f978b1-c1f4-4be8-a67d-aa076e0a4152",
+  "daxregion":{
+    "id":1,
+    "size":"3.94 GiB (4.23 GB)",
+    "align":2097152,
+    "devices":[
+      {
+        "chardev":"dax1.0",
+        "size":"3.94 GiB (4.23 GB)",
+        "target_node":3,
+        "mode":"devdax"
+      }
+    ]
+  },
+  "align":2097152
+}
+{
+  "dev":"namespace0.0",
+  "mode":"devdax",
+  "map":"dev",
+  "size":"3.94 GiB (4.23 GB)",
+  "uuid":"0529e940-38b1-45fd-a0b1-43fcf95192ce",
+  "daxregion":{
+    "id":0,
+    "size":"3.94 GiB (4.23 GB)",
+    "align":2097152,
+    "devices":[
+      {
+        "chardev":"dax0.0",
+        "size":"3.94 GiB (4.23 GB)",
+        "target_node":2,
+        "mode":"devdax"
+      }
+    ]
+  },
+  "align":2097152
+}
+created 2 namespaces
+root@localhost:~/my_modules/drivers/nvdimm/nvdimm# daxctl reconfigure-device --mode=system-ram all
+[
+  {
+    "chardev":"dax0.0",
+    "size":4225761280,
+    "target_node":2,
+    "mode":"system-ram",
+    "movable":true
+  }
+]<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>非首次运行：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@localhost:~/my_modules/drivers/nvdimm<span class="token comment"># echo offline &gt; /sys/devices/system/memory/auto_online_blocks</span>
+oy-namespace all
+ndctl create-namespace <span class="token parameter variable">-f</span> <span class="token parameter variable">--mode</span> devdax <span class="token parameter variable">--continue</span>
+daxctl reconfigure-device --moderoot@localhost:~/my_modules/drivers/nvdimm<span class="token comment"># ndctl disable-namespace all</span>
+<span class="token operator">=</span>system-ram alldisabled <span class="token number">2</span> namespaces
+root@localhost:~/my_modules/drivers/nvdimm<span class="token comment"># ndctl destroy-namespace all</span>
+destroyed <span class="token number">0</span> namespaces
+root@localhost:~/my_modules/drivers/nvdimm<span class="token comment"># ndctl create-namespace -f --mode devdax --continue</span>
+<span class="token punctuation">{</span>
+  <span class="token string">"dev"</span><span class="token builtin class-name">:</span><span class="token string">"namespace1.0"</span>,
+  <span class="token string">"mode"</span><span class="token builtin class-name">:</span><span class="token string">"devdax"</span>,
+  <span class="token string">"map"</span><span class="token builtin class-name">:</span><span class="token string">"dev"</span>,
+  <span class="token string">"size"</span><span class="token builtin class-name">:</span><span class="token string">"3.94 GiB (4.23 GB)"</span>,
+  <span class="token string">"uuid"</span><span class="token builtin class-name">:</span><span class="token string">"8259f939-0c3d-43c4-89cb-6e89653c290f"</span>,
+  <span class="token string">"daxregion"</span>:<span class="token punctuation">{</span>
+    <span class="token string">"id"</span>:1,
+    <span class="token string">"size"</span><span class="token builtin class-name">:</span><span class="token string">"3.94 GiB (4.23 GB)"</span>,
+    <span class="token string">"align"</span>:2097152,
+    <span class="token string">"devices"</span>:<span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>
+        <span class="token string">"chardev"</span><span class="token builtin class-name">:</span><span class="token string">"dax1.0"</span>,
+        <span class="token string">"size"</span><span class="token builtin class-name">:</span><span class="token string">"3.94 GiB (4.23 GB)"</span>,
+        <span class="token string">"target_node"</span>:3,
+        <span class="token string">"mode"</span><span class="token builtin class-name">:</span><span class="token string">"devdax"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>,
+  <span class="token string">"align"</span>:2097152
+<span class="token punctuation">}</span>
+<span class="token punctuation">{</span>
+  <span class="token string">"dev"</span><span class="token builtin class-name">:</span><span class="token string">"namespace0.0"</span>,
+  <span class="token string">"mode"</span><span class="token builtin class-name">:</span><span class="token string">"devdax"</span>,
+  <span class="token string">"map"</span><span class="token builtin class-name">:</span><span class="token string">"dev"</span>,
+  <span class="token string">"size"</span><span class="token builtin class-name">:</span><span class="token string">"3.94 GiB (4.23 GB)"</span>,
+  <span class="token string">"uuid"</span><span class="token builtin class-name">:</span><span class="token string">"41d3381f-cd6a-4c02-b8d1-c97cd2633cb4"</span>,
+  <span class="token string">"daxregion"</span>:<span class="token punctuation">{</span>
+    <span class="token string">"id"</span>:0,
+    <span class="token string">"size"</span><span class="token builtin class-name">:</span><span class="token string">"3.94 GiB (4.23 GB)"</span>,
+    <span class="token string">"align"</span>:2097152,
+    <span class="token string">"devices"</span>:<span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>
+        <span class="token string">"chardev"</span><span class="token builtin class-name">:</span><span class="token string">"dax0.0"</span>,
+        <span class="token string">"size"</span><span class="token builtin class-name">:</span><span class="token string">"3.94 GiB (4.23 GB)"</span>,
+        <span class="token string">"target_node"</span>:2,
+        <span class="token string">"mode"</span><span class="token builtin class-name">:</span><span class="token string">"devdax"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>,
+  <span class="token string">"align"</span>:2097152
+<span class="token punctuation">}</span>
+created <span class="token number">2</span> namespaces
+root@localhost:~/my_modules/drivers/nvdimm<span class="token comment"># daxctl reconfigure-device --mode=system-ram all</span>
+<span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>
+    <span class="token string">"chardev"</span><span class="token builtin class-name">:</span><span class="token string">"dax0.0"</span>,
+    <span class="token string">"size"</span>:4225761280,
+    <span class="token string">"target_node"</span>:2,
+    <span class="token string">"mode"</span><span class="token builtin class-name">:</span><span class="token string">"system-ram"</span>,
+    <span class="token string">"movable"</span>:true
+  <span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+reconfigured <span class="token number">2</span> devices<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="遇到的一些问题"><a href="#遇到的一些问题" class="headerlink" title="遇到的一些问题"></a>遇到的一些问题</h2><h3 id="1、ext4文件系统损坏"><a href="#1、ext4文件系统损坏" class="headerlink" title="1、ext4文件系统损坏"></a>1、ext4文件系统损坏</h3><h4 id="问题：系统启动时，遇到ext4的报错信息"><a href="#问题：系统启动时，遇到ext4的报错信息" class="headerlink" title="问题：系统启动时，遇到ext4的报错信息"></a>问题：系统启动时，遇到ext4的报错信息</h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span> <span class="token number">3.630969</span><span class="token punctuation">]</span> EXT4-fs error <span class="token punctuation">(</span>device sda<span class="token punctuation">)</span>: htree_dirblock_to_tree:1080: inode <span class="token comment">#393220: comm systemd-tmpfile: Directory block failed checksum</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>这还会导致其它的问题，例如：</p>
+<ul>
+<li>有文件删不掉<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">rm: cannot remove <span class="token string">'directory'</span><span class="token builtin class-name">:</span> Bad message<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li>文件变成目录，还删不掉<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 提示双重目录（因为daxctl.conf变成了目录）</span>
+conf_files_filter_out: Directories inside directories are not supported: /etc/modprobe.d/daxctl.conf
+<span class="token comment"># 删除不了</span>
+<span class="token string">"cannot remove 'daxctl.conf': Directory not empty"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></li>
+</ul>
+<h4 id="解决办法："><a href="#解决办法：" class="headerlink" title="解决办法："></a>解决办法：</h4><p>使用<code>e2fsck</code>工具扫描并修复一下文件系统，基本全程按<code>y</code>确定，即可。（按我看到的信息，貌似是一些文件的ref没有更新，导致文件出错）</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">e2fsck <span class="token parameter variable">-y</span> ubuntu-rootfs-raw-20G.image<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>其中，<br><code>-f</code> 选项用于强制检查文件系统，即使文件系统处于已挂载状态。<br><code>-y</code> 选项用于自动回答所有修复问题为 “yes”，以便自动修复文件系统错误。<br>检查：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ e2fsck ubuntu-rootfs-raw-20G.image
+e2fsck <span class="token number">1.45</span>.5 <span class="token punctuation">(</span>07-Jan-2020<span class="token punctuation">)</span>
+ubuntu-rootfs-raw-20G.image: clean, <span class="token number">13654</span>/1310720 files, <span class="token number">321042</span>/5242880 blocks<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h3 id="2、内核模块未成功加载"><a href="#2、内核模块未成功加载" class="headerlink" title="2、内核模块未成功加载"></a>2、内核模块未成功加载</h3><p>出错信息</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ ndctl create-namespace <span class="token parameter variable">-f</span> <span class="token parameter variable">--mode</span> devdax <span class="token parameter variable">--continue</span>
+libkmod: ERROR <span class="token punctuation">..</span>/libkmod/libkmod-module.c:838 kmod_module_insert_module: could not <span class="token function">find</span> module by <span class="token assign-left variable">name</span><span class="token operator">=</span><span class="token string">'dax_pmem'</span>
+原因：lsmod检查一下，应该是dax_pmem模块没有成功加载。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@localhost:~<span class="token comment"># depmod -a</span>
+depmod: ERROR: could not <span class="token function">open</span> directory /lib/modules/5.15.114+: No such <span class="token function">file</span> or directory
+
+原因：我一开始忘记把内核模块放到镜像里了。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="3、qemu报错"><a href="#3、qemu报错" class="headerlink" title="3、qemu报错"></a>3、qemu报错</h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># qemu环境中，执行关机命令</span>
+$ <span class="token function">shutdown</span> now
+<span class="token punctuation">..</span><span class="token punctuation">..</span>
+systemd-journald<span class="token punctuation">[</span><span class="token number">202</span><span class="token punctuation">]</span>: Failed to send stream <span class="token function">file</span> descriptor to <span class="token function">service</span> manager: Connection refused<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>猜测：可能是这里有文件没有写完，qemu就被我关了。说不定前面文件系统出错就是因为这个原因。</p>
+<h3 id="4、主机终端无法正常打开"><a href="#4、主机终端无法正常打开" class="headerlink" title="4、主机终端无法正常打开"></a>4、主机终端无法正常打开</h3><p>不知道具体什么原因（猜测是因为我有时挂载了/dev目录，然后导致终端无法打开，vscode远程链接的终端也无法打开），报错信息如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">There was an error creating the child proces <span class="token keyword">for</span> this terminalFailed to <span class="token function">open</span> PTY: No such device<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="https://img-blog.csdnimg.cn/0639d273f65f4d8daa38ceca47e0a7ef.png" alt="在这里插入图片描述"><br>解决办法：<br>1、想办法进入系统，通过安全模式或者启动盘，或者什么的，反正只要能运行boot-repair<br>2、下载boot-repair<br>3、运行boot-repair进行修复。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> boot-repair
+$ boot-repair<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h3 id="5、模块与内核版本不一致"><a href="#5、模块与内核版本不一致" class="headerlink" title="5、模块与内核版本不一致"></a>5、模块与内核版本不一致</h3><p>insmod时出错，然后<code>dmesg | tail</code>可查到报错信息，大致如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">device_dax: disagrees about version of symbol vmf_insert_mixed
+ <span class="token builtin class-name">:</span> unknown symbol kmalloc_caches <span class="token punctuation">(</span>err -22<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>原因：为了编译更快一点，我的编译命令是<code>make -j16 vmlinux</code>，因此只有vmlinux被更新了，其它的模块没有被更新。</p>
+<blockquote>
+<p>tips（备忘录）<br>假如存在目录a/c和目录b/c，现在a/c下面添加了1.txt，而我想把这个1.txt同步到b/c下面。<br>首先， <code>cp -r a/c b/c</code>和<code>cp -r a/c b/c/</code>都不行，它们会把a/c复制到b/c下面，出现了一个b/c/c的文件夹<br>然后，网上提出了一些方案：<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/23698183/how-to-force-cp-to-overwrite-directory-instead-of-creating-another-one-inside">https://stackoverflow.com/questions/23698183/how-to-force-cp-to-overwrite-directory-instead-of-creating-another-one-inside</a>，但是我觉得都不太优雅。。。</p>
+<ol>
+<li>先rm旧文件夹，再cp新文件夹。简单，但是缺点是文件夹很大的话就很慢吧？</li>
+<li>使用rsync同步文件夹。很好，唯一缺点：我用rsync用得没那么熟，而且我不确定rsync是否在所有服务器上都默认已经安装了</li>
+<li>使用<code>-T</code>参数，将目标目录视为文件对象。缺点：很少用到这个参数，而且将文件夹视为文件这个功能，我怕我乱用之后，自己以后脑子都记不清了。</li>
+<li><code>cp -r a/c/* b/c/*</code>。缺点：我平时用肯定会选这个，但是写在脚本里就不太方便，因为第一次运行得时候，<code>b/c</code>文件夹是不存在的，那这个命令就会报错。因此我写脚本的时候，需要判断这种情况，然后再用不同命令处理。</li>
+</ol>
+</blockquote>
+<p>解决办法：<br>（1）在编译内核的时候同时编译相关模块</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 默认会编译所有代码</span>
+<span class="token function">make</span> <span class="token parameter variable">-j16</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>（2）将新编译的模块替换旧的模块，为了方便这里写了个脚本。脚本内容就是先挂载镜像，然后拷贝文件，最后卸载镜像。只不过为了安全起见，加了一些check的代码（担心有参数是空的，然后路径变成<code>/</code>什么的）。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 需要修改的变量</span>
+<span class="token comment"># 内核代码（默认当前文件夹）</span>
+<span class="token assign-left variable">linux_kernel_root</span><span class="token operator">=</span>.
+<span class="token comment"># 镜像路径</span>
+<span class="token assign-left variable">image_path</span><span class="token operator">=</span>/home/dell/my_images/ubuntu-base/ubuntu-rootfs-raw-20G.image
+<span class="token comment"># 挂载镜像的文件夹</span>
+<span class="token assign-left variable">mount_dir</span><span class="token operator">=</span>/home/dell/my_images/ubuntu-base/ubuntu-rootfs-dir
+
+<span class="token comment"># check</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token operator">!</span> <span class="token parameter variable">-f</span> <span class="token variable">$image_path</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token variable">$image_path</span><span class="token string">" not exists"</span>
+    <span class="token builtin class-name">exit</span>
+<span class="token keyword">fi</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token operator">!</span> <span class="token parameter variable">-d</span> <span class="token variable">$mount_dir</span> <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token variable">$mount_dir</span><span class="token string">" not exists"</span>
+    <span class="token builtin class-name">exit</span>
+<span class="token keyword">fi</span>
+
+
+<span class="token comment"># mount</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token variable">$image_path</span> <span class="token variable">$mount_dir</span>
+<span class="token assign-left variable">ret</span><span class="token operator">=</span><span class="token variable">$?</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token operator">!</span> ret <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"mount <span class="token variable">$image_path</span> to <span class="token variable">$mount_dir</span> failed"</span>
+    <span class="token builtin class-name">exit</span>
+<span class="token keyword">fi</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"success mounting <span class="token variable">$image_path</span> to <span class="token variable">$mount_dir</span>"</span>
+
+<span class="token comment"># copy</span>
+<span class="token assign-left variable">module_path</span><span class="token operator">=</span><span class="token variable">$mount_dir</span><span class="token string">"/root/my_modules"</span>
+
+<span class="token function">sudo</span> <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$module_path</span>/drivers/dax
+<span class="token function">sudo</span> <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$module_path</span>/drivers/nvdimm
+
+<span class="token function">sudo</span> <span class="token function">rm</span> <span class="token parameter variable">-r</span> <span class="token variable">$module_path</span>/drivers/dax
+<span class="token function">sudo</span> <span class="token function">rm</span> <span class="token parameter variable">-r</span> <span class="token variable">$module_path</span>/drivers/nvdimm
+
+<span class="token function">sudo</span> <span class="token function">cp</span> <span class="token parameter variable">-r</span> <span class="token variable">$linux_kernel_root</span>/drivers/dax <span class="token variable">$module_path</span>/drivers/dax
+<span class="token function">sudo</span> <span class="token function">cp</span> <span class="token parameter variable">-r</span> <span class="token variable">$linux_kernel_root</span>/drivers/nvdimm <span class="token variable">$module_path</span>/drivers/nvdimm
+
+<span class="token builtin class-name">echo</span> <span class="token string">"success copying modules to <span class="token variable">$module_path</span>"</span>
+
+<span class="token comment"># umount</span>
+<span class="token function">sudo</span> <span class="token function">umount</span> <span class="token variable">$mount_dir</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token punctuation">[</span> <span class="token operator">!</span> ret <span class="token punctuation">]</span><span class="token punctuation">]</span>
+<span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"umount <span class="token variable">$mount_dir</span> failed"</span>
+    <span class="token builtin class-name">exit</span>
+<span class="token keyword">fi</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"success umounting <span class="token variable">$image_path</span> to <span class="token variable">$mount_dir</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2024/07/19/qemu%E6%A8%A1%E6%8B%9F%E5%88%86%E6%88%90%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F/">http://ytirus.github.io/2024/07/19/qemu%E6%A8%A1%E6%8B%9F%E5%88%86%E6%88%90%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Hybrid-Memory/">
+                                    <span class="chip bg-color">Hybrid-Memory</span>
+                                </a>
+                            
+                                <a href="/tags/qemu/">
+                                    <span class="chip bg-color">qemu</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2024/07/21/Git%20push%E5%8F%8D%E6%82%94/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="Git push反悔">
+                        
+                        <span class="card-title">Git push反悔</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            git常用操作
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-07-21
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/git/">
+                        <span class="chip bg-color">git</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2024/07/01/vector%20iterators%20incompatible/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="Expression vector iterators incompatible">
+                        
+                        <span class="card-title">Expression vector iterators incompatible</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            在迭代器中push_back()引发错误Expression vector iterators incompatible
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-07-01
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/vector/">
+                        <span class="chip bg-color">vector</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2025</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">245.9k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

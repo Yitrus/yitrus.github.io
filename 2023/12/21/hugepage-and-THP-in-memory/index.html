@@ -435,8 +435,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/Basics/" class="post-category">
-                                Basics
+                            <a href="/categories/OS/" class="post-category">
+                                OS
                             </a>
                         
                     </div>
@@ -568,6 +568,7 @@ hugepagesz <span class="token operator">=</span> 2MB， hugepages <span class="t
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> always <span class="token operator">&gt;</span> /sys/kernel/mm/transparent_hugepage/defrag
 <span class="token builtin class-name">echo</span> always <span class="token operator">&gt;</span> /sys/kernel/mm/transparent_hugepage/enabled<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
+<p>自己整理的大页面申请流程：<br><img src="/images/%E5%A4%A7%E9%A1%B5%E7%94%B3%E8%AF%B7%E6%B5%81%E7%A8%8B%E5%9B%BE.jpg"></p>
 <p>参考<a target="_blank" rel="noopener" href="http://cenalulu.github.io/linux/huge-page-on-numa/">Huge Page 是否是拯救性能的万能良药？</a>可以有参考。<br>参考<a target="_blank" rel="noopener" href="https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/">透明巨页：衡量性能影响</a></p>
 <h2 id="3-TLB"><a href="#3-TLB" class="headerlink" title="3. TLB"></a>3. TLB</h2><p>通过编译优化来将频繁被访问的指令汇总到一起，放在二进制文件中的同一个地方，以提高空间局部性，这样就可以提高iTLB命中。这块放置频繁访问指令的区域，就叫热区域（Hot Text）。</p>
 <p>通过在大页面上放置热文本，可以进一步提升iTLB命中率。使用大页面iTLB条目时，单个TLB条目覆盖的代码是标准4K页面的512倍。更重要的是，当代的CPU体系结构，通常为大页面提供一些单独的TLB条目，如果我们不使用大页面，这些条目将处于空闲状态。（是吗？待考证）所以，通过使用大页面，也可以充分利用那些TLB条目。</p>
@@ -875,12 +876,12 @@ Example:
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Hybrid-Memory-Systems/">
-                        <span class="chip bg-color">Hybrid Memory Systems</span>
+                    <a href="/tags/CCFA/">
+                        <span class="chip bg-color">CCFA</span>
                     </a>
                     
-                    <a href="/tags/A/">
-                        <span class="chip bg-color">A</span>
+                    <a href="/tags/Hybrid-Memory/">
+                        <span class="chip bg-color">Hybrid-Memory</span>
                     </a>
                     
                     <a href="/tags/Cloud/">
@@ -931,20 +932,16 @@ Example:
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/A/">
-                        <span class="chip bg-color">A</span>
+                    <a href="/tags/CCFA/">
+                        <span class="chip bg-color">CCFA</span>
                     </a>
                     
                     <a href="/tags/CXL/">
                         <span class="chip bg-color">CXL</span>
                     </a>
                     
-                    <a href="/tags/Memory/">
-                        <span class="chip bg-color">Memory</span>
-                    </a>
-                    
-                    <a href="/tags/ML/">
-                        <span class="chip bg-color">ML</span>
+                    <a href="/tags/Machine-learning/">
+                        <span class="chip bg-color">Machine-learning</span>
                     </a>
                     
                 </div>
@@ -1091,7 +1088,7 @@ Example:
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2024</span>
+                <span id="year">2019-2025</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -1100,7 +1097,7 @@ Example:
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">175.9k</span>&nbsp;字
+                class="white-color">245.9k</span>&nbsp;字
             
             
             
