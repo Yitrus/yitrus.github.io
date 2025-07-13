@@ -457,14 +457,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.9k
+                    4.6k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    15 分
+                    18 分
                 </div>
                 
 
@@ -550,6 +550,36 @@ hugepagesz <span class="token operator">=</span> 2MB， hugepages <span class="t
 <p>使用 <code>libhugetlbfs</code> 结合 <code>LD_PRELOAD</code>，可以在不修改程序源码的情况下让程序使用静态大页。这种方式适用于大多数需要使用静态大页的应用场景。</p>
 <h2 id="2-THP"><a href="#2-THP" class="headerlink" title="2. THP"></a>2. THP</h2><p>复合页（Compound Page）就是将物理上连续的两个或多个页看成一个独立的大页，它能够用来创建hugetlbfs中使用的大页（hugepage）。也能够用来创建透明大页（transparent huge page）。可是它不能用在页缓存（page cache）中，这是由于页缓存中管理的都是单个页。分配一个复合页的方式是：使用<code>alloc_pages</code>函数，參数order至少为1，且设置<code>__GFP_COMP</code>标记。由于依据复合页的定义，它通常包含2个或多个连续的物理内存页，这是由它的实现决定的，因而order参数不可能为0。</p>
 <p>transparent huge page透明大页。在Linux中自2.6.38版本开始支持THP。在应用需要huge page的时候，可通过memory compaction（内存规整）操作移动页面，以形成一个huge page，因为该过程不会被应用感知到，所以被称为”transparent”。</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">page</span> <span class="token punctuation">{</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">long</span> flags<span class="token punctuation">;</span>		<span class="token comment">/* Atomic flags, some possibly
+					 * updated asynchronously */</span>
+	<span class="token keyword">union</span> <span class="token punctuation">{</span> <span class="token comment">// 这个结构中每个struct代表一种页面类型</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        <span class="token keyword">struct</span> <span class="token punctuation">{</span>	<span class="token comment">/* Tail pages of compound page */</span>
+            <span class="token comment">// 对于尾页面（tail page），这个字段指向对应的头页面（head page）的地址</span>
+            <span class="token comment">// 位0被置为1（通过位操作实现），表示这是一个尾页面</span>
+            <span class="token comment">// 不被置为1，那么就是Head page保存整个复合页面的信息</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">long</span> compound_head<span class="token punctuation">;</span>	<span class="token comment">/* Bit zero is set */</span>
+
+			<span class="token comment">/* First tail page only */</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">char</span> compound_dtor<span class="token punctuation">;</span> <span class="token comment">// 在头页面中指定了复合页面的析构函数</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">char</span> compound_order<span class="token punctuation">;</span> <span class="token comment">// 表示该复合页面的阶数（order）。</span>
+            <span class="token comment">// 对于透明大页面（2MB的页面），compound_order=9，因为2^9 = 512个4KB的基础页面</span>
+			<span class="token class-name">atomic_t</span> compound_mapcount<span class="token punctuation">;</span> <span class="token comment">// 用于跟踪该复合页面被映射到用户空间的次数</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">int</span> compound_nr<span class="token punctuation">;</span> <span class="token comment">/* 1 &lt;&lt; compound_order */</span>
+            <span class="token comment">// 指定该复合页面包含的基础页面数目，例如1 &lt;&lt; 9 = 512</span>
+		<span class="token punctuation">}</span><span class="token punctuation">;</span>
+		<span class="token keyword">struct</span> <span class="token punctuation">{</span>	<span class="token comment">/* Second tail page of compound page */</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">long</span> _compound_pad_1<span class="token punctuation">;</span>	<span class="token comment">/* compound_head 指向复合页面的头页面 */</span>
+			<span class="token class-name">atomic_t</span> hpage_pinned_refcount<span class="token punctuation">;</span> <span class="token comment">// 在被分解时需要处理额外的引用计数？</span>
+			<span class="token comment">/* For both global and memcg */</span>
+			<span class="token keyword">struct</span> <span class="token class-name">list_head</span> deferred_list<span class="token punctuation">;</span> <span class="token comment">// 延迟释放大页面</span>
+		<span class="token punctuation">}</span><span class="token punctuation">;</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token punctuation">}</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
 <p>THP采用常规(“高阶”)内存分配路径，它<strong>要求操作系统能够找到连续且对齐的内存块</strong>。它与常规页面存在相同的问题，即碎片化。如果操作系统<strong>找不到连续的内存块，它将尝试压缩、回收或分页其他页面</strong>。**该过程成本高昂，可能会导致延迟峰值(长达几秒钟)**。此问题已在4.6 内核中得到解决(通过”延迟”选项)，如果操作系统无法分配大页面，则会回退到常规页面。</p>
 <p>维护。即使应用程序只接触1字节的内存，它也会占用整个2MB的大页面。这显然是浪费内存。所以有一个名为<strong>khugepaged的后台内核线程</strong>。它<strong>扫描页面</strong>并尝试对其<strong>进行碎片整理并折叠成一个巨大的页面</strong>。尽管它是一个后台线程，<strong>但它会锁定它使用的页面</strong>，因此也可能导致<strong>延迟峰值</strong>。另一个陷阱在于<strong>大页面拆分</strong>，并非操作系统的所有部分都适用于大页面，例如Swap。操作系统将大页面拆分为常规页面。它还可能<strong>降低性能并增加内存碎片</strong>。</p>
 <p>实现THP作为一个整体被swap out和swap in（<a href="https://link.zhihu.com/?target=https://lwn.net/Articles/758677/">参考这篇文章</a>）</p>
@@ -565,7 +595,24 @@ hugepagesz <span class="token operator">=</span> 2MB， hugepages <span class="t
 
 <p>自己整理的大页面申请流程：<br><img src="/images/%E5%A4%A7%E9%A1%B5%E7%94%B3%E8%AF%B7%E6%B5%81%E7%A8%8B%E5%9B%BE.jpg"></p>
 <p>参考<a target="_blank" rel="noopener" href="http://cenalulu.github.io/linux/huge-page-on-numa/">Huge Page 是否是拯救性能的万能良药？</a>可以有参考。<br>参考<a target="_blank" rel="noopener" href="https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/">透明巨页：衡量性能影响</a></p>
-<h2 id="3-TLB"><a href="#3-TLB" class="headerlink" title="3. TLB"></a>3. TLB</h2><p>通过编译优化来将频繁被访问的指令汇总到一起，放在二进制文件中的同一个地方，以提高空间局部性，这样就可以提高iTLB命中。这块放置频繁访问指令的区域，就叫热区域（Hot Text）。</p>
+<h2 id="3-页表"><a href="#3-页表" class="headerlink" title="3. 页表"></a>3. 页表</h2><p>PGD (Page Global Directory) → P4D → PUD → PMD → PTE每一级页表存储下一级页表的地址，最终PTE(Page Table Entry)指向实际的物理页。一个PMD直接指向2MB的物理页（跳过PTE层级）;一个PUD直接指向 1GB 的物理页（跳过PMD和PTE层级）。在Linux中，页表本身（比如PTE、PMD、PUD表）都是由实际的物理页面承载的。<code>struct mm_struct</code>是每个进程唯一的地址空间结构，进程的所有内存映射信息都在这。当你在内核中分配一个页表页（通常在处理page fault或mmap时），你从物理页池中拿一个4KB页面作为页表。内核通过<code>struct page</code>管理这个物理页，它需要知道这个页表页是为哪个进程分配的。页表页属于某个进程，需要知道归属。</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// 存页表的物理页面的struct page中的union</span>
+<span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    <span class="token keyword">unsigned</span> <span class="token keyword">long</span> _pt_pad_1<span class="token punctuation">;</span>      <span class="token comment">// 填充字段，用于对齐或覆盖共用结构</span>
+    <span class="token class-name">pgtable_t</span> pmd_huge_pte<span class="token punctuation">;</span>       <span class="token comment">// 和THP拆分有关</span>
+    <span class="token keyword">unsigned</span> <span class="token keyword">long</span> _pt_pad_2<span class="token punctuation">;</span>      <span class="token comment">// 填充字段</span>
+    <span class="token keyword">union</span> <span class="token punctuation">{</span>
+        <span class="token keyword">struct</span> <span class="token class-name">mm_struct</span> <span class="token operator">*</span>pt_mm<span class="token punctuation">;</span>          <span class="token comment">// 指向拥有该页表页的进程的mm_struct</span>
+        <span class="token class-name">atomic_t</span> pt_frag_refcount<span class="token punctuation">;</span>       <span class="token comment">// 在部分架构中用于页表碎片引用计数</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">if</span> <span class="token expression">ALLOC_SPLIT_PTLOCKS</span></span>
+    <span class="token class-name">spinlock_t</span> <span class="token operator">*</span>ptl<span class="token punctuation">;</span>              <span class="token comment">// 指向外部页表锁</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">else</span></span>
+    <span class="token class-name">spinlock_t</span> ptl<span class="token punctuation">;</span>               <span class="token comment">// 内嵌页表锁（节省空间）</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="4-TLB"><a href="#4-TLB" class="headerlink" title="4. TLB"></a>4. TLB</h2><p>通过编译优化来将频繁被访问的指令汇总到一起，放在二进制文件中的同一个地方，以提高空间局部性，这样就可以提高iTLB命中。这块放置频繁访问指令的区域，就叫热区域（Hot Text）。</p>
 <p>通过在大页面上放置热文本，可以进一步提升iTLB命中率。使用大页面iTLB条目时，单个TLB条目覆盖的代码是标准4K页面的512倍。更重要的是，当代的CPU体系结构，通常为大页面提供一些单独的TLB条目，如果我们不使用大页面，这些条目将处于空闲状态。（是吗？待考证）所以，通过使用大页面，也可以充分利用那些TLB条目。</p>
 <p>关于<a target="_blank" rel="noopener" href="https://blog.csdn.net/hanzefeng/article/details/82893317">分支预测</a>的基础知识。如果从运行的二进制文件来优化iTLB，可以考虑<a target="_blank" rel="noopener" href="https://lwn.net/Articles/680985/">LBR（Last Branch Record，最后分支记录）</a>为热函数创建优化表单<a target="_blank" rel="noopener" href="https://github.com/facebook/hhvm/tree/master/hphp/tools/hfsort">HFSort</a>工具。</p>
 <p>事实上，perf只支持所有事件的一个小子集，而CPU有数百个不同的计数器来监测性能。<br><strong>在页表中遍历所花费的 CPU 周期数</strong></p>
@@ -589,7 +636,7 @@ hugepagesz <span class="token operator">=</span> 2MB， hugepages <span class="t
      <span class="token number">1.007177568</span>                  <span class="token number">5</span>      ireads<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 
-<h2 id="4-伙伴系统内存分配的碎片"><a href="#4-伙伴系统内存分配的碎片" class="headerlink" title="4. 伙伴系统内存分配的碎片"></a>4. 伙伴系统内存分配的碎片</h2><p>随着时间的推移，分配请求将拆分、合并、拆分…这个池，直到我们到达由于缺少连续内存块而可能不得不使请求失败的地步。在这种情况下，buddyinfo proc 文件将允许您查看内存的当前碎片状态。这是一个快速的python脚本。</p>
+<h2 id="5-伙伴系统内存分配的碎片"><a href="#5-伙伴系统内存分配的碎片" class="headerlink" title="5. 伙伴系统内存分配的碎片"></a>5. 伙伴系统内存分配的碎片</h2><p>随着时间的推移，分配请求将拆分、合并、拆分…这个池，直到我们到达由于缺少连续内存块而可能不得不使请求失败的地步。在这种情况下，buddyinfo proc 文件将允许您查看内存的当前碎片状态。这是一个快速的python脚本。</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment">#!/usr/bin/env python</span>
 <span class="token comment"># vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 textwidth=79 autoindent</span>
 
@@ -711,12 +758,7 @@ Example:
 <span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">'__main__'</span><span class="token punctuation">:</span>
     main<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-
-
-
-
-
-
+<h2 id="回收的时候要被怎么拆分？"><a href="#回收的时候要被怎么拆分？" class="headerlink" title="回收的时候要被怎么拆分？"></a>回收的时候要被怎么拆分？</h2><p><a target="_blank" rel="noopener" href="https://lore.kernel.org/linux-mm/20230913164938.16918-1-vernhao@tencent.com/">https://lore.kernel.org/linux-mm/20230913164938.16918-1-vernhao@tencent.com/</a><br><a target="_blank" rel="noopener" href="https://patchew.org/linux/20230912021727.61601-1-vernhao@tencent.com/">https://patchew.org/linux/20230912021727.61601-1-vernhao@tencent.com/</a></p>
 
                 
             </div>
@@ -1092,7 +1134,7 @@ Example:
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

@@ -423,16 +423,16 @@
                                 <span class="chip bg-color">NUMA</span>
                             </a>
                         
+                            <a href="/tags/Kernel-Crashed/">
+                                <span class="chip bg-color">Kernel-Crashed</span>
+                            </a>
+                        
                             <a href="/tags/proc/">
                                 <span class="chip bg-color">proc</span>
                             </a>
                         
                             <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
                                 <span class="chip bg-color">虚拟文件系统</span>
-                            </a>
-                        
-                            <a href="/tags/Kernel-Crashed/">
-                                <span class="chip bg-color">Kernel-Crashed</span>
                             </a>
                         
                     </div>
@@ -465,7 +465,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    7.9k
+                    8k
                 </div>
                 
 
@@ -509,7 +509,7 @@
 <li><code>/proc/[pid]/maps</code> 或者 <code>pmap pid</code> 命令来查看进程用户态虚拟内存空间的实际分布</li>
 <li><code>/proc/iomem</code> 命令来查看进程内核态虚拟内存空间的的实际分布，还能查看内存的物理地址，不用sudo竟然地址全是0</li>
 <li><code>/proc/buddyinfo</code>命令来查看NUMA节点中不同内存区域zone的伙伴系统当前状态，迁移类型，链表成员数量</li>
-<li><code>/proc/meminfo</code>显示的是当前时刻物理页的信息，包括LRU的、slab的、hugepage的等等，<code>meminfo_proc_show</code>函数实现</li>
+<li><code>/proc/meminfo</code>显示的是当前时刻物理页的信息，包括LRU的、slab的、hugepage的等等，<code>meminfo_proc_show</code>函数实现，这篇文章对输出内容做了非常详细的解释<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/391f42f8fb0d">内存详解</a></li>
 <li><code>proc/[pid]/status | grep -E 'Name|Pid|Vm*|Rss*|Vm*|Hu*'</code>是进程和内存相关的信息。数据结构<code>mm_struct</code>成员<code>rss_stat</code>会记录进程内存的使用情况。（VmRSS进程使用的最大物理内存、RssAnon进程使用的匿名页、RssFile、RssShmem共享页、VmPTE页表大小、VmSwap交换区大小等）</li>
 <li><code>proc/mounts</code>已加载的文件系统列表</li>
 <li><code>proc/modules</code>已加载的模块</li>
@@ -1162,7 +1162,7 @@ Remote Socket L2-<span class="token operator">&gt;</span>L2 HITM latency <span c
 Writer Numa Node     <span class="token number">0</span>	     <span class="token number">1</span>	
             <span class="token number">0</span>	     -	  <span class="token number">53.7</span>	
             <span class="token number">1</span>	  <span class="token number">55.3</span>	     -	<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/447936509">MLC内存测试结果解读到CPU架构设计分析</a></p>
 <h2 id="10-使用SystemTap软件跟踪内核函数"><a href="#10-使用SystemTap软件跟踪内核函数" class="headerlink" title="10. 使用SystemTap软件跟踪内核函数"></a>10. 使用SystemTap软件跟踪内核函数</h2><p>衡量 TPH 如何影响性能和延迟的另一种有效方法是跟踪/探测 Linux 内核功能。为此使用<strong>SystemTap</strong>，它是“用于动态检测正在运行的生产Linux内核操作系统的工具”。这个工具有它自己的脚本语言，使用非常灵活。</p>
 <p>第一个函数是<code>__alloc_pages_slowpath</code>。当没有可用于分配的连续内存块时，将执行它。反过来，此函数调用可能导致延迟峰值的昂贵页面压缩和回收逻辑。第二个函数是<code>khugepaged_scan_mm_slot</code>。它由后台“khugepaged”内核线程执行。它扫描巨大的页面并试图将它们折叠成一个。<br>脚本如下：</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#! /usr/bin/env stap</span>
@@ -1277,16 +1277,16 @@ value <span class="token operator">|</span>-------------------------------------
                                     <span class="chip bg-color">NUMA</span>
                                 </a>
                             
+                                <a href="/tags/Kernel-Crashed/">
+                                    <span class="chip bg-color">Kernel-Crashed</span>
+                                </a>
+                            
                                 <a href="/tags/proc/">
                                     <span class="chip bg-color">proc</span>
                                 </a>
                             
                                 <a href="/tags/%E8%99%9A%E6%8B%9F%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
                                     <span class="chip bg-color">虚拟文件系统</span>
-                                </a>
-                            
-                                <a href="/tags/Kernel-Crashed/">
-                                    <span class="chip bg-color">Kernel-Crashed</span>
                                 </a>
                             
                         </div>
@@ -1368,12 +1368,12 @@ value <span class="token operator">|</span>-------------------------------------
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/PTE/">
-                        <span class="chip bg-color">PTE</span>
-                    </a>
-                    
                     <a href="/tags/Memory/">
                         <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/PTE/">
+                        <span class="chip bg-color">PTE</span>
                     </a>
                     
                 </div>
@@ -1424,16 +1424,16 @@ value <span class="token operator">|</span>-------------------------------------
                         <span class="chip bg-color">虚拟文件系统</span>
                     </a>
                     
+                    <a href="/tags/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
+                        <span class="chip bg-color">文件系统</span>
+                    </a>
+                    
                     <a href="/tags/%E5%90%8E%E5%8F%B0%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B/">
                         <span class="chip bg-color">后台守护进程</span>
                     </a>
                     
                     <a href="/tags/%E5%86%85%E6%A0%B8%E7%BA%BF%E7%A8%8B/">
                         <span class="chip bg-color">内核线程</span>
-                    </a>
-                    
-                    <a href="/tags/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">
-                        <span class="chip bg-color">文件系统</span>
                     </a>
                     
                 </div>
@@ -1589,7 +1589,7 @@ value <span class="token operator">|</span>-------------------------------------
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

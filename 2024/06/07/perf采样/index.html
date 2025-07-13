@@ -500,7 +500,7 @@
 <p>perf event的组织方式是cpu维度或者task维度，这样采样才不是只有整个系统的。在manual page有写，<code>perf_event_open()</code>系统调用使用cpu、pid两个参数来指定<code>perf_event</code>的cpu、task维度。两种维度的关联是靠<code>perf_event_context</code>如下图：</p>
 <p><img src="https://terenceli.github.io/assets/img/perf/3.png"><br>每个<code>perf_event</code>由<code>event_list</code>连接，而group的连接方式便于perf count功能一次性读出。</p>
 <p>由于cpu维度的<code>perf_event</code>只要cpu online就会一直运行，task维度只有task被调度才会运行，这涉及perf驱动开关和任务调度。一个概括的函数调用图如下：<br><img src="https://terenceli.github.io/assets/img/perf/5.png"></p>
-<p>Every PMU is registerd by calling ‘perf_pmu_register’.</p>
+<p>Every PMU is registerd by calling <code>perf_pmu_register</code>.</p>
 <p>每个pmu拥有一个per_cpu的链表，perf_event需要在哪个cpu上获取数据就加入到哪个cpu的链表上。如果event被触发，它会根据当前的运行cpu给对应链表上的所有perf_event推送数据。</p>
 <p><img src="https://images.weserv.nl/?url=https://img-blog.csdn.net/20180725121740849"></p>
 <p>cpu维度的context：<code>this_cpu_ptr</code>(<code>pmu-&gt;pmu_cpu_context-&gt;ctx</code>)上链接的所有perf_event会根据绑定的pmu，链接到pmu对应的per_cpu的-&gt;perf_events链表上。<br>task维度的context：<code>this_cpu_ptr</code>(<code>pmu-&gt;pmu_cpu_context-&gt;task_ctx</code>)上链接的所有perf_event会根据绑定的pmu，链接到pmu对应的per_cpu的-&gt;perf_events链表上。perf_event还需要做cpu匹配，符合<code>event-&gt;cpu == -1 || event-&gt;cpu == smp_processor_id()</code>条件的event才能链接到pmu上。</p>
@@ -1104,9 +1104,9 @@ unlock<span class="token operator">:</span>
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/40.jpg" class="responsive-img" alt="CPU相关信息查看">
+                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="CPU和DRAM硬件相关信息查看">
                         
-                        <span class="card-title">CPU相关信息查看</span>
+                        <span class="card-title">CPU和DRAM硬件相关信息查看</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -1134,8 +1134,12 @@ unlock<span class="token operator">:</span>
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/CPU%E6%8B%93%E6%89%91/">
-                        <span class="chip bg-color">CPU拓扑</span>
+                    <a href="/tags/Memory/">
+                        <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/CPU/">
+                        <span class="chip bg-color">CPU</span>
                     </a>
                     
                     <a href="/tags/LLC/">
@@ -1299,7 +1303,7 @@ unlock<span class="token operator">:</span>
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

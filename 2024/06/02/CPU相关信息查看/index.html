@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="CPU相关信息查看, Yi&#39;s Blog">
+    <meta name="keywords" content="CPU和DRAM硬件相关信息查看, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>CPU相关信息查看 | Yi&#39;s Blog</title>
+    <title>CPU和DRAM硬件相关信息查看 | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -294,12 +294,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/40.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/19.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">CPU相关信息查看</h1> -->
+                    <!-- <h1 class="description center-align post-title">CPU和DRAM硬件相关信息查看</h1> -->
                 </div>
             </div>
         </div>
@@ -415,8 +415,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/CPU%E6%8B%93%E6%89%91/">
-                                <span class="chip bg-color">CPU拓扑</span>
+                            <a href="/tags/Memory/">
+                                <span class="chip bg-color">Memory</span>
+                            </a>
+                        
+                            <a href="/tags/CPU/">
+                                <span class="chip bg-color">CPU</span>
                             </a>
                         
                             <a href="/tags/LLC/">
@@ -457,14 +461,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    141
+                    1.7k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    1 分
+                    9 分
                 </div>
                 
 
@@ -487,17 +491,264 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p><code>lscpu</code>命令可以显示CPU架构相关的信息，包括缓存大小。</p>
+                <h3 id="lscpu"><a href="#lscpu" class="headerlink" title="lscpu"></a>lscpu</h3><p><code>lscpu</code>命令可以显示CPU架构相关的信息，包括缓存大小。这个信息是来自对<code>proc/cpuinfo</code>文件的读取</p>
+<pre class="line-numbers language-none"><code class="language-none">$ lscpu
+架构：           aarch64
+字节序：         Little Endian # 在内存中存储多字节数据（如整数、浮点数）时的排列顺序；
+                              # 小端序数据的低位字节存储在低内存地址，高位字节存储在高内存地址。
+CPU:             256
+在线 CPU 列表：  0-255
+每个核的线程数： 2
+每个座的核数：   64
+座：             2
+NUMA 节点：      4          # 两个socket，每个socket64核心，这是物理上的。但是有4个numa节点，每个物理CPU插槽通常对应一个或多个 NUMA 节点。
+厂商 ID：        HiSilicon
+BIOS Vendor ID:  HiSilicon
+型号：           0
+BIOS Model name: HUAWEI Kunpeng 920 V200 7270Z
+步进：           0x0
+CPU 最大 MHz：   2900.0000
+CPU 最小 MHz：   400.0000
+BogoMIPS：       200.00
+L1d 缓存：       64K
+L1i 缓存：       64K
+L2 缓存：        1280K
+L3 缓存：        57344K
+NUMA 节点0 CPU： 0-63 
+NUMA 节点1 CPU： 64-127 # 每个NUMA节点有独立的内存通道，访问本地内存速度更快，跨节点访问延迟更高。
+NUMA 节点2 CPU： 128-191
+NUMA 节点3 CPU： 192-255
+标记：           fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm ssbs 
+sb dcpodp flagm2 frint svei8mm svef32mm svef64mm svebf16 i8mm bf16 dgh rng ecv<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我还是不清楚，物理上128核，每个numa64核，是每个numa32物理核32逻辑核，还是有的numa64逻辑核。应该是前者吧，后者共享cache没法有独立内存通道啊。</p>
 <p>在<code>/sys</code>文件系统中可以找到有关CPU缓存的信息。</p>
 <pre class="line-numbers language-none"><code class="language-none">cat /sys/devices/system/cpu/cpu0/cache/index0/size  # L1d Cache
 cat /sys/devices/system/cpu/cpu0/cache/index1/size  # L1i Cache
 cat /sys/devices/system/cpu/cpu0/cache/index2/size  # L2 Cache
 cat /sys/devices/system/cpu/cpu0/cache/index3/size  # L3 Cache<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><code>dmidecode</code>命令可以获取系统硬件的详细信息，包括CPU缓存。</p>
-<pre class="line-numbers language-none"><code class="language-none">sudo dmidecode --type cache<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>如果我想获取每个socket的代表core（因为一些场景下，对寄存器的写入要指定core，但是起作用的是整个socket）</p>
+<pre class="line-numbers language-none"><code class="language-none">import (
+	"os/exec"
+	"strconv"
+	"strings"
+)
 
-<p>使用<code>lstopo</code>命令来绘制CPU拓扑图。这个命令是<code>hwloc</code>工具的一部分。</p>
+// getSocketLeaderCores 使用 lscpu 命令获取每个插槽的第一个核心
+func getSocketLeaderCores() ([]int, error) {
+	cmd := exec.Command("lscpu", "-p=SOCKET,CORE") // 以0,63一行的形式列出了每个socket对应的物理core编号
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	socketFirstCore := make(map[int]int)
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "#") || line == "" {
+			continue
+		}
+		parts := strings.Split(line, ",")
+		if len(parts) &lt; 2 {
+			continue
+		}
+		socketID, err := strconv.Atoi(parts[0])
+		if err != nil {
+			continue
+		}
+		coreID, err := strconv.Atoi(parts[1])
+		if err != nil {
+			continue
+		}
+		// 记录每个 socket 的最小 core ID
+		if firstCore, exists := socketFirstCore[socketID]; !exists || coreID &lt; firstCore {
+			socketFirstCore[socketID] = coreID
+		}
+	}
+	// 转换为有序切片
+	result := make([]int, 0, len(socketFirstCore))
+	for _, coreID := range socketFirstCore {
+		result = append(result, coreID)
+	}
+	return result, nil
+}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="dmidecode"><a href="#dmidecode" class="headerlink" title="dmidecode"></a>dmidecode</h3><p><code>dmidecode</code>命令可以获取系统硬件的详细信息，包括CPU缓存。</p>
+<pre class="line-numbers language-none"><code class="language-none">sudo dmidecode --type cache<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>从下面信息可以知道：每个物理 CPU 1 个 IMC（Integrated  Memory Controller），每个 IMC 管理 8 个 channel，每个channel 2个 DIMM。64GB，DDR5 内存，传输速率 4400MT/s（最高传输频率），channel 的位宽 64 bits。</p>
+<pre class="line-numbers language-none"><code class="language-none"># 显示硬件信息，包括内存模块（DIMM）的详细信息
+sudo dmidecode -t memory
+Handle 0x0021, DMI type 17, 92 bytes
+Memory Device
+        Array Handle: 0x0000
+        Error Information Handle: Not Provided
+        Total Width: 80 bits
+        Data Width: 64 bits
+        Size: 64 GB
+        Form Factor: DIMM
+        Set: None
+        Locator: DIMM171
+        Bank Locator: SOCKET 1 CHANNEL 7 DIMM 1
+        Type: DDR5
+        Type Detail: Synchronous Registered (Buffered)
+        Speed: 5600 MT/s
+        Manufacturer: Hynix
+        Serial Number: 80AD032407E12D1E69
+        Asset Tag: 2407 
+        Part Number: HMCG94AGBRA182N               
+        Rank: 2
+        Configured Memory Speed: 4400 MT/s
+        Minimum Voltage: 1.067 V
+        Maximum Voltage: 1.166 V
+        Configured Voltage: 1.1 V
+        Memory Technology: DRAM
+        Memory Operating Mode Capability: None
+        Firmware Version: Not Specified
+        Module Manufacturer ID: Bank 1, Hex 0xAD
+        Module Product ID: Unknown
+        Memory Subsystem Controller Manufacturer ID: Unknown
+        Memory Subsystem Controller Product ID: Unknown
+        Non-Volatile Size: None
+        Volatile Size: None
+        Cache Size: None
+        Logical Size: None
+
+$ dmidecode -t memory | grep -A10 "Memory Device" | grep -E "Locator:|Size:"
+        Size: 64 GB
+        Locator: DIMM000
+        Bank Locator: SOCKET 0 CHANNEL 0 DIMM 0
+        Size: 64 GB
+        Locator: DIMM001
+        Bank Locator: SOCKET 0 CHANNEL 0 DIMM 1
+        Size: 64 GB
+        Locator: DIMM010
+        Bank Locator: SOCKET 0 CHANNEL 1 DIMM 0
+        Size: 64 GB
+        Locator: DIMM011
+        Bank Locator: SOCKET 0 CHANNEL 1 DIMM 1
+        Size: 64 GB
+        Locator: DIMM020
+        Bank Locator: SOCKET 0 CHANNEL 2 DIMM 0
+        Size: 64 GB
+        Locator: DIMM021
+        Bank Locator: SOCKET 0 CHANNEL 2 DIMM 1
+        Size: 64 GB
+        Locator: DIMM030
+        Bank Locator: SOCKET 0 CHANNEL 3 DIMM 0
+        Size: 64 GB
+        Locator: DIMM031
+        Bank Locator: SOCKET 0 CHANNEL 3 DIMM 1
+        Size: 64 GB
+        Locator: DIMM040
+        Bank Locator: SOCKET 0 CHANNEL 4 DIMM 0
+        Size: 64 GB
+        Locator: DIMM041
+        Bank Locator: SOCKET 0 CHANNEL 4 DIMM 1
+        Size: 64 GB
+        Locator: DIMM050
+        Bank Locator: SOCKET 0 CHANNEL 5 DIMM 0
+        Size: 64 GB
+        Locator: DIMM051
+        Bank Locator: SOCKET 0 CHANNEL 5 DIMM 1
+        Size: 64 GB
+        Locator: DIMM060
+        Bank Locator: SOCKET 0 CHANNEL 6 DIMM 0
+        Size: 64 GB
+        Locator: DIMM061
+        Bank Locator: SOCKET 0 CHANNEL 6 DIMM 1
+        Size: 64 GB
+        Locator: DIMM070
+        Bank Locator: SOCKET 0 CHANNEL 7 DIMM 0
+        Size: 64 GB
+        Locator: DIMM071
+        Bank Locator: SOCKET 0 CHANNEL 7 DIMM 1
+        Size: 64 GB
+        Locator: DIMM100
+        Bank Locator: SOCKET 1 CHANNEL 0 DIMM 0
+        Size: 64 GB
+        Locator: DIMM101
+        Bank Locator: SOCKET 1 CHANNEL 0 DIMM 1
+        Size: 64 GB
+        Locator: DIMM110
+        Bank Locator: SOCKET 1 CHANNEL 1 DIMM 0
+        Size: 64 GB
+        Locator: DIMM111
+        Bank Locator: SOCKET 1 CHANNEL 1 DIMM 1
+        Size: 64 GB
+        Locator: DIMM120
+        Bank Locator: SOCKET 1 CHANNEL 2 DIMM 0
+        Size: 64 GB
+        Locator: DIMM121
+        Bank Locator: SOCKET 1 CHANNEL 2 DIMM 1
+        Size: 64 GB
+        Locator: DIMM130
+        Bank Locator: SOCKET 1 CHANNEL 3 DIMM 0
+        Size: 64 GB
+        Locator: DIMM131
+        Bank Locator: SOCKET 1 CHANNEL 3 DIMM 1
+        Size: 64 GB
+        Locator: DIMM140
+        Bank Locator: SOCKET 1 CHANNEL 4 DIMM 0
+        Size: 64 GB
+        Locator: DIMM141
+        Bank Locator: SOCKET 1 CHANNEL 4 DIMM 1
+        Size: 64 GB
+        Locator: DIMM150
+        Bank Locator: SOCKET 1 CHANNEL 5 DIMM 0
+        Size: 64 GB
+        Locator: DIMM151
+        Bank Locator: SOCKET 1 CHANNEL 5 DIMM 1
+        Size: 64 GB
+        Locator: DIMM160
+        Bank Locator: SOCKET 1 CHANNEL 6 DIMM 0
+        Size: 64 GB
+        Locator: DIMM161
+        Bank Locator: SOCKET 1 CHANNEL 6 DIMM 1
+        Size: 64 GB
+        Locator: DIMM170
+        Bank Locator: SOCKET 1 CHANNEL 7 DIMM 0
+        Size: 64 GB
+        Locator: DIMM171
+        Bank Locator: SOCKET 1 CHANNEL 7 DIMM 1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>从下面信息可以算出来：物理 CPU 理论内存带宽：<br>单CPU带宽=8通道×4400MT/s×64bit÷8= 281,600MB/s=275 GB/s </p>
+<pre class="line-numbers language-none"><code class="language-none">$ dmidecode -t memory | grep "Bank Locator"
+        Bank Locator: SOCKET 0 CHANNEL 0 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 0 DIMM 1
+        Bank Locator: SOCKET 0 CHANNEL 1 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 1 DIMM 1
+        Bank Locator: SOCKET 0 CHANNEL 2 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 2 DIMM 1
+        Bank Locator: SOCKET 0 CHANNEL 3 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 3 DIMM 1
+        Bank Locator: SOCKET 0 CHANNEL 4 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 4 DIMM 1
+        Bank Locator: SOCKET 0 CHANNEL 5 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 5 DIMM 1
+        Bank Locator: SOCKET 0 CHANNEL 6 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 6 DIMM 1
+        Bank Locator: SOCKET 0 CHANNEL 7 DIMM 0
+        Bank Locator: SOCKET 0 CHANNEL 7 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 0 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 0 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 1 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 1 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 2 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 2 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 3 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 3 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 4 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 4 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 5 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 5 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 6 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 6 DIMM 1
+        Bank Locator: SOCKET 1 CHANNEL 7 DIMM 0
+        Bank Locator: SOCKET 1 CHANNEL 7 DIMM 1
+
+$ dmidecode -t memory | grep speed -i
+        Speed: 5600 MT/s
+        Configured Memory Speed: 4400 MT/s<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="lstopo"><a href="#lstopo" class="headerlink" title="lstopo"></a>lstopo</h3><p>使用<code>lstopo</code>命令来绘制CPU拓扑图。这个命令是<code>hwloc</code>工具的一部分。但是这个在有图形化界面的机器上更好看一些。</p>
 <pre class="line-numbers language-none"><code class="language-none">sudo apt install hwloc
 sudo yum install hwloc
 lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
@@ -564,8 +815,12 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/CPU%E6%8B%93%E6%89%91/">
-                                    <span class="chip bg-color">CPU拓扑</span>
+                                <a href="/tags/Memory/">
+                                    <span class="chip bg-color">Memory</span>
+                                </a>
+                            
+                                <a href="/tags/CPU/">
+                                    <span class="chip bg-color">CPU</span>
                                 </a>
                             
                                 <a href="/tags/LLC/">
@@ -881,7 +1136,7 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

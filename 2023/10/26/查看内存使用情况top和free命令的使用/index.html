@@ -449,14 +449,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    720
+                    861
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    2 分
+                    3 分
                 </div>
                 
 
@@ -495,6 +495,7 @@
 <li>COMMAND：启动进程的命令名称。</li>
 </ol>
 <p>关于%MEM列，它显示了每个进程占用系统内存的百分比。如果有四个进程显示为11%，那么它们各自占用的内存比例是11%，但不能简单地将它们相加得到总内存占用百分比。这是因为每个进程使用的内存之间可能存在重叠，以及系统的其他进程和缓存也在使用内存。</p>
+<p>实际运维过程中的一些经验总结（环境不同仅供参考）：<br>%iowait 的值过高，表示硬盘存在IO瓶颈。<br>%idle&nbsp;值高，表示CPU&nbsp;较空闲。<br>%idle&nbsp;值高但系统响应慢时，有可能是CPU等待分配内存，此时应加大内存容量。<br>%idle&nbsp;小于&nbsp;70，IO压力就较大了，一般读取速度有较多的wait。<br>%idle&nbsp;值如果持续低于10，那么系统的CPU处理能力相对较低，表明系统中最需要解决的资源是CPU。</p>
 <hr>
 <p>要计算所有进程占用内存的总和，需要考虑整个系统的内存使用情况，而不仅仅是top命令中列出的那些进程。使用<code>free</code>命令可以查看系统的内存使用情况。</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c">free <span class="token operator">-</span>h<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
@@ -876,7 +877,7 @@ Swap<span class="token operator">:</span>          <span class="token number">2.
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

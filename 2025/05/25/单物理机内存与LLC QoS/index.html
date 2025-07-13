@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="qemu虚拟机扩容, Yi&#39;s Blog">
+    <meta name="keywords" content="内存带宽与LLC带宽QoS, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>qemu虚拟机扩容 | Yi&#39;s Blog</title>
+    <title>内存带宽与LLC带宽QoS | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -294,12 +294,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/18.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">qemu虚拟机扩容</h1> -->
+                    <!-- <h1 class="description center-align post-title">内存带宽与LLC带宽QoS</h1> -->
                 </div>
             </div>
         </div>
@@ -415,8 +415,12 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/qemu/">
-                                <span class="chip bg-color">qemu</span>
+                            <a href="/tags/Memory/">
+                                <span class="chip bg-color">Memory</span>
+                            </a>
+                        
+                            <a href="/tags/LLC/">
+                                <span class="chip bg-color">LLC</span>
                             </a>
                         
                     </div>
@@ -440,7 +444,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2024-09-22
+                    2025-05-25
                 </div>
                 
 
@@ -449,14 +453,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    512
+                    2.2k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    1 分
+                    8 分
                 </div>
                 
 
@@ -479,42 +483,64 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h3 id="物理机上的操作"><a href="#物理机上的操作" class="headerlink" title="物理机上的操作"></a>物理机上的操作</h3><p><code>qemu-img resize xx.img +30G</code></p>
-<h3 id="启动虚拟机"><a href="#启动虚拟机" class="headerlink" title="启动虚拟机"></a>启动虚拟机</h3><p>进入系统后<code>sudo fdisk -l</code>或者<code>lsblk</code>；·发现sda很大，没有分到sda1及其他上</p>
-<h5 id="使用-parted-调整分区大小"><a href="#使用-parted-调整分区大小" class="headerlink" title="使用 parted 调整分区大小"></a>使用 <code>parted</code> 调整分区大小</h5><p>启动 <code>parted</code>：</p>
-<pre class="line-numbers language-none"><code class="language-none">sudo parted /dev/sda<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p>在 <code>parted</code> 提示符下，查看当前分区表：</p>
-<pre class="line-numbers language-none"><code class="language-none">(parted) print<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p>假设你要调整的是分区 2（<code>/dev/sda2</code>），首先确定分区的起始点和结束点。</p>
-<p><strong>调整分区大小</strong>： 使用 <code>resizepart</code> 命令调整分区的结束位置。</p>
-<p>其中 <code>2</code> 是分区号，<code>100G</code> 是新的结束位置。你也可以使用 <code>100%</code> 来表示使用整个可用空间：</p>
-<pre class="line-numbers language-none"><code class="language-none">(parted) resizepart 2 100%<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p><img src="/images/4.png"></p>
-<p>退出 <code>parted</code>：</p>
-<pre class="line-numbers language-none"><code class="language-none">(parted) quit / q<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p>根据你提供的截图，<code>sda2</code> 已经扩展到了 84.7G，而你的根文件系统（<code>openeuler-root</code>）和交换分区（<code>openeuler-swap</code>）是在 LVM（逻辑卷管理器）中的。现在，你需要扩展 LVM 逻辑卷以及根文件系统来利用这多出来的磁盘空间。</p>
-<p><img src="/images/5.png"></p>
-<p>下面是扩展文件系统的步骤：</p>
-<h5 id="扩展物理卷"><a href="#扩展物理卷" class="headerlink" title="扩展物理卷"></a>扩展物理卷</h5><p>LVM 中需要首先将新的磁盘空间添加到物理卷。你可以使用 <code>pvresize</code> 命令来扩展物理卷，使其能够利用 <code>sda2</code> 中的额外空间。</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pvresize /dev/sda2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p>这将重新扫描并扩展物理卷到 <code>sda2</code> 的完整大小。</p>
-<h5 id="扩展逻辑卷"><a href="#扩展逻辑卷" class="headerlink" title="扩展逻辑卷"></a>扩展逻辑卷</h5><p>现在，物理卷已经扩展，你可以扩展根分区的逻辑卷。在你的截图中，根分区是 <code>openeuler-root</code>。可以使用以下命令来扩展这个逻辑卷：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">lvextend <span class="token parameter variable">-l</span> +100%FREE /dev/mapper/openeuler-root<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p>这个命令会将所有剩余的可用空间分配给 <code>openeuler-root</code> 逻辑卷。</p>
-<p><img src="/images/6.png"></p>
-<h5 id="扩展文件系统"><a href="#扩展文件系统" class="headerlink" title="扩展文件系统"></a>扩展文件系统</h5><p>最后，你需要扩展文件系统，以使它能够利用逻辑卷的新空间。</p>
+                <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>QoS（Quality of Service，服务质量）是一个广义术语，通常用于描述系统对资源分配和性能管理的控制能力，以确保关键任务或高优先级任务获得所需的资源（如带宽、计算能力、内存等）。</p>
+<p>QoS的实现主要从几个方面来概括：</p>
 <ul>
-<li>如果你使用的是 <code>ext4</code> 文件系统，运行以下命令：<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">resize2fs /dev/mapper/openeuler-root<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li>资源隔离与分配。比如不同容器可使用的内存容量是memcg控制的，这是操作系统层面的软件控制。文章之后涉及到的对于带宽的控制是基于硬件级 QoS 支持。</li>
+<li>调度优先级。比如将将关键任务绑定到专用 CPU 核，避免其他任务干扰。或 SCHED_FIFO/S CHED_RR 实时调度策略，让高优先级任务优先获得 CPU 时间片。</li>
 </ul>
-<h5 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h5><p>你可以使用以下命令来确认文件系统是否成功扩展：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-h</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>确保根文件系统（<code>/</code>）的大小已经增加，并能使用新的磁盘空间。</p>
+<p>QoS的目标是在有资源竞争的情况下，保证关键业务。这种资源竞争也可能是为了降本增效人为导致的。</p>
+<p>内存带宽方面的一些背景看这篇实战帖子<a target="_blank" rel="noopener" href="https://blog.yufeng.info/archives/1511">详解服务器内存带宽计算和使用情况测量</a></p>
+<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>在集群混部背景下，将在线业务和离线业务做静态的资源隔离是保证在线业务高计算优先级的一种方式。</p>
+<p>对实际情况的观察发现，动态内存带宽隔离依然存在可观收益，因为随着带宽增加内存访问延迟也呈现线性甚至指数趋势的增加。某些特定的在线业务会存在某一时段带宽需求骤增，为了保证在线业务优先被响应，需要减少离线业务在此刻造成的带宽争用。同时在线业务带宽占用很少的时段，可以让这些空闲资源被离线业务使用。</p>
+<p>同理，LLC资源的使用也存在时段。不过在限制LLC带宽时要小心增加的cache miss带来更多的内存访问，从而又加剧内存带宽争用。</p>
+<h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><p>动态带宽隔离由3个循环的步骤组成：监控在线业务和整机的带宽情况-&gt;依据前期实验和观测，设置安全的动态策略，由该策略计算出目前的带宽分配方案-&gt;实施带宽隔离。</p>
+<p>在后面的方案设计中，针对每一个环节的底层依赖和实施难点做介绍。</p>
+<h2 id="方案设计"><a href="#方案设计" class="headerlink" title="方案设计"></a>方案设计</h2><p>不过这里也会放一些细节上的东西（类似背景的内容）。</p>
+<h3 id="1-Resctrl文件系统"><a href="#1-Resctrl文件系统" class="headerlink" title="1.Resctrl文件系统"></a>1.Resctrl文件系统</h3><p>Resctrl文件系统是Linux内核在4.10开始提供的对MBM技术的支持（不同机器的底层不一样，详见下一节硬件资源隔离部分）。作为一个伪文件系统在使用方式上与cgroup是类似，通过提供一系列的文件为用户态提供查询和修改接口。 最近看见B站也会统计NUMA流量来自指导资源调度<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/fFaUCUA2w8wkKWeLy55Bjw">资源合池化后的异构差异问题解析–CPU分层现象和解决思路</a>。</p>
+<h4 id="1-1-挂载"><a href="#1-1-挂载" class="headerlink" title="1.1 挂载"></a>1.1 挂载</h4><p>虽然其他文档或者博客会介绍说开机后挂载这个文件，不过一般成功率不高，都是开机的时候自动挂载上去的。</p>
+<pre class="line-numbers language-none"><code class="language-none">$ mount -t resctrl resctrl /sys/fs/resctrl
+mount: /  sys/fs/resctrl: mount point does not exist.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>查看内核启动参数<code>cat /proc/cmdline</code>,arm机器启动arm有mpam=acpi和arm64.mpam。intel机型需要内核引导文件(grub)加上rdt=cmt,mbmtotal,mbmlocal,l3cat,l3cdp,l2cat,l2cdp,mba. 在AMD Milan机型不需要在引导文件加上述引导项。还要注意可能由于机器比较老开机挂载不上。</p>
+<h4 id="1-2-文件内容"><a href="#1-2-文件内容" class="headerlink" title="1.2 文件内容"></a>1.2 文件内容</h4><p>在不同机器上打开这个文件夹看到的内容不太一样，不过这里总结出了一些共同之处：</p>
+<ol>
+<li><p>/sys/fs/resctrl/schemata<br>这个是和硬件资源隔离有关的文件。内容第一行指的是对内存带宽的隔离限度有的机器按照MB配置，即最大带宽2GB。有的机器按照百分比配置，10%指允许”最大流量”的10%的带宽流量。一般来说一台机器的”最大流量”都是确定的，或者也可以测试出来，比如以往的测试中限制10%的情况是13-14GB，类推限制为80%时允许的带宽上线是最大112GB/s。这里的1，2，3，4指numa节点（有的机器也指socket）。第二行用于限制LLC可用的cache way. CBM（Cache Bit Mask）是Intel/AMD处理器中用于控制LLC分配方式的位掩码。每个二进制位对应一个缓存单元（如Intel的CAT技术中，每bit代表一个Cache Way）。例如：在16路L3缓存中，0xFFFF表示占用全部16路，0x000F表示仅占用前4路。在下面的输出内容中，L3表示LLC的掩码，fff表示cache被划分为12份，每一个bit表示1/12。</p>
+<pre class="line-numbers language-none"><code class="language-none">MB:0=2048;1=2048;2=2048;3=2048
+L3:0=ffff;1=ffff;2=ffff;3=ffff<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
+<li><p>/sys/fs/resctrl/task<br>所有属于这个资源控制组的任务（进程和线程皆可），里面就是按行记录的 pid、tid。</p>
+</li>
+<li><p>/sys/fs/resctrl/mon_data/XXX<br>每个group的内容。该task所在的域上mon_data中会有数值；在其他域上mon_data中的数值为0。<br>进入每个域的文件夹XXX后，一般会有3个文件，这是对内存带宽或者LLC带宽的监控数据：<br>llc_occupancy ：show the current snapshot of LLC occupancy of the corresponding MON group or CTRL_MON group.)<br>mbm_local_bytes ： 仅记录该控制组或任务访问本地NUMA节点内存的带宽，不包括通过QPI/UPI等互联技术访问其他NUMA节点的远程内存流量。<br>mbm_total_bytes ：记录该控制组（cgroup）或任务使用的全部内存带宽（Local NUMA和Remote NUMA）</p>
+</li>
+<li><p>其他目录和文件介绍。但是要注意不同机器挂载后不完全一样，这和他们底层的硬件实现有关。</p>
+<pre class="line-numbers language-none"><code class="language-none">info
+├── L3 
+│   ├── bit_usage 
+│   ├── cbm_mask # cache bit mask 描述的是某资源CBM位掩码。该掩码是通过cpuid获取CBM的最大长度，然后根据该长度生成所有位为1的掩码。
+│   ├── min_cbm_bits # cbm的最小连续长度。当配置一个CBM的时候，有些cpu要求CBM必须满足连续多少位是1。
+│   ├── num_closids # closid的个数
+│   └── shareable_bits
+├── L3_MON
+│   ├── max_threshold_occupancy # 当某rmid的llc占用量计数器低于该值时考虑释放，与rmid重用有关
+│   ├── mon_features # 支持的监控事件列表
+│   └── num_rmids # rmid的数量
+├── last_cmd_status # 最后一条指令执行的结果
+└── MB
+├── bandwidth_gran # 带宽的设置的粒度
+├── delay_linear 
+├── min_bandwidth # 最小的内存带宽百分比
+├── num_closids # closid数量
+└── thread_throttle_mode # core上的多个thread存在不同带宽时的处理，max-以最大限制同时压制 per-thread：各自应用不同的带宽比例<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/v5.4/x86/resctrl_ui.html">更多关于x86机型的内容</a></p>
+<h3 id="2-硬件资源隔离"><a href="#2-硬件资源隔离" class="headerlink" title="2.硬件资源隔离"></a>2.硬件资源隔离</h3><p>对硬件资源的隔离和优先级控制，不同的CPU使用的是不同的技术。但是主要可以分为这几个功能：Memory Bandwidth Allocation（MBA），Memory Bandwidth Monitoring（MBM），Cache Allocation Technology（CAT），Cache Monitoring Technology（CMT）. 下面总结一下这些功能在不同CPU的实现的差异，了解这些差异可以减少在程序开发时的重构。</p>
+<h4 id="2-1-Intel-RDT"><a href="#2-1-Intel-RDT" class="headerlink" title="2.1 Intel RDT"></a>2.1 Intel RDT</h4><p>RDT通过一个硬件概念的id(closid)来标记某个实体，对带宽的控制每个socket之间是独立的，一个socket最多可以分为4个不同的优先级或者流量限制域（称为MCLOS）。在程序运行期间，将程序所在resctrl组的closid与MCLOS绑定,写入寄存器MSR。同一个MCLOS组中的程序在这段时间内产生的RDT监控数据就可以用于反馈给MBA，以进行下一步流量限制。不过只有16个closid可以被分配。Intel RDT MBA本质是对MSR寄存器的读写操作。</p>
+<h4 id="2-2-AMD-PQOS"><a href="#2-2-AMD-PQOS" class="headerlink" title="2.2 AMD PQOS"></a>2.2 AMD PQOS</h4><p>Platform Quality of Service. AMD并不是socket级别的视图，是channel级别视图。而且不用closid与MCLOS绑定这些的流程，每一个resctrl都能被独立的限制，在进程级别对cache和内存带宽的使用做限制。（并且创建数量也不止16个。）</p>
+<h4 id="2-3-ARM-MPAM"><a href="#2-3-ARM-MPAM" class="headerlink" title="2.3 ARM MPAM"></a>2.3 ARM MPAM</h4><p>Memory System Resource Partitioning and Monitoring. 在resctrl方面和AMD PQOS更相似，但是在底层实现上更粗粒度像Intel RDT. 针对MB，拥有更低的控制粒度和min_mb设置，例如某arm64机器的控制粒度为2%，最小为2%， 而x86最小为10%，控制粒度为10%。但是由于控制精度的问题，不建议按照如此小的配置粒度进行配置。<a target="_blank" rel="noopener" href="https://developer.arm.com/documentation/ddi0598/latest/">更多信息</a></p>
+<h3 id="3-策略设计"><a href="#3-策略设计" class="headerlink" title="3.策略设计"></a>3.策略设计</h3><ul>
+<li>基于业务实际情况，总结规律是保证策略有效的途径之一。</li>
+<li>对于带宽的隔离，主要目标是减少访问延迟，因此基于延迟的策略比直接用带宽设计的策略更有效。</li>
+</ul>
+<h3 id="4-收益"><a href="#4-收益" class="headerlink" title="4.收益"></a>4.收益</h3><p>对某些业务相应时间有10%以上的降低。</p>
 
                 
             </div>
@@ -541,7 +567,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://ytirus.github.io/2024/09/22/qemu%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%89%A9%E5%AE%B9/">http://ytirus.github.io/2024/09/22/qemu%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%89%A9%E5%AE%B9/</a>
+                    <a href="http://ytirus.github.io/2025/05/25/%E5%8D%95%E7%89%A9%E7%90%86%E6%9C%BA%E5%86%85%E5%AD%98%E4%B8%8ELLC%20QoS/">http://ytirus.github.io/2025/05/25/%E5%8D%95%E7%89%A9%E7%90%86%E6%9C%BA%E5%86%85%E5%AD%98%E4%B8%8ELLC%20QoS/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -579,8 +605,12 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/qemu/">
-                                    <span class="chip bg-color">qemu</span>
+                                <a href="/tags/Memory/">
+                                    <span class="chip bg-color">Memory</span>
+                                </a>
+                            
+                                <a href="/tags/LLC/">
+                                    <span class="chip bg-color">LLC</span>
                                 </a>
                             
                         </div>
@@ -628,24 +658,24 @@
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2024/09/27/etmem%E5%B7%A5%E5%85%B7%E6%B5%85%E6%9E%90/">
+                <a href="/2025/06/11/%E9%A1%B9%E7%9B%AE%E9%87%8D%E6%9E%84%E4%B8%8E%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="etmem工具浅析">
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="项目重构与扩展">
                         
-                        <span class="card-title">etmem工具浅析</span>
+                        <span class="card-title">项目重构与扩展</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            openEuler社区开源的工具，读了一些源码对感兴趣的结构体和函数做了整理
+                            基于go语言
                         
                     </div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2024-09-27
+                            <i class="far fa-clock fa-fw icon-date"></i>2025-06-11
                         </span>
                         <span class="publish-author">
                             
@@ -662,20 +692,12 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Hybrid-Memory/">
-                        <span class="chip bg-color">Hybrid-Memory</span>
+                    <a href="/tags/Golang/">
+                        <span class="chip bg-color">Golang</span>
                     </a>
                     
-                    <a href="/tags/Memory/">
-                        <span class="chip bg-color">Memory</span>
-                    </a>
-                    
-                    <a href="/tags/openEuler/">
-                        <span class="chip bg-color">openEuler</span>
-                    </a>
-                    
-                    <a href="/tags/etmemd/">
-                        <span class="chip bg-color">etmemd</span>
+                    <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+                        <span class="chip bg-color">设计模式</span>
                     </a>
                     
                 </div>
@@ -689,24 +711,24 @@
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2024/09/09/%E7%A1%AC%E7%9B%98%E6%8C%82%E8%BD%BD%E5%92%8C%E6%89%A9%E5%AE%B9/">
+                <a href="/2025/05/11/%E7%89%A9%E7%90%86%E6%9C%BA%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/25.jpg" class="responsive-img" alt="硬盘挂载和扩容">
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="CPU架构的差异">
                         
-                        <span class="card-title">硬盘挂载和扩容</span>
+                        <span class="card-title">CPU架构的差异</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            服务器硬盘不够用，新装了一块上去，并且迁移自己的workspace
+                            组合lscpu等命令输出的信息，判断底层隔离技术等其他和CPU紧密相关的设计是用的哪一种。记录遇到的被困扰过的差异点。
                         
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2024-09-09
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-05-11
                             </span>
                         <span class="publish-author">
                             
@@ -723,8 +745,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/%E7%A1%AC%E7%9B%98/">
-                        <span class="chip bg-color">硬盘</span>
+                    <a href="/tags/CPU/">
+                        <span class="chip bg-color">CPU</span>
                     </a>
                     
                 </div>
@@ -856,6 +878,13 @@
 </main>
 
 
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
 
 
     <footer class="page-footer bg-color">
@@ -873,7 +902,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

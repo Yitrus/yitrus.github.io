@@ -453,14 +453,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.2k
+                    2.8k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    8 分
+                    11 分
                 </div>
                 
 
@@ -549,21 +549,77 @@ CONFIG_CGROUP_UNIFIED_SYSTEMD=y<span aria-hidden="true" class="line-numbers-rows
 <p>运行脚本<code>sudo cgexec -g memory:memhog-limiter ./memhog.sh</code>查看这个内存控制组里的pid<code>cat  /sys/fs/cgroup/memhog-limiter/cgroup.procs</code></p>
 <p><img src="https://images.weserv.nl/?url=https://img-blog.csdnimg.cn/98414239c59242a1b9a5d84302694121.png"></p>
 <p>显然没有控制住，emmmm到底什么原因？后来发现还是得在grub设置<code>systemd.unified_cgroup_hierarchy=1</code>才行。</p>
-<h2 id="2-3-内存cgroup创建原理和记账过程"><a href="#2-3-内存cgroup创建原理和记账过程" class="headerlink" title="2.3.内存cgroup创建原理和记账过程"></a>2.3.内存cgroup创建原理和记账过程</h2><p>在进程<code>task_struct</code>结构中，<code>*cgroup</code>指向了所关联的各种cgroup，对内存限制是通过<code>mem_cgroup</code>来实现的</p>
-<pre class="line-numbers language-none"><code class="language-none">// include/linux/memcontrol.h
+<h2 id="2-3-内存cgroup创建原理和记账过程"><a href="#2-3-内存cgroup创建原理和记账过程" class="headerlink" title="2.3.内存cgroup创建原理和记账过程"></a>2.3.内存cgroup创建原理和记账过程</h2><p>在进程<code>task_struct</code>结构中，<code>*cgroup</code>指向了所关联的各种cgroup，对内存限制是通过<code>mem_cgroup</code>来实现的：<br><img src="/images/cgroup_task.png.jpg"></p>
+<p>cgroup 框架需要管理多个子系统（如 memory_cgroup、cpu_cgroup 等），但不同子系统的控制结构可能完全不同。为了统一回调函数的参数，内核使用 struct cgroup_subsys_state 作为通用接口，而具体的子系统（如 mem_cgroup）会内嵌这个结构体： </p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// include/linux/cgroup-defs.h</span>
 
-struct mem_cgroup {
-	struct cgroup_subsys_state css;
-	struct mem_cgroup_id id;
+<span class="token comment">// V2中每个cgroup控制组有个关键结构体struct cgroup *</span>
+<span class="token keyword">struct</span> <span class="token class-name">cgroup</span> <span class="token punctuation">{</span>
+	<span class="token comment">// 每个cgroup对每个资源控制器（如 memory、cpu）都有一个子系统，这是指向所有子系统的数组</span>
+    <span class="token keyword">struct</span> <span class="token class-name">cgroup_subsys_state</span> <span class="token operator">*</span>subsys<span class="token punctuation">[</span>CGROUP_SUBSYS_COUNT<span class="token punctuation">]</span><span class="token punctuation">;</span>
+	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">cgroup_subsys_state</span> <span class="token punctuation">{</span>
+	<span class="token keyword">struct</span> <span class="token class-name">cgroup</span> <span class="token operator">*</span>cgroup<span class="token punctuation">;</span>        <span class="token comment">// 所属的 cgroup</span>
+	<span class="token keyword">struct</span> <span class="token class-name">cgroup_subsys</span> <span class="token operator">*</span>ss<span class="token punctuation">;</span>     <span class="token comment">// 所属的子系统（控制器）</span>
+	<span class="token keyword">struct</span> <span class="token class-name">list_head</span> sibling<span class="token punctuation">;</span>     <span class="token comment">// 在 cgroup-&gt;e_csss 中的链表</span>
+	<span class="token keyword">struct</span> <span class="token class-name">list_head</span> children<span class="token punctuation">;</span>    <span class="token comment">// 子 css 列表</span>
+	<span class="token keyword">struct</span> <span class="token class-name">cgroup_subsys_state</span> <span class="token operator">*</span>parent<span class="token punctuation">;</span> <span class="token comment">// 父 css</span>
+	<span class="token class-name">refcount_t</span> refcnt<span class="token punctuation">;</span>            <span class="token comment">// 引用计数</span>
+	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 从 css（cgroup_subsys_state）获取 mem_cgroup：</span>
+<span class="token keyword">struct</span> <span class="token class-name">mem_cgroup</span> <span class="token operator">*</span>memcg <span class="token operator">=</span> <span class="token function">container_of</span><span class="token punctuation">(</span>css<span class="token punctuation">,</span> <span class="token keyword">struct</span> <span class="token class-name">mem_cgroup</span><span class="token punctuation">,</span> css<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// include/linux/memcontrol.h</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">mem_cgroup</span> <span class="token punctuation">{</span>
+	<span class="token keyword">struct</span> <span class="token class-name">cgroup_subsys_state</span> css<span class="token punctuation">;</span> <span class="token comment">// mem_cgroup 里的 cgroup_subsys_state 指针被保存在cgroup的 cgroup-&gt;subsys[] 里</span>
+	<span class="token keyword">struct</span> <span class="token class-name">mem_cgroup_id</span> id<span class="token punctuation">;</span>
 	
-	// cgroup内存计数
-	// 统计并判断是否需要oom
-	struct page_counter memory;
-	// 记录详细RSS和PageCache的内存开销
-	struct memcg_vmstats_percpu_ __percpu *vmstats_percpu;
-	......
-}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+	<span class="token comment">// cgroup内存计数</span>
+	<span class="token comment">// 统计并判断是否需要oom</span>
+	<span class="token keyword">struct</span> <span class="token class-name">page_counter</span> memory<span class="token punctuation">;</span>
+	<span class="token comment">// 记录详细RSS和PageCache的内存开销</span>
+	<span class="token keyword">struct</span> <span class="token class-name">memcg_vmstats_percpu_</span> __percpu <span class="token operator">*</span>vmstats_percpu<span class="token punctuation">;</span>
+	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// include/linux/sched.h  </span>
+
+<span class="token keyword">struct</span> <span class="token class-name">task_struct</span> <span class="token punctuation">{</span>
+	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifdef</span> <span class="token expression">CONFIG_CGROUPS</span></span>
+	<span class="token comment">/* Control Group info protected by css_set_lock: */</span>
+	<span class="token comment">// 该任务当前所处的所有控制器（子系统）的状态集合</span>
+	<span class="token comment">// 因为css_set是在运行时由多个任务共享的，所以用了 RCU 机制来保证读取安全</span>
+	<span class="token keyword">struct</span> <span class="token class-name">css_set</span> __rcu		<span class="token operator">*</span>cgroups<span class="token punctuation">;</span>
+	<span class="token comment">/* cg_list protected by css_set_lock and tsk-&gt;alloc_lock: */</span>
+	<span class="token comment">// 用于将一个task_struct挂到对应css_set的tasks链表上，子进程默认继承父进程的css_set</span>
+	<span class="token comment">// 作为一个进程挂在哪个css_set-&gt;tasks的成员，就能反向找到tasks</span>
+	<span class="token comment">// 如果之前没有完全一样的绑定, 修改cgroup会新建css_set</span>
+	<span class="token keyword">struct</span> <span class="token class-name">list_head</span>		cg_list<span class="token punctuation">;</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// include/linux/cgroup-defs.h</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">css_set</span> <span class="token punctuation">{</span>
+	<span class="token comment">/*
+	 * Set of subsystem states, one for each subsystem. This array is
+	 * immutable after creation apart from the init_css_set during
+	 * subsystem registration (at boot time).
+	 */</span>
+	<span class="token keyword">struct</span> <span class="token class-name">cgroup_subsys_state</span> <span class="token operator">*</span>subsys<span class="token punctuation">[</span>CGROUP_SUBSYS_COUNT<span class="token punctuation">]</span><span class="token punctuation">;</span>
+	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>在<code>handle_mm_fault</code>中向伙伴系统申请完物理页后，会使用<code>try_charge_memcg</code>函数对分配的内存进行记账；如果记账超出限制会回收内存，仍然超就会oom kill.</p>
+<blockquote>
+<p>补充一个有意思的情况：在进程退出过程中，进程占有的所有资源将被回收，除了task_struct结构（以及少数资源）以外。于是进程就只剩下task_struct这么个空壳，故称为僵尸。之所以保留task_struct，是因为task_struct里面保存了进程的退出码、以及一些统计信息。而其父进程很可能会关心这些信息。比如在shell中，$?变量就保存了最后一个退出的前台进程的退出码，而这个退出码往往被作为if语句的判断条件。我们知道子进程默认继承父进程的cgroup. 僵尸进程仍然属于其原cgroup但不可迁移；管理工具如systemd或cgroupfs操作时，不能移动zombie；要清除zombie的资源，就必须由父进程调用wait()完成清理。</p>
+</blockquote>
 <h2 id="2-4-创建namespace"><a href="#2-4-创建namespace" class="headerlink" title="2.4. 创建namespace"></a>2.4. 创建namespace</h2><p><code>sudo cgexec -g memory:memhog-limiter unshare -fp --mount-proc</code></p>
 <p>To verify that you are in a new namespace<code>ps -ef</code></p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token environment constant">UID</span>          PID    <span class="token environment constant">PPID</span>  C STIME TTY          TIME CMD
@@ -950,7 +1006,7 @@ root          <span class="token number">12</span>       <span class="token numb
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

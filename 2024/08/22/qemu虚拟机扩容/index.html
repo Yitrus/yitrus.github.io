@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="硬盘挂载和扩容, Yi&#39;s Blog">
+    <meta name="keywords" content="qemu虚拟机扩容, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>硬盘挂载和扩容 | Yi&#39;s Blog</title>
+    <title>qemu虚拟机扩容 | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -294,12 +294,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/25.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/18.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">硬盘挂载和扩容</h1> -->
+                    <!-- <h1 class="description center-align post-title">qemu虚拟机扩容</h1> -->
                 </div>
             </div>
         </div>
@@ -415,8 +415,8 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/%E7%A1%AC%E7%9B%98/">
-                                <span class="chip bg-color">硬盘</span>
+                            <a href="/tags/qemu/">
+                                <span class="chip bg-color">qemu</span>
                             </a>
                         
                     </div>
@@ -440,7 +440,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2024-09-09
+                    2024-08-22
                 </div>
                 
 
@@ -449,14 +449,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    845
+                    512
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    4 分
+                    1 分
                 </div>
                 
 
@@ -479,123 +479,42 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>GPT（GUID Partition Table）是一种磁盘分区表的标准，用于在计算机系统中管理硬盘驱动器的分区信息。与传统的MBR（Master Boot Record）分区表相比，GPT提供了更强大和灵活的分区管理机制。</p>
-<hr>
-<p>查找未挂载的硬盘并挂载它</p>
-<pre class="line-numbers language-none"><code class="language-none">sudo fdisk -l<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>硬盘通常会显示为类似 <code>/dev/sdX</code> 的设备。</p>
-<p>找到想要挂载的分区：<code>lsblk</code></p>
-<p>使用 mount 命令挂载硬盘到目录：</p>
-<pre class="line-numbers language-none"><code class="language-none">sudo mount /dev/sdXY /mnt/mydrive<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+                <h3 id="物理机上的操作"><a href="#物理机上的操作" class="headerlink" title="物理机上的操作"></a>物理机上的操作</h3><p><code>qemu-img resize xx.img +30G</code></p>
+<h3 id="启动虚拟机"><a href="#启动虚拟机" class="headerlink" title="启动虚拟机"></a>启动虚拟机</h3><p>进入系统后<code>sudo fdisk -l</code>或者<code>lsblk</code>；·发现sda很大，没有分到sda1及其他上</p>
+<h5 id="使用-parted-调整分区大小"><a href="#使用-parted-调整分区大小" class="headerlink" title="使用 parted 调整分区大小"></a>使用 <code>parted</code> 调整分区大小</h5><p>启动 <code>parted</code>：</p>
+<pre class="line-numbers language-none"><code class="language-none">sudo parted /dev/sda<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p>确认文件系统类型:</p>
-<pre class="line-numbers language-none"><code class="language-none">sudo blkid /dev/sdX<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>在 <code>parted</code> 提示符下，查看当前分区表：</p>
+<pre class="line-numbers language-none"><code class="language-none">(parted) print<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p>检查文件系统的完整性:</p>
-<pre class="line-numbers language-none"><code class="language-none">sudo fsck /dev/sdaX<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>假设你要调整的是分区 2（<code>/dev/sda2</code>），首先确定分区的起始点和结束点。</p>
+<p><strong>调整分区大小</strong>： 使用 <code>resizepart</code> 命令调整分区的结束位置。</p>
+<p>其中 <code>2</code> 是分区号，<code>100G</code> 是新的结束位置。你也可以使用 <code>100%</code> 来表示使用整个可用空间：</p>
+<pre class="line-numbers language-none"><code class="language-none">(parted) resizepart 2 100%<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p>使用工具如 <code>smartctl </code>检查硬盘的健康状况:</p>
-<pre class="line-numbers language-none"><code class="language-none">sudo smartctl -a /dev/sda<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/images/4.png"></p>
+<p>退出 <code>parted</code>：</p>
+<pre class="line-numbers language-none"><code class="language-none">(parted) quit / q<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p>使用工具<code>parted</code>查看分区的详细信息:<br>sudo parted /dev/sda print</p>
-<h4 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h4><p>实验室服务器新增了一块SSD，现在要把自己的实验空间迁移去新的SSD中。</p>
-<p><code>fdisk -l</code>得到目前新的ssd和hdd的情况。<br><img src="/images/2024-05-08-185826.jpg">接着迁移workspace：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@PowerEdge-R750:/home/Documents<span class="token comment"># fdisk /dev/sda</span>
+<p>根据你提供的截图，<code>sda2</code> 已经扩展到了 84.7G，而你的根文件系统（<code>openeuler-root</code>）和交换分区（<code>openeuler-swap</code>）是在 LVM（逻辑卷管理器）中的。现在，你需要扩展 LVM 逻辑卷以及根文件系统来利用这多出来的磁盘空间。</p>
+<p><img src="/images/5.png"></p>
+<p>下面是扩展文件系统的步骤：</p>
+<h5 id="扩展物理卷"><a href="#扩展物理卷" class="headerlink" title="扩展物理卷"></a>扩展物理卷</h5><p>LVM 中需要首先将新的磁盘空间添加到物理卷。你可以使用 <code>pvresize</code> 命令来扩展物理卷，使其能够利用 <code>sda2</code> 中的额外空间。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pvresize /dev/sda2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-Welcome to <span class="token function">fdisk</span> <span class="token punctuation">(</span>util-linux <span class="token number">2.31</span>.1<span class="token punctuation">)</span>.
-Changes will remain <span class="token keyword">in</span> memory only, <span class="token keyword">until</span> you decide to <span class="token function">write</span> them.
-Be careful before using the <span class="token function">write</span> command.
+<p>这将重新扫描并扩展物理卷到 <code>sda2</code> 的完整大小。</p>
+<h5 id="扩展逻辑卷"><a href="#扩展逻辑卷" class="headerlink" title="扩展逻辑卷"></a>扩展逻辑卷</h5><p>现在，物理卷已经扩展，你可以扩展根分区的逻辑卷。在你的截图中，根分区是 <code>openeuler-root</code>。可以使用以下命令来扩展这个逻辑卷：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">lvextend <span class="token parameter variable">-l</span> +100%FREE /dev/mapper/openeuler-root<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-Device does not contain a recognized partition table.
-Created a new DOS disklabel with disk identifier 0x1f065fec.
-
-Command <span class="token punctuation">(</span>m <span class="token keyword">for</span> <span class="token builtin class-name">help</span><span class="token punctuation">)</span>: n <span class="token comment"># 新建分区</span>
-Partition <span class="token builtin class-name">type</span>
-   p   primary <span class="token punctuation">(</span><span class="token number">0</span> primary, <span class="token number">0</span> extended, <span class="token number">4</span> <span class="token function">free</span><span class="token punctuation">)</span>
-   e   extended <span class="token punctuation">(</span>container <span class="token keyword">for</span> logical partitions<span class="token punctuation">)</span>
-Select <span class="token punctuation">(</span>default p<span class="token punctuation">)</span>: p <span class="token comment"># 基本分区</span>
-Partition number <span class="token punctuation">(</span><span class="token number">1</span>-4, default <span class="token number">1</span><span class="token punctuation">)</span>: <span class="token number">1</span> <span class="token comment"># 表示新建一个分区</span>
-First sector <span class="token punctuation">(</span><span class="token number">2048</span>-3123183615, default <span class="token number">2048</span><span class="token punctuation">)</span>:  <span class="token comment"># 默认</span>
-Last sector, +sectors or +size<span class="token punctuation">{</span>K,M,G,T,P<span class="token punctuation">}</span> <span class="token punctuation">(</span><span class="token number">2048</span>-3123183615, default <span class="token number">3123183615</span><span class="token punctuation">)</span>:  <span class="token comment"># 默认</span>
-
-Created a new partition <span class="token number">1</span> of <span class="token builtin class-name">type</span> <span class="token string">'Linux'</span> and of size <span class="token number">1.5</span> TiB.
-
-Command <span class="token punctuation">(</span>m <span class="token keyword">for</span> <span class="token builtin class-name">help</span><span class="token punctuation">)</span>: w <span class="token comment"># 将表写入磁盘并退出</span>
-The partition table has been altered.
-Calling ioctl<span class="token punctuation">(</span><span class="token punctuation">)</span> to re-read partition table.
-Syncing disks.
-
-root@PowerEdge-R750:/home/Documents<span class="token comment"># fdisk -l</span>
-<span class="token comment"># ……</span>
-<span class="token comment"># 这些是服务器硬盘空间的分配</span>
-<span class="token comment"># SSD SAS</span>
-Disk /dev/sda: <span class="token number">1.5</span> TiB, <span class="token number">1599070011392</span> bytes, <span class="token number">3123183616</span> sectors
-Units: sectors of <span class="token number">1</span> * <span class="token number">512</span> <span class="token operator">=</span> <span class="token number">512</span> bytes
-Sector size <span class="token punctuation">(</span>logical/physical<span class="token punctuation">)</span>: <span class="token number">512</span> bytes / <span class="token number">512</span> bytes
-I/O size <span class="token punctuation">(</span>minimum/optimal<span class="token punctuation">)</span>: <span class="token number">262144</span> bytes / <span class="token number">524288</span> bytes
-Disklabel type: dos
-Disk identifier: 0x1f065fec
-
-Device     Boot Start        End    Sectors  Size Id Type
-/dev/sda1        <span class="token number">2048</span> <span class="token number">3123183615</span> <span class="token number">3123181568</span>  <span class="token number">1</span>.5T <span class="token number">83</span> Linux
-
-<span class="token comment"># HDD SAS</span>
-Disk /dev/sdb: <span class="token number">4.4</span> TiB, <span class="token number">4799625953280</span> bytes, <span class="token number">9374269440</span> sectors
-Units: sectors of <span class="token number">1</span> * <span class="token number">512</span> <span class="token operator">=</span> <span class="token number">512</span> bytes
-Sector size <span class="token punctuation">(</span>logical/physical<span class="token punctuation">)</span>: <span class="token number">512</span> bytes / <span class="token number">512</span> bytes
-I/O size <span class="token punctuation">(</span>minimum/optimal<span class="token punctuation">)</span>: <span class="token number">262144</span> bytes / <span class="token number">524288</span> bytes
-
-<span class="token comment"># SSD SATA</span>
-Disk /dev/sdc: <span class="token number">446.6</span> GiB, <span class="token number">479559942144</span> bytes, <span class="token number">936640512</span> sectors
-Units: sectors of <span class="token number">1</span> * <span class="token number">512</span> <span class="token operator">=</span> <span class="token number">512</span> bytes
-Sector size <span class="token punctuation">(</span>logical/physical<span class="token punctuation">)</span>: <span class="token number">512</span> bytes / <span class="token number">512</span> bytes
-I/O size <span class="token punctuation">(</span>minimum/optimal<span class="token punctuation">)</span>: <span class="token number">262144</span> bytes / <span class="token number">262144</span> bytes
-Disklabel type: gpt
-Disk identifier: 02C050F2-3252-47D3-928A-556A13617985
-
-Device       Start       End   Sectors   Size Type
-/dev/sdc1     <span class="token number">2048</span>   <span class="token number">1050623</span>   <span class="token number">1048576</span>   512M EFI System
-/dev/sdc2  <span class="token number">1050624</span> <span class="token number">936638463</span> <span class="token number">935587840</span> <span class="token number">446</span>.1G Linux filesystem
-
-<span class="token comment"># ……</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>磁盘格式ext4，并格式化：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@PowerEdge-R750:/home/Documents<span class="token comment"># df -Th</span>
-Filesystem     Type      Size  Used Avail Use% Mounted on
-udev           devtmpfs   63G     <span class="token number">0</span>   63G   <span class="token number">0</span>% /dev
-tmpfs          tmpfs      13G  <span class="token number">3</span>.3M   13G   <span class="token number">1</span>% /run
-/dev/sdc2      ext4      439G  229G  188G  <span class="token number">55</span>% /
-<span class="token comment"># ……</span>
-
-root@PowerEdge-R750:/home/Documents<span class="token comment"># mkfs -t ext4 /dev/sda1</span>
-<span class="token function">mke2fs</span> <span class="token number">1.44</span>.1 <span class="token punctuation">(</span><span class="token number">24</span>-Mar-2018<span class="token punctuation">)</span>
-Creating filesystem with <span class="token number">390397696</span> 4k blocks and <span class="token number">97599488</span> inodes
-Filesystem UUID: 856ea741-4a84-4794-96ea-4084ddbee879
-Superblock backups stored on blocks: 
-        <span class="token number">32768</span>, <span class="token number">98304</span>, <span class="token number">163840</span>, <span class="token number">229376</span>, <span class="token number">294912</span>, <span class="token number">819200</span>, <span class="token number">884736</span>, <span class="token number">1605632</span>, <span class="token number">2654208</span>, 
-        <span class="token number">4096000</span>, <span class="token number">7962624</span>, <span class="token number">11239424</span>, <span class="token number">20480000</span>, <span class="token number">23887872</span>, <span class="token number">71663616</span>, <span class="token number">78675968</span>, 
-        <span class="token number">102400000</span>, <span class="token number">214990848</span>
-
-Allocating group tables: <span class="token keyword">done</span>                            
-Writing inode tables: <span class="token keyword">done</span>                            
-Creating journal <span class="token punctuation">(</span><span class="token number">262144</span> blocks<span class="token punctuation">)</span>: <span class="token keyword">done</span>
-Writing superblocks and filesystem accounting information: <span class="token keyword">done</span>  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>挂载和设置开机自动挂载：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@PowerEdge-R750:/home/Documents<span class="token comment"># mount -t ext4 /dev/sda1 /home/ssd</span>
-root@PowerEdge-R750:/home/Documents<span class="token comment"># mount -t ext4 /dev/sdb /home/hdd</span>
-
-<span class="token function">vim</span> /etc/fstab
-<span class="token comment"># &lt;file system&gt; &lt;mount point&gt;   &lt;type&gt;  &lt;options&gt;       &lt;dump&gt;  &lt;pass&gt;</span>
-<span class="token comment"># / was on /dev/sdb2 during installation</span>
-<span class="token assign-left variable">UUID</span><span class="token operator">=</span>ce0c24b8-724b-4f33-9b2c-618433560aef /               ext4    <span class="token assign-left variable">errors</span><span class="token operator">=</span>remount-ro <span class="token number">0</span>       <span class="token number">1</span>
-<span class="token comment"># /boot/efi was on /dev/sdb1 during installation</span>
-<span class="token assign-left variable">UUID</span><span class="token operator">=</span>987B-EEFC  /boot/efi       vfat    <span class="token assign-left variable">umask</span><span class="token operator">=</span>0077      <span class="token number">0</span>       <span class="token number">1</span>
-/swapfile                                 none            swap    sw              <span class="token number">0</span>       <span class="token number">0</span>
-/dev/sda1       /home/ssd       ext4    defaults        <span class="token number">0</span>       <span class="token number">0</span>
-/dev/sdb        /home/hdd       ext4    defaults        <span class="token number">0</span>       <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>OK正常运行的，然后把我的文件夹复制过去。</p>
+<p>这个命令会将所有剩余的可用空间分配给 <code>openeuler-root</code> 逻辑卷。</p>
+<p><img src="/images/6.png"></p>
+<h5 id="扩展文件系统"><a href="#扩展文件系统" class="headerlink" title="扩展文件系统"></a>扩展文件系统</h5><p>最后，你需要扩展文件系统，以使它能够利用逻辑卷的新空间。</p>
+<ul>
+<li>如果你使用的是 <code>ext4</code> 文件系统，运行以下命令：<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">resize2fs /dev/mapper/openeuler-root<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+</ul>
+<h5 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h5><p>你可以使用以下命令来确认文件系统是否成功扩展：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-h</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>确保根文件系统（<code>/</code>）的大小已经增加，并能使用新的磁盘空间。</p>
 
                 
             </div>
@@ -622,7 +541,7 @@ root@PowerEdge-R750:/home/Documents<span class="token comment"># mount -t ext4 /
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://ytirus.github.io/2024/09/09/%E7%A1%AC%E7%9B%98%E6%8C%82%E8%BD%BD%E5%92%8C%E6%89%A9%E5%AE%B9/">http://ytirus.github.io/2024/09/09/%E7%A1%AC%E7%9B%98%E6%8C%82%E8%BD%BD%E5%92%8C%E6%89%A9%E5%AE%B9/</a>
+                    <a href="http://ytirus.github.io/2024/08/22/qemu%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%89%A9%E5%AE%B9/">http://ytirus.github.io/2024/08/22/qemu%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%89%A9%E5%AE%B9/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -660,8 +579,8 @@ root@PowerEdge-R750:/home/Documents<span class="token comment"># mount -t ext4 /
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/%E7%A1%AC%E7%9B%98/">
-                                    <span class="chip bg-color">硬盘</span>
+                                <a href="/tags/qemu/">
+                                    <span class="chip bg-color">qemu</span>
                                 </a>
                             
                         </div>
@@ -709,31 +628,31 @@ root@PowerEdge-R750:/home/Documents<span class="token comment"># mount -t ext4 /
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2024/09/22/qemu%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%89%A9%E5%AE%B9/">
+                <a href="/2024/09/27/etmem%E5%B7%A5%E5%85%B7%E6%B5%85%E6%9E%90/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/18.jpg" class="responsive-img" alt="qemu虚拟机扩容">
+                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="etmem工具浅析">
                         
-                        <span class="card-title">qemu虚拟机扩容</span>
+                        <span class="card-title">etmem工具浅析</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            qemu虚拟机使用一段时间后所设置的磁盘大小不够用了，需要从物理机再分配
+                            openEuler社区开源的工具，读了一些源码对感兴趣的结构体和函数做了整理
                         
                     </div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2024-09-22
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-09-27
                         </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/OS/" class="post-category">
-                                    OS
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
                                 </a>
                             
                             
@@ -743,8 +662,20 @@ root@PowerEdge-R750:/home/Documents<span class="token comment"># mount -t ext4 /
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/qemu/">
-                        <span class="chip bg-color">qemu</span>
+                    <a href="/tags/Hybrid-Memory/">
+                        <span class="chip bg-color">Hybrid-Memory</span>
+                    </a>
+                    
+                    <a href="/tags/Memory/">
+                        <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/openEuler/">
+                        <span class="chip bg-color">openEuler</span>
+                    </a>
+                    
+                    <a href="/tags/etmemd/">
+                        <span class="chip bg-color">etmemd</span>
                     </a>
                     
                 </div>
@@ -950,7 +881,7 @@ root@PowerEdge-R750:/home/Documents<span class="token comment"># mount -t ext4 /
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             

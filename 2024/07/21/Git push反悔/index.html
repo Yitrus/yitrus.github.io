@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="Git push反悔, Yi&#39;s Blog">
+    <meta name="keywords" content="常见场景下的git操作, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>Git push反悔 | Yi&#39;s Blog</title>
+    <title>常见场景下的git操作 | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -299,7 +299,7 @@
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">Git push反悔</h1> -->
+                    <!-- <h1 class="description center-align post-title">常见场景下的git操作</h1> -->
                 </div>
             </div>
         </div>
@@ -449,14 +449,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    362
+                    1.1k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    1 分
+                    4 分
                 </div>
                 
 
@@ -479,22 +479,19 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>一些常用命令：</p>
-<ul>
-<li>切换clone分支git clone -b sosp-submission(某个分支) <a target="_blank" rel="noopener" href="https://xxx.git/">https://xxx.git</a></li>
-<li>整个新建流程：<pre class="line-numbers language-none"><code class="language-none">git init
+                <p>关于git的知识在<a target="_blank" rel="noopener" href="https://liaoxuefeng.com/books/git/what-is-git/index.html">廖雪峰Git是什么</a>讲的很清楚了。但是要实际结合场景才能用的明白。</p>
+<h3 id="通用新建仓库"><a href="#通用新建仓库" class="headerlink" title="通用新建仓库"></a>通用新建仓库</h3><pre class="line-numbers language-none"><code class="language-none">git init
 git add .
 git commit -m "Modified the issue mentioned in the comment"
 git branch -M main
 git remote add origin 
-git push https://xxx.git<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
-<li>更新修改代码<pre class="line-numbers language-none"><code class="language-none">git status  # 查看是否有冲突
+git push https://xxx.git<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="更新修改代码"><a href="#更新修改代码" class="headerlink" title="更新修改代码"></a>更新修改代码</h3><pre class="line-numbers language-none"><code class="language-none">git status  # 查看是否有冲突
 git add .  # 将当前工作目录中更改或者新增的文件加入到Git的索引中
 git commit -m ""  # 添加注释（必填）
-git push -u origin main  # 提交修改到远程仓库<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></li>
-</ul>
-<p>关于git的知识在<a target="_blank" rel="noopener" href="https://liaoxuefeng.com/books/git/what-is-git/index.html">廖雪峰Git是什么</a>讲的很清楚了。</p>
-<p>在往Github仓库push，很多时候因为有超过限制大小的文件所以push不成功，这个时候操作如下：</p>
+git push -u origin main  # 提交修改到远程仓库<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="git-push反悔"><a href="#git-push反悔" class="headerlink" title="git push反悔"></a>git push反悔</h3><p>在往Github仓库push，很多时候因为有超过限制大小的文件所以push不成功，这个时候操作如下：</p>
 <ul>
 <li><code>git log</code>查看hash值，找到main那个哈希值这是远程现在的状态(其实就像查看这些指针指向一样)</li>
 <li><code>git reset --soft &lt;commit-hash&gt;</code> 然后删除不想要的大文件，正常提交步骤</li>
@@ -504,7 +501,56 @@ git push -u origin main  # 提交修改到远程仓库<span aria-hidden="true" c
 <p>–soft 只更改提交记录，不影响文件；–hard 则完全重置，包括删除未提交的本地更改。</p>
 </blockquote>
 <p>git reset –soft 和 git reset –hard 都只影响本地仓库，不会直接修改远程仓库。如果需要同步远程仓库的状态，一定记得 git push。</p>
+<h3 id="新建分支开发新功能"><a href="#新建分支开发新功能" class="headerlink" title="新建分支开发新功能"></a>新建分支开发新功能</h3><p>每个 PR（Pull Request/Merge Request）必须关联一个独立的分支，这是 Git 协作的基本规则。一般来说，每次小改动一个pr，那么都需要新建一个分支去做修改。并入主线后可以把那个分支删除了。</p>
+<pre class="line-numbers language-none"><code class="language-none">git checkout master     # 切换到 master 分支
+git pull origin master  # 拉取远程最新的 master 内容（确保与远程仓库一致）
+# 或者不想从master开始做你的开发，那么就写你要基于哪个分支开发的对应分支名字
 
+git checkout -b 某个新分支名称         # 创建新分支
+# 或者你的新分支已经有了，直接重置到 master 的状态
+git checkout 某个新分支名称         # 切换到你的分支
+
+# 首次推送到远程需设置上游分支（关联远程分支）
+git push origin 某个新分支名称<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>其中 <code>git checkout xx</code> 是转换分支的意思<br>而<code>git checkout -b xx</code> 是新建一个xx分支，并转换过去的意思</p>
+<h3 id="拉取-克隆某个分支的代码"><a href="#拉取-克隆某个分支的代码" class="headerlink" title="拉取/克隆某个分支的代码"></a>拉取/克隆某个分支的代码</h3><ol>
+<li><p>一种方式是克隆后切换分支</p>
+<pre class="line-numbers language-none"><code class="language-none"># 克隆仓库（默认只拉取默认分支，通常是 master/main）
+git clone https://xxx.com/xxx.git
+
+# 进入项目目录
+cd xxx
+
+# 切换到 yyy 分支
+git checkout yyy<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+<li><p>直接克隆 yyy 分支</p>
+<pre class="line-numbers language-none"><code class="language-none">git clone -b yyy https://xxx.com/xxx.git<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
+<li><p>如果之前已经克隆过仓库，只需拉取 yyy 分支的最新代码：</p>
+<pre class="line-numbers language-none"><code class="language-none">git fetch origin yyy    # 拉取远程 yyy 分支到本地
+git checkout yyy         # 切换到该分支
+git pull origin yyy     # 更新代码<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></li>
+</ol>
+<h3 id="根据review意见重新提交"><a href="#根据review意见重新提交" class="headerlink" title="根据review意见重新提交"></a>根据review意见重新提交</h3><p>添加改动并提交（选择追加到最后一次提交，避免历史杂乱）：</p>
+<pre class="line-numbers language-none"><code class="language-none">git checkout yyy # 确保在提交的那个pr分支上操作
+git add .                      # 暂存修改
+git commit --amend             # 追加到上一次提交（修改提交信息）
+git push origin yyy --force   # 强制推送（覆盖远程分支）<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>（使用<code>git commit --amend</code>修改提交后，必须通过<code>git push --force-with-lease</code>（推荐）或<code>git push --force</code>强制推送。这是因为 <code>--amend</code>重写了提交历史，导致本地和远程的分支历史不一致，Git会拒绝常规的<code>git push</code>。）强制推送是安全的，前提是你确定自己是唯一修改分支的人。</p>
+<h3 id="master分支有更新导致冲突"><a href="#master分支有更新导致冲突" class="headerlink" title="master分支有更新导致冲突"></a>master分支有更新导致冲突</h3><p>拉取 master 最新代码并 rebase</p>
+<pre class="line-numbers language-none"><code class="language-none">git checkout yyy
+git fetch origin master      # 获取远程 master 最新状态
+
+git rebase origin/master     # 变基到 master
+或者
+git merge origin/master # 将 master 合并到当前分支<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>手动解决冲突ing……<br>决定完冲突部分要保留哪一方后，继续 rebase</p>
+<pre class="line-numbers language-none"><code class="language-none">git add &lt;冲突文件&gt;
+git rebase --continue
+git push origin yyy --force # 强制推送<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="在test分支改完pr建议再合并去pr所在分支"><a href="#在test分支改完pr建议再合并去pr所在分支" class="headerlink" title="在test分支改完pr建议再合并去pr所在分支"></a>在test分支改完pr建议再合并去pr所在分支</h3><pre class="line-numbers language-none"><code class="language-none">git checkout yyy          # 切换到目标pr分支
+git merge test            # 合并 test 分支的改动
+git push origin yyy       # 推送更新到远程<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
                 
             </div>
             <hr/>
@@ -674,13 +720,13 @@ git push -u origin main  # 提交修改到远程仓库<span aria-hidden="true" c
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2024/07/19/qemu%E6%A8%A1%E6%8B%9F%E5%88%86%E6%88%90%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F/">
+                <a href="/2024/07/19/qemu%E6%A8%A1%E6%8B%9F%E5%88%86%E5%B1%82%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/15.jpg" class="responsive-img" alt="qemu模拟分成内存系统">
+                        <img src="/medias/featureimages/25.jpg" class="responsive-img" alt="qemu模拟分层内存系统">
                         
-                        <span class="card-title">qemu模拟分成内存系统</span>
+                        <span class="card-title">qemu模拟分层内存系统</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -869,7 +915,7 @@ git push -u origin main  # 提交修改到远程仓库<span aria-hidden="true" c
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">248.2k</span>&nbsp;字
+                class="white-color">263.9k</span>&nbsp;字
             
             
             
