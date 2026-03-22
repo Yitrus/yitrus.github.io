@@ -1,0 +1,1427 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="操作系统常问八股2, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>操作系统常问八股2 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/27.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">操作系统常问八股2</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Cache/">
+                                <span class="chip bg-color">Cache</span>
+                            </a>
+                        
+                            <a href="/tags/Memory/">
+                                <span class="chip bg-color">Memory</span>
+                            </a>
+                        
+                            <a href="/tags/TLB/">
+                                <span class="chip bg-color">TLB</span>
+                            </a>
+                        
+                            <a href="/tags/%E8%BF%9B%E7%A8%8B/">
+                                <span class="chip bg-color">进程</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/OS/" class="post-category">
+                                OS
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2025-09-29
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    4.3k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    15 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="虚拟机最多会page-walk几次"><a href="#虚拟机最多会page-walk几次" class="headerlink" title="虚拟机最多会page walk几次"></a>虚拟机最多会page walk几次</h2><p>（物理机虚拟机都是四级页表。）在没有虚拟化的普通Linux系统（使用x86-64的4级页表）中，将虚拟地址（VA）转换为物理地址（PA）的过程称为一次<strong>Page Walk</strong>。</p>
+<p>虚拟机（Guest）认为自己拥有整个物理机器。它的内核维护着自己的页表（<strong>Guest页表</strong>），负责将 <strong>Guest虚拟地址（GVA）</strong> 映射到 <strong>Guest物理地址（GPA）</strong>。虚拟机监控器（Hypervisor / VMM）管理着真实的物理硬件。它维护着另一套页表（<font style="background-color:#f3bb2f;">Nested页表 / Extended页表，简称EPT</font>），负责将 <strong>Guest物理地址（GPA）</strong> 映射到真正的 <strong>主机物理地址（HPA）</strong>。</p>
+<p>EPT Walk：</p>
+<ol>
+<li><strong>转换Guest的CR3 (GPA) -&gt; HPA</strong>：需要1次完整的4级EPT Walk。（为了找到PML4E的HPA）</li>
+<li><strong>转换PML4E (GPA) -&gt; HPA</strong>：需要1次完整的4级EPT Walk。</li>
+<li><strong>转换PDPTE (GPA) -&gt; HPA</strong>：需要1次完整的4级EPT Walk。</li>
+<li><strong>转换PDE (GPA) -&gt; HPA</strong>：需要1次完整的4级EPT Walk。</li>
+<li><strong>转换PTE (GPA) -&gt; HPA</strong>：需要1次完整的4级EPT Walk。</li>
+<li><strong>转换最终目标数据 (GPA) -&gt; HPA</strong>：需要1次完整的4级EPT Walk。</li>
+</ol>
+<p><strong>总内存访问次数 = 6次EPT Walk × 4次访问/每次Walk = 24次内存访问</strong>。</p>
+<hr>
+<h2 id="Memory-Zones（内存区域）有哪些什么作用"><a href="#Memory-Zones（内存区域）有哪些什么作用" class="headerlink" title="Memory Zones（内存区域）有哪些什么作用"></a>Memory Zones（内存区域）有哪些什么作用</h2><p>是Linux内核为了兼容不同硬件架构的限制和优化内存管理而设计的一种分层策略。</p>
+<table>
+<thead>
+<tr>
+<th>Zone 名称</th>
+<th>主要作用</th>
+<th>物理地址范围 (典型)</th>
+<th>存在于</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ZONE_DMA</td>
+<td>为老式ISA设备提供DMA可用内存</td>
+<td><strong>0 ~ 16 MB</strong></td>
+<td>所有系统</td>
+</tr>
+<tr>
+<td>ZONE_DMA32</td>
+<td>为32位设备提供DMA可用内存</td>
+<td><strong>16 MB ~ 4 GB</strong></td>
+<td>64位系统</td>
+</tr>
+<tr>
+<td>ZONE_NORMAL</td>
+<td>内核直接映射区，<strong>主要工作区域</strong></td>
+<td>32位: <strong>16MB ~ 896MB</strong>     64位: <strong>几乎所有内存</strong></td>
+<td>所有系统</td>
+</tr>
+<tr>
+<td>ZONE_HIGHMEM</td>
+<td>管理32位系统无法直接映射的内存</td>
+<td><strong>&gt; ~896 MB</strong></td>
+<td><strong>仅32位系统</strong></td>
+</tr>
+<tr>
+<td>ZONE_MOVABLE</td>
+<td>防止内存碎片，支持内存热插拔</td>
+<td>物理上不连续，逻辑上的一个集合。<strong>页迁移机制</strong>和<strong>内存碎片整理</strong>（Memory Compaction）算法使用这个区域。</td>
+<td>所有系统</td>
+</tr>
+<tr>
+<td><code>ZONE_DEVICE</code> 是一种附着在NUMA节点上的特殊内存类型。主要是表示Intel的Optane DC Persistent Memory这类持久内存的。</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<pre class="line-numbers language-plain" data-language="plain"><code class="language-plain">NUMA Node 0
+    ZONE_DMA
+    ZONE_DMA32
+    ZONE_NORMAL (主要的DRAM内存)
+NUMA Node 1
+    ZONE_NORMAL (主要的DRAM内存)
+NUMA Node 2 (内核为持久内存创建的新节点)
+    ZONE_DEVICE (几乎全部的容量都是这个区域)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>从NUMA的角度看，访问这个 <code>ZONE_DEVICE</code> 内存就是访问NUMA Node 2。</p>
+<hr>
+<h2 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h2><p>背景：<strong>生产者</strong> 是内核态的 perf 事件采样机制（可能由 NMI、PMU 或其他硬件触发），它会写入 ring buffer。<strong>消费者</strong> 是用户态程序（比如 <code>perf</code> 工具或你自己的采样线程），它从 ring buffer 读出数据。这俩线程可以运行在<strong>不同的 CPU 上</strong>，因此会有跨核缓存一致性问题。</p>
+<p>数据是否同步取决于 CPU 缓存机制，如果不通过内存屏障明确同步可能会出现：</p>
+<ul>
+<li>读取到过时的 <code>data_head</code></li>
+<li>写入的 <code>data_tail</code> 没有及时刷新  </li>
+</ul>
+<p><strong>为了让消费者看到生产者“已经完成”的更新</strong>，从而安全地消费数据：</p>
+<ol>
+<li><code>__sync_synchronize()</code> 是 GCC 内建的<strong>全内存屏障</strong>：所有之前的读写操作在屏障前完成，之后的读写操作不会被重排到前面。</li>
+<li>针对编译器优化层面，必须与 <code>smp_rmb()</code> / <code>smp_mb()</code> 配合使用，才能确保跨核同步语义。</li>
+</ol>
+<ul>
+<li>**READ_ONCE()**：防止编译器优化（缓存寄存器副本、重排等），强制每次从内存读取。</li>
+<li>**WRITE_ONCE()**：防止编译器合并写入或重排。</li>
+</ul>
+<ol start="3">
+<li>在 perf ring buffer 消费逻辑中，这个顺序正是官方推荐的：<ul>
+<li><code>READ_ONCE(data_head)</code> —— 获取生产者写的头部位置。</li>
+<li><code>smp_rmb()</code> —— 确保读取数据前不会看到被重排的旧数据。</li>
+<li>从 buffer 中读取样本数据。</li>
+<li>处理完毕后：<ul>
+<li><code>smp_mb()</code> —— 确保所有读取都完成。</li>
+<li><code>WRITE_ONCE(data_tail, ...)</code> —— 更新消费者位置。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>这确保生产者不会覆盖你尚未读取的数据。</p>
+<hr>
+<h2 id="讲讲透明大页"><a href="#讲讲透明大页" class="headerlink" title="讲讲透明大页"></a>讲讲透明大页</h2><p><a target="_blank" rel="noopener" href="https://yitrus.github.io/2023/12/21/hugepage-and-THP-in-memory/">HugePage and THP in memory | Yi’s Blog</a></p>
+<p>大页面对文件类型页的支持情况（匿名页是肯定支持的）：<br>| 特性              | 支持情况                               |<br>| ————— | ———————————- |<br>| tmpfs/shmem THP | ✅ 支持（可配置策略）                        |<br>| 普通文件映射 THP      | ⚠️ Linux 5.4+ 支持，但有严格限制（只读、可执行、对齐） |<br>| 显式大页（hugetlbfs） | ✅ 完全支持，性能最可控                       |</p>
+<hr>
+<h2 id="程序-dump-时查看出错位置"><a href="#程序-dump-时查看出错位置" class="headerlink" title="程序 dump 时查看出错位置"></a>程序 dump 时查看出错位置</h2><ul>
+<li>崩溃后会生成转存储core 文件，<code>gdb &lt;可执行文件&gt; core</code>查看调用栈、崩溃函数及对应源文件、行号。</li>
+<li>看一些log</li>
+<li>重启，加上各种调试信息复现。</li>
+</ul>
+<hr>
+<h2 id="段错误有哪些情况"><a href="#段错误有哪些情况" class="headerlink" title="段错误有哪些情况"></a>段错误有哪些情况</h2><ul>
+<li><strong>访问非法地址</strong><ul>
+<li>访问未分配的堆/栈/全局/代码段区域</li>
+<li>空指针解引用（<code>NULL</code>）</li>
+<li>野指针（指向已释放的内存）</li>
+</ul>
+</li>
+<li><strong>越界访问</strong><ul>
+<li>栈溢出（递归过深或大数组局部变量）</li>
+<li>越界访问数组、缓冲区</li>
+</ul>
+</li>
+<li><strong>权限错误</strong><ul>
+<li>写入只读段（如 <code>.text</code> 代码段）</li>
+<li>执行不可执行的内存页（如数据段执行）</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="僵尸进程"><a href="#僵尸进程" class="headerlink" title="僵尸进程"></a>僵尸进程</h2><p>产生条件：<br>①子进程先于父进程结束，②父进程未正确处理子进程退出：</p>
+<ul>
+<li>当一个子进程完成执行时，操作系统会保留它的进程表条目。</li>
+<li>如果父进程没有正确处理子进程的退出信号（如 <code>SIGCHLD</code>），或者父进程在子进程退出时没有调用 <code>wait()</code> 或 <code>waitpid()</code>，子进程就会变成僵尸进程。</li>
+<li>例如，父进程可能忽略了 <code>SIGCHLD</code> 信号，或者父进程在子进程退出时正在执行其他任务，未能及时处理子进程的退出。<br>危险：<br>僵尸进程仍然占用进程表中的一个条目，这可能导致进程表资源耗尽，比如pid无法再分配了从而系统崩溃。<br>清理：</li>
+<li>父进程仍然在运行，可以通过调用 <code>wait()</code> 或 <code>waitpid()</code> 来读取子进程的状态信息，从而释放子进程的进程表条目。</li>
+<li>僵尸进程不能被 <code>kill</code> 命令终止，因为它们已经“死亡”，只是状态信息尚未被父进程读取。但是可以kill父进程，父进程退出后，僵尸进程会被系统自动回收。（僵尸进程会被 <code>init</code> 进程（进程号为 1）接管然后退出。）</li>
+</ul>
+<hr>
+<h2 id="进程-线程-协程的区别"><a href="#进程-线程-协程的区别" class="headerlink" title="进程/线程/协程的区别"></a>进程/线程/协程的区别</h2><p>进程是<strong>操作系统资源分配的基本单位</strong>，线程是<strong>CPU调度的基本单位</strong>，协程是用户态的轻量级线程，由语言runtime控制调度。协程和线程区别是<strong>协程完全用户态</strong>，包括对象定义、创建、调度和上下文切换，其中<strong>上下文切换开销是线程的二十分之一</strong>。</p>
+<p>区分线程和进程主要看它<strong>有没有独立的地址空间</strong>！但是，两者的相同点大于不同点。都是<code>task_struct</code>结构来实现的，具体来说有以下几个部分:</p>
+<blockquote>
+<ol>
+<li>进程、线程状态：就绪、执行、阻塞</li>
+<li>进程pid和线程tgid，对于主线程而言<code>pid==tgid</code></li>
+<li>进程树，维护父子兄弟之间的关系</li>
+<li>调度优先级的一系列参数：普通进程CFS，实时进程又不一样，</li>
+<li>进程地址空间mm_struct，不过这个主要针对用户进程来讲。包含代码段、数据段、BSS段、堆、栈、共享库。内核线程在高地址空间中是直接映射的，<code>mm_struct==null</code>.</li>
+<li>进程文件相关信息：当前目录、进程打开的文件</li>
+<li>命名空间隔离内核资源</li>
+</ol>
+</blockquote>
+<p><u>协程的产生主要是同步阻塞用线程做很浪费资源，想和epoll的多路复用技术</u>（<strong>用 1 个线程监听多个连接</strong>，谁有数据就处理谁，避免阻塞等待。）<u>结合起来</u>，于是很多语言就有了运行时协程。go语言运行时库会和C语言运行时库一样，实现自己的线程，不过<strong>线程和协程最大区别是协程完全用户态</strong>可以自己裁剪，而线程和C实现的差不多。</p>
+<p>协程调度差不多把内核调度都实现了一遍：</p>
+<div class="note warning no-icon">
+为每个CPU定义一个运行队列（P相当于linux中cpu核的虚拟化，每个核都有个运行队列）
+
+<p>每个运行队列中定义红黑树来组织待运行任务（go是多任务队列）</p>
+<p>基于定时器的节拍调度判断是否需要切换下一个任务</p>
+<p>考虑多个运行队列中的负载均衡问题</p>
+</div>
+
+
+<p>（main不是真正运行起来了，要处理关键的初始化GMP，让调度器开始执行）</p>
+<hr>
+<h2 id="fork"><a href="#fork" class="headerlink" title="fork"></a>fork</h2><ul>
+<li>在父进程中，<code>fork()</code> 返回子进程的进程标识符（PID）。这个 PID 是操作系统分配给子进程的唯一标识符，父进程可以用它来跟踪子进程的状态，例如通过 <code>wait()</code> 系统调用来等待子进程结束。</li>
+<li>在子进程中，<code>fork()</code> 返回 0。子进程可以通过这个返回值知道自己是子进程，并且可以根据需要执行不同的代码逻辑。</li>
+</ul>
+<h3 id="1-地址共享"><a href="#1-地址共享" class="headerlink" title="1. 地址共享"></a>1. 地址共享</h3><p>哪些地址空间会共享，哪些不会共享？包括signal这些。</p>
+<p><font style="background-color:#f3bb2f;">堆、栈、brk、匿名 </font><code>mmap</code><font style="background-color:#f3bb2f;"> 等→ </font><strong><font style="background-color:#f3bb2f;">只读共享</font><strong>，子进程获得父进程的</strong>完整副本</strong>，COW 机制，<code>fork()</code> 后父子进程<strong>共享内存</strong>，直到一方尝试修改数据时才会真正复制(即物理页在第一次写之后就不再共享)。</p>
+<p> <code>mmap(..., MAP_SHARED, ...)</code> 映射的<font style="background-color:#f3bb2f;">共享文件页</font>、<code>POSIX/SysV</code> 共享内存、tmpfs 页（可以理解为大页文件页）→ <strong>物理页完全共享</strong>，修改双方立即可见。（动态链接库，代码段 <code>.text</code>）</p>
+<p><code>mmap(..., MAP_SHARED | MAP_ANONYMOUS, ...)</code><font style="background-color:#f3bb2f;">映射的共享匿名页</font>。（父子之间通信用）</p>
+<p>不共享：内核栈、thread_info、task_struct、PID、TID、寄存器现场、命名空间。（只有“明确标记为共享”或“只读”的页才真正共享）</p>
+<blockquote>
+<p>线程创建和进程创建虽然在用户态调用的函数不一样，但是内核态最终都会使用kernel_clone函数创建，不过传入的flag不一样，（命名空间，内存地址空间、挂载点（当前目录文件信息）、打开的文件）这四部分都是共用的。</p>
+</blockquote>
+<p>进程最常见的典型信号（Shell、C 开发天天遇到）：</p>
+<table>
+<thead>
+<tr>
+<th align="left">名称</th>
+<th align="left">默认动作</th>
+<th align="left">常见场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>SIGINT</code> 2</td>
+<td align="left">终止</td>
+<td align="left">Ctrl-C</td>
+</tr>
+<tr>
+<td align="left"><code>SIGQUIT</code> 3</td>
+<td align="left">终止+core</td>
+<td align="left">Ctrl-</td>
+</tr>
+<tr>
+<td align="left"><code>SIGKILL</code> 9</td>
+<td align="left">终止（不可捕/不可忽）</td>
+<td align="left"><code>kill -9</code></td>
+</tr>
+<tr>
+<td align="left"><code>SIGSEGV</code> 11</td>
+<td align="left">终止+core</td>
+<td align="left">段错误、空指针</td>
+</tr>
+<tr>
+<td align="left"><code>SIGTERM</code> 15</td>
+<td align="left">终止</td>
+<td align="left"><code>kill</code> 默认信号</td>
+</tr>
+<tr>
+<td align="left"><code>SIGCHLD</code> 17</td>
+<td align="left">忽略</td>
+<td align="left">子进程状态变化通知父进程</td>
+</tr>
+<tr>
+<td align="left"><code>SIGSTOP</code> 19</td>
+<td align="left">停止（不可捕）</td>
+<td align="left">Ctrl-Z / <code>kill -STOP</code></td>
+</tr>
+<tr>
+<td align="left"><code>SIGCONT</code> 18</td>
+<td align="left">继续</td>
+<td align="left">唤醒被 STOP 的进程</td>
+</tr>
+</tbody></table>
+<ol>
+<li>已经到达、但还没处理的<strong>挂起信号</strong>（pending signal）  不继承：<br>这些位图存在<strong>父进程 PCB 里</strong>  → fork 时子进程得到一份干净的新 PCB，挂起信号被清零</li>
+<li>信号屏蔽字（blocked mask）：调用 <code>sigprocmask()</code> 设置的那些“暂时不递送”的信号集合  → 子进程继承父进程当前的 mask。</li>
+<li>用 <code>sigaction()</code> 或 <code>signal()</code> 注册过的信号，全部继承。</li>
+</ol>
+<h3 id="2-fork缺页"><a href="#2-fork缺页" class="headerlink" title="2. fork缺页"></a>2. fork缺页</h3><p>fork场景下什么情况会导致缺页？</p>
+<p>整个fork之后子进程访问为什么会导致缺页，已经fault in，对物理页write protect写保护会触发。这个不是major fault 是<strong>Minor</strong>  page fault.</p>
+<h3 id="3-文件句柄继承"><a href="#3-文件句柄继承" class="headerlink" title="3. 文件句柄继承"></a>3. 文件句柄继承</h3><p>当父进程调用 <code>fork()</code> 时，子进程会获得父进程文件描述符表的一个副本。这并不是简单的数字拷贝，而是子进程的文件描述符指向了和父进程相同的文件表项。所以，子进程可以通过这个文件描述符访问和父进程打开的同一个文件，而且它们看到的文件读写位置等状态信息是一致的。比如在一些服务器程序中，父进程可以打开一个日志文件，然后创建多个子进程来处理不同的请求，子进程都可以通过继承的文件描述符将日志信息写入同一个日志文件。</p>
+<hr>
+<h2 id="进程间通信"><a href="#进程间通信" class="headerlink" title="进程间通信"></a>进程间通信</h2><p>进程间通信的方式有哪几种，分别适用于那些场合？</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>不相关进程通信（本机）</td>
+<td>FIFO、UNIX Socket</td>
+</tr>
+<tr>
+<td>父子进程简单通信</td>
+<td>匿名管道</td>
+</tr>
+<tr>
+<td>大量数据共享</td>
+<td>共享内存 + 信号量</td>
+</tr>
+<tr>
+<td>异步事件通知</td>
+<td>信号</td>
+</tr>
+<tr>
+<td>分布式服务</td>
+<td>TCP Socket、gRPC</td>
+</tr>
+<tr>
+<td>高速实时数据</td>
+<td>mmap + 环形缓冲区</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h2><p><u>简述处理器中断处理的过程</u></p>
+<p>处理器在中断处理的过程中，一般分为以下几个步骤：中断请求 -&gt; 中断响应 -&gt; 保护现场 -&gt; 中断服务 -&gt; 恢复现场 -&gt; 中断返回。</p>
+<p>①当硬件设备需要CPU处理时（例如，网卡收到数据包），它会通过主板上的中断控制器（如8259A或现代的APIC）向CPU的一个特定引脚发送一个电信号。②CPU在执行完<strong>当前指令</strong>后，会立即检测到这个中断请求。它会<strong>保存当前工作的现场</strong>（比如当前程序的地址、寄存器状态等），以便后续能恢复回来继续工作。③CPU根据中断请求号，去一个叫做<strong>中断描述符表（IDT）</strong> 的地方查找对应的<strong>中断服务程序（ISR）</strong> 的地址。这个ISR是设备驱动程序预先准备好的一段处理特定中断的代码。④CPU开始执行这个中断服务程序。这个程序通常会进行一些快速、关键的操作，比如：- 从网卡的缓冲区读取数据。- 确认中断已被处理。- 将更耗时的数据处理任务推迟到后面（通常放入一个队列，触发<strong>软中断</strong>或由内核线程处理）。</p>
+<p><u>什么是中断向量？什么是中断嵌套？</u></p>
+<p>中断向量：中断服务子程序的入口地址。</p>
+<p>中断嵌套：中断系统正在执行一个中断服务程序时，有另一个优先级更高的中断源提出请求，这时会暂停当前正在执行的级别较低的中断源的服务程序，处理级别更高的中断源。处理完毕后再返回到被中断了的中断服务程序。</p>
+<p><u>中断的优缺点？</u></p>
+<p>优点：实现CPU和I/O设备的并行，提高CPU的利用率和系统的性能。</p>
+<p>缺点：中断处理过程需要保护现场、恢复现场（用户态切换到内核态），整个过程需要一定的时间和空间开销。如果中断的频率太高，会降低系统的性能。</p>
+<p>（<strong>上下文切换指的是内核（操作系统的核心）在CPU上对进程或者线程进行切换</strong>。 上下文切换过程中的信息被保存在进程控制块（PCB-Process Control Block）中。算力记账给中断时被暂停的线程，并使用其内核栈。）</p>
+<hr>
+<h2 id="DPDK原理和性能优化"><a href="#DPDK原理和性能优化" class="headerlink" title="DPDK原理和性能优化"></a>DPDK原理和性能优化</h2><p>在传统Linux网络栈中，<strong>数据包接收路径</strong>是这样的：</p>
+<ol>
+<li>网卡（NIC）收到一个数据包后，会触发<strong>硬件中断（Interrupt）</strong>；</li>
+<li>CPU 响应中断，进入<strong>内核态</strong>，调用中断处理函数；</li>
+<li>数据包从网卡DMA缓冲区拷贝到内核缓冲区，硬中断通知CPU，处理完后软中断ksoftirqd内核线程将从ringbuffer摘下数据包；（涉及内核协议栈）</li>
+<li>最终再通过<code>socket</code>接口从内核拷贝到用户态应用，并唤醒等待队列上的进程。。<br>整个过程涉及：</li>
+</ol>
+<ul>
+<li>用户态 ↔ 内核态切换；</li>
+<li>多次内存拷贝；</li>
+<li>中断触发和上下文切换的开销。<br>DPDK优化思路：</li>
+<li>DPDK提供了基于<strong>UIO（Userspace I/O）</strong> 或更现代的<strong>VFIO（Virtual Function I/O）</strong> 的用户空间驱动。<font style="background-color:#f3bb2f;">DPDK通过VFIO/UIO驱动，将这片物理内存（也就是DMA将要和正在使用的区域）映射到用户空间的虚拟地址</font>。这使得应用程序可以<strong>完全在用户空间直接与网卡硬件交互</strong>，无需陷入内核。DPDK应用程序程序通过内存映射（Memory Map）的方式直接从网卡接收队列（RX Ring）中获取数据包描述符（Descriptor），该描述符指向已映射到用户空间的、由大页内存组成的<strong>内存池（Mempool）</strong> 中的数据包。处理完成后，只需修改描述符，即可将数据包放入发送队列（TX Ring）。从而<font style="background-color:#f3bb2f;">完全避免了系统调用和上下文切换，整个过程中，数据包本身始终存放在用户空间的同一块内存中，没有任何拷贝操作。</font></li>
+<li>DPDK轮询时CPU核心持续、主动地检查网卡接收队列是否有新数据包到达。没有包时就空转。这虽然看起来浪费CPU（空转），但在<strong>高负载流量下</strong>，效率远高于处理海量中断。DPDK应用程序通常会<strong>绑定专用的CPU核心来执行轮询任务</strong>。（传统方法包速率高时 CPU 时间几乎都浪费在中断调度上了）</li>
+</ul>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2025/09/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B8%B8%E9%97%AE%E5%85%AB%E8%82%A12/">http://ytirus.github.io/2025/09/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B8%B8%E9%97%AE%E5%85%AB%E8%82%A12/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Cache/">
+                                    <span class="chip bg-color">Cache</span>
+                                </a>
+                            
+                                <a href="/tags/Memory/">
+                                    <span class="chip bg-color">Memory</span>
+                                </a>
+                            
+                                <a href="/tags/TLB/">
+                                    <span class="chip bg-color">TLB</span>
+                                </a>
+                            
+                                <a href="/tags/%E8%BF%9B%E7%A8%8B/">
+                                    <span class="chip bg-color">进程</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2025/09/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B8%B8%E9%97%AE%E5%85%AB%E8%82%A12/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/27.jpg" class="responsive-img" alt="操作系统常问八股2">
+                        
+                        <span class="card-title">操作系统常问八股2</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            面试爱问的操作系统相关问题
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-09-29
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Cache/">
+                        <span class="chip bg-color">Cache</span>
+                    </a>
+                    
+                    <a href="/tags/Memory/">
+                        <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/TLB/">
+                        <span class="chip bg-color">TLB</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%BF%9B%E7%A8%8B/">
+                        <span class="chip bg-color">进程</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2025/09/15/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B8%B8%E9%97%AE%E5%85%AB%E8%82%A1/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="操作系统常问八股">
+                        
+                        <span class="card-title">操作系统常问八股</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            面试爱问的操作系统相关问题
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-09-15
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Cache/">
+                        <span class="chip bg-color">Cache</span>
+                    </a>
+                    
+                    <a href="/tags/Memory/">
+                        <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/TLB/">
+                        <span class="chip bg-color">TLB</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%BF%9B%E7%A8%8B/">
+                        <span class="chip bg-color">进程</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">290.5k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

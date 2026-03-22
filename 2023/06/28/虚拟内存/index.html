@@ -42,7 +42,11 @@
 
     <script src="/libs/jquery/jquery.min.js"></script>
 
-<meta name="generator" content="Hexo 5.4.2">
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
 
@@ -457,14 +461,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    6.4k
+                    6.9k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    22 分
+                    23 分
                 </div>
                 
 
@@ -532,7 +536,7 @@
 <li>简化内存分配：当一个运行在用户进程中的程序要求额外的堆空间时（如调用 malloc 的结果）， 操作系统分配一个适当数字（例如<strong>k个）连续的虚拟内存页面</strong>，并且将它们映射到<strong>物理内存中任意位置的k个物理页面</strong>。由于页表工作的方式，操作系统没有必要分配k个连续的物理内存页面。页面可以随机地分散在物理内存中。</li>
 </ul>
 <h2 id="五、虚拟内存作为内存保护的工具"><a href="#五、虚拟内存作为内存保护的工具" class="headerlink" title="五、虚拟内存作为内存保护的工具"></a>五、虚拟内存作为内存保护的工具</h2><p><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/cab11a701ff84055d6c1e0c28134d2bf.png"><br>在这个示例中，每个PTE中已经添加了三个许可位。SUP 位表示进程<strong>是否必须运行在内核(超级用户）模式下才能访问该页</strong>。运行在内核模式中的进程可以访问任何页面，但是运行在用户模式中的进程只允许访问那些SUP为0的页面。READ位和WRITE位控制对页面的读和写访问。例如，如果进程i运行在用户模式下，那么它有读VP0和读写VP1的权限。然而，不允许它访问 VP2。如果<strong>一条指令违反了这些许可条件，那么 CPU 就触发一个一般保护故障，将控制传递给一个内核中的异常处理程序</strong>。Linux shell —般将这种异常报告为“段错误（segmentation fault)” 。</p>
-<h2 id="六、地址翻译"><a href="#六、地址翻译" class="headerlink" title="六、地址翻译"></a>六、地址翻译</h2><p>了解硬件在支持虚拟内存中的角色，省略了大量的细节，尤其是和时序相关的细节。图 9-11 概括了我们在这节里将要使用的所有符号。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/dfdd9b9240b6e1dad1bd2a4cd45bb113.png"><br>图9-12展示了MMU如何利用页表来实现虚拟地址空间到物理地址空间映射。CPU中的一个控制寄存器，<strong>页表基址寄存器（Page Table Base Register, PTBR)</strong> 指向当前页表。<strong>n位的虚拟地址包含两个部分：一个p位的虚拟页面偏移（Virtual Page Offset, VPO)和一个（n-p）位的虚拟页号（Virtual Page Number, VPN)。MMU利用VPN来选择适当的PTE</strong>。例如，VPN0选择PTE0，VPN1选择PTE1，以此类推。<strong>将页表条目中物理页号(Physical Page Number, PPN)和虚拟地址中的VPO串联起来，就得到相应的物理地址。</strong> 注意，<strong>因为物理和虚拟页面都是P字节的，所以物理页面偏移（Physical Page Offset, PPO)和VPO是相同的</strong>。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/ddfd48096b097b2475af1a54c3902626.png"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/66f69f26e863933a8ad1339cf1afe10b.png"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/357644f5c6cb00b4f572b74be6476141.png"></p>
+<h2 id="六、地址翻译"><a href="#六、地址翻译" class="headerlink" title="六、地址翻译"></a>六、地址翻译</h2><p>了解硬件在支持虚拟内存中的角色，省略了大量的细节，尤其是和时序相关的细节。图 9-11 概括了我们在这节里将要使用的所有符号。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/dfdd9b9240b6e1dad1bd2a4cd45bb113.png"><br>图9-12展示了MMU如何利用页表来实现虚拟地址空间到物理地址空间映射。CPU中的一个控制寄存器，<strong>页表基址寄存器（Page Table Base Register, PTBR)</strong> 指向当前页表。<strong>n位的虚拟地址包含两个部分：一个p位的虚拟页面偏移（Virtual Page Offset, VPO)和一个（n-p）位的虚拟页号（Virtual Page Number, VPN)。MMU利用VPN来选择适当的PTE</strong>。例如，VPN0选择PTE0，VPN1选择PTE1，以此类推。<strong>将页表条目中物理页号(Physical Page Number, PPN)和虚拟地址中的VPO串联起来，就得到相应的物理地址。</strong> 注意，<strong>因为物理和虚拟页面都是P字节的，所以物理页面偏移（Physical Page Offset, PPO)和VPO是相同的</strong>。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/ddfd48096b097b2475af1a54c3902626.png"><br><strong>物理地址 PA = (PFN &lt;&lt; PAGE_SHIFT) | offset</strong> ，一个物理地址长这样：| 高位（页号 PFN） | 低位（页内偏移 offset） |。页偏移用于找到页内的具体位置。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/66f69f26e863933a8ad1339cf1afe10b.png"><br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/357644f5c6cb00b4f572b74be6476141.png"></p>
 <p>（第7步其实就是a)的一次循环了）。</p>
 <h3 id="1、结合高速缓存和虚拟内存"><a href="#1、结合高速缓存和虚拟内存" class="headerlink" title="1、结合高速缓存和虚拟内存"></a>1、结合高速缓存和虚拟内存</h3><p>既使用虚拟内存又使用SRAM髙速缓存的系统中，都有应该<strong>使用虚拟地址还是使用物理地址来访问SRAM高速缓存</strong>的问题。<strong>大多数系统是选择物理寻址的</strong>。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/6b80f5092571a3e819efc90e03daa1f4.png"></p>
 <h3 id="2、利用TLB加速地址翻译"><a href="#2、利用TLB加速地址翻译" class="headerlink" title="2、利用TLB加速地址翻译"></a>2、利用TLB加速地址翻译</h3><p>每次CPU产生一个虚拟地址，MMU就必须查阅一个PTE, 以便将虚拟地址翻译为物理地址。在MMU中包括了一个关于PTE的小的缓存，称为<strong>翻译后备缓冲器（Translation Lookaside Buffer, TLB</strong>)。TLB 是一个小的、虚拟寻址的缓存，其中每一行都保存着一个由单个 PTE 组成的块。TLB 通常有高度的相联度。当 TLB 命中时(通常情况)所有的地址翻译步骤都是在芯片上的 MMU 中执行的，因此非常快。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/994d33e77e9d49591d1a627dadff6ce2.png"></p>
@@ -569,6 +573,18 @@
 <h3 id="2、使用mmap函数的用户级内存映射"><a href="#2、使用mmap函数的用户级内存映射" class="headerlink" title="2、使用mmap函数的用户级内存映射"></a>2、使用mmap函数的用户级内存映射</h3><p>mmap函数要求内核创建一个新的虚拟内存区域，最好是从地址start开始的一个区域，并将文件描述符fd指定的对象的一个连续的片（chunk)映射到这个新的区域。连续的对象片大小为length字节，从距文件开始处偏移量为offset字节的地方开始。start地址仅仅是一个暗示，通常被定义为 NULL。为了我们的目的，我们总是假设起始地址为NULL。<br><img src="https://images.weserv.nl/?url=https://i-blog.csdnimg.cn/blog_migrate/a70cbaf763ff44c207b48fc97e373853.png"></p>
 <hr>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/tolimit/p/5435068.html">内存回收</a>和反向映射相关。</p>
+<blockquote>
+<p>一些概念补充：</p>
+<ul>
+<li>虚拟内存是内核为每个进程提供的独立线性地址空间的抽象，通过页表与物理内存解耦。</li>
+<li>页表找到虚拟地址到物理地址的映射：虚拟地址（VA）→ <strong>物理地址（PA）</strong>。不是 <code>struct page</code>, 可以这样想：MMU 只认识物理地址，不认识内核的数据结构。但是呢，页表项里有存页对齐的物理地址和标志位即：<strong>PFN + flags（present, dirty, rw, …）</strong>。可以将<code>struct page</code> 看作是PFN 的软件侧描述符。</li>
+<li>&nbsp;<code>struct page</code>&nbsp;<strong>描述物理页面</strong>，指描述 PFN（一一对应关系）。<strong>物理页帧 PFN</strong> 是页编号，对应一段连续的物理空间，是一页大小（通常 4KB）的物理内存块的编号；&nbsp;<code>struct page</code>&nbsp;描述其引用计数、zone/node 信息、匿名页/文件页。</li>
+<li><strong>PFN = 物理地址 &gt;&gt; PAGE_SHIFT</strong>举个例子：PFN = 100 物理地址范围<code>[100 * 4KB, 101 * 4KB)</code>也就是实际覆盖<code>[0x190000, 0x191000)</code>这一段物理地址空间，而不是单个地址。对应的物理页帧起始地址是 <code>0x190000</code>。</li>
+<li>“Node-Zone-伙伴系统”管理物理页面，通过&nbsp;<code>struct page</code>&nbsp;维护物理空闲页框的分配与回收。涉及到NUMA，watermark，URL list这些经典内容。</li>
+<li>SPARSEMEM 是一种稀疏的物理内存描述符组织机制，通过 Section 粒度的分层映射，实现 PFN 到 <code>struct page</code> 的可扩展、可热插拔的寻址，同时避免为内存空洞分配不必要的管理开销。</li>
+<li>物理页帧，真实的RAM硅片，如MMU、DMA控制器直接使用物理地址。</li>
+</ul>
+</blockquote>
 
                 
             </div>
@@ -925,7 +941,7 @@
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2025</span>
+                <span id="year">2019-2026</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -934,7 +950,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">263.9k</span>&nbsp;字
+                class="white-color">290.5k</span>&nbsp;字
             
             
             
@@ -970,10 +986,61 @@
 
 </div>
     </div>
+
 </footer>
 
 <div class="progress-bar"></div>
 
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
 
     <!-- 搜索遮罩框 -->
 <div id="searchModal" class="modal">

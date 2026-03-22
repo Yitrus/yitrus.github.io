@@ -1,0 +1,1264 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="perf采样频率动态调整, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>perf采样频率动态调整 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">perf采样频率动态调整</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/perf/">
+                                <span class="chip bg-color">perf</span>
+                            </a>
+                        
+                            <a href="/tags/CPU-%E5%BC%80%E9%94%80/">
+                                <span class="chip bg-color">CPU 开销</span>
+                            </a>
+                        
+                            <a href="/tags/%E8%BF%9B%E7%A8%8B/">
+                                <span class="chip bg-color">进程</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/OS/" class="post-category">
+                                OS
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2025-07-23
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    1.5k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    6 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="一、ksamplingd-线程概述"><a href="#一、ksamplingd-线程概述" class="headerlink" title="一、ksamplingd 线程概述"></a>一、ksamplingd 线程概述</h2><p>在内核中新建 ksamplingd 用于采样硬件性能事件的线程：</p>
+<ul>
+<li>从 Perf Events 的 ring buffer 里读取样本</li>
+<li>处理样本数据</li>
+<li>根据自身实际 CPU 时间占用率，动态调整采样频率<br>这篇文章的介绍将略过采样和处理样本的部分，因为采样在之前博客里详细分析过（TODO）。这里主要调整的参数是<code>struct perf_event_attr sample_period</code></li>
+</ul>
+<h2 id="二、线程初始化"><a href="#二、线程初始化" class="headerlink" title="二、线程初始化"></a>二、线程初始化</h2><h3 id="1-CPU-线程给定"><a href="#1-CPU-线程给定" class="headerlink" title="1. CPU 线程给定"></a>1. CPU 线程给定</h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">cpumask</span> <span class="token operator">*</span>cpumask <span class="token operator">=</span> <span class="token function">cpumask_of_node</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">cpumask_empty</span><span class="token punctuation">(</span>cpumask<span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token function">do_set_cpus_allowed</span><span class="token punctuation">(</span>access_sampling<span class="token punctuation">,</span> cpumask<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<ul>
+<li><code>cpumask_of_node(0)</code> 获取节点 0 所有 CPU 的 mask。</li>
+<li>通过 <code>do_set_cpus_allowed()</code> 把采样线程给定运行在某些 CPU 上。看需求，因为在笔者的场景中，只关注 socket0 的冷数据和热数据，而socket0 虽然 NUMA 有两个，实际物理核心只是 NUMA0 的。</li>
+</ul>
+<h3 id="2-时间变量初始化"><a href="#2-时间变量初始化" class="headerlink" title="2. 时间变量初始化"></a>2. 时间变量初始化</h3><pre class="line-numbers language-c" data-language="c"><code class="language-c">trace_runtime <span class="token operator">=</span> total_runtime <span class="token operator">=</span> exec_runtime <span class="token operator">=</span> t<span class="token operator">-&gt;</span>se<span class="token punctuation">.</span>sum_exec_runtime<span class="token punctuation">;</span>
+trace_cputime <span class="token operator">=</span> total_cputime <span class="token operator">=</span> elapsed_cputime <span class="token operator">=</span> jiffies<span class="token punctuation">;</span>
+sleep_timeout <span class="token operator">=</span> <span class="token function">usecs_to_jiffies</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<ul>
+<li><code>t-&gt;se.sum_exec_runtime</code> ：是内核调度实体 <code>task_struct</code>的 <code>struct sched_entity</code> 中记录该进程历史上总共运行的 CPU 耗时（单位 ns）。原本用于计算 CFS 调度器中优先级和时间分配。</li>
+<li><code>jiffies</code> ：内核时钟计数器</li>
+<li><code>sleep_timeout</code> ：指定最短采样间隔</li>
+</ul>
+<h2 id="三、CPU-占用率计算"><a href="#三、CPU-占用率计算" class="headerlink" title="三、CPU 占用率计算"></a>三、CPU 占用率计算</h2><h3 id="1-时间差值"><a href="#1-时间差值" class="headerlink" title="1. 时间差值"></a>1. 时间差值</h3><pre class="line-numbers language-c" data-language="c"><code class="language-c">exec_runtime <span class="token operator">=</span> t<span class="token operator">-&gt;</span>se<span class="token punctuation">.</span>sum_exec_runtime <span class="token operator">-</span> exec_runtime<span class="token punctuation">;</span> <span class="token comment">// ns</span>
+elapsed_cputime <span class="token operator">=</span> <span class="token function">jiffies_to_usecs</span><span class="token punctuation">(</span>cur <span class="token operator">-</span> elapsed_cputime<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// us</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<ul>
+<li><code>exec_runtime</code> ：本次周期内采样线程耗时</li>
+<li><code>elapsed_cputime</code> ：本次周期内当前增量时间</li>
+</ul>
+<h3 id="2-占用率计算"><a href="#2-占用率计算" class="headerlink" title="2. 占用率计算"></a>2. 占用率计算</h3><p>需要单位符合：把 ns -&gt; us</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">u64 cur_cputime <span class="token operator">=</span> <span class="token function">div64_u64</span><span class="token punctuation">(</span>exec_runtime <span class="token operator">/</span> <span class="token number">1000</span><span class="token punctuation">,</span> elapsed_cputime<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// permil</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>最终得到 <code>cputime</code> ：</p>
+<ul>
+<li>单位是 permil (％ 的 10倍)</li>
+<li>如果 <code>cputime = 300</code> ，即 CPU 占用 30%</li>
+</ul>
+<h2 id="四、动态调整采样频率"><a href="#四、动态调整采样频率" class="headerlink" title="四、动态调整采样频率"></a>四、动态调整采样频率</h2><h3 id="1-调整规则"><a href="#1-调整规则" class="headerlink" title="1. 调整规则"></a>1. 调整规则</h3><p>关键参数：<br><code>ksampled_soft_cpu_quota</code>    目标 CPU 占用率上限（permil，千分比）<br><code>cputime</code>    实际测得的 CPU 时间占用率<br><code>sample_period</code>    当前 LLC 采样周期（控制采样间隔）<br><code>sample_inst_period</code>    当前指令采样周期<br><code>pcount</code> 宏定义的上限</p>
+<p>增加采样周期（降低采样频率）:<br>当 <code>cputime</code> 超过目标占用率 <code>ksampled_soft_cpu_quota + 5</code>(防止频繁调整)，且 <code>sample_period</code> 没有达到上限 <code>pcount</code>，调用 <code>increase_sample_period</code> 使采样周期增加，从而降低采样频率。如果周期有变化，应用新的采样周期。</p>
+<p>减少采样周期（提高采样频率）：<br>当 <code>cputime</code> 低于目标占用率 <code>ksampled_soft_cpu_quota - 5</code>，并且 <code>sample_period</code> 大于 <code>pinstcount</code>，可以调用 <code>decrease_sample_period</code> 减小采样周期，增加采样频率。同样如果采样周期发生变化，需要更新 pebs 采样器的配置。</p>
+<h3 id="2-调整函数实现细节"><a href="#2-调整函数实现细节" class="headerlink" title="2. 调整函数实现细节"></a>2. 调整函数实现细节</h3><ul>
+<li>线性调整：每次增加或减少采样周期，只调整一个单位。确保不会超过预定义的上下限 <code>pcount</code> 和 <code>pinstcount</code>。响应慢但足够稳定。</li>
+<li>通过查表（预先定义一个已经排序的数组，数组中每个值表示周期）进行非线性调整，适合对不同采样周期有特殊设计的应用场景。</li>
+</ul>
+<h2 id="五、线程休眠机制"><a href="#五、线程休眠机制" class="headerlink" title="五、线程休眠机制"></a>五、线程休眠机制</h2><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token function">schedule_timeout_interruptible</span><span class="token punctuation">(</span>sleep_timeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token operator">-</span> 休眠控制线程激活频率
+<span class="token operator">-</span> 配合采样周期，避免忙等和超时间
+
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> sleep_timeout <span class="token operator">=</span> <span class="token function">usecs_to_jiffies</span><span class="token punctuation">(</span><span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">/* 每个采样循环休眠2ms */</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">long</span> cpucap_period <span class="token operator">=</span> <span class="token function">msecs_to_jiffies</span><span class="token punctuation">(</span><span class="token number">15000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">/* 15s查一次采样开销便于动态控制 */</span>
+
+    <span class="token keyword">unsigned</span> <span class="token keyword">long</span> sample_period <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token comment">/* 一般事件的采样频率 */</span>
+    <span class="token keyword">unsigned</span> <span class="token keyword">long</span> sample_inst_period <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token comment">/* 指令事件的采样频率 */</span>
+
+	<span class="token comment">/*
+		total_runtime	采样线程启动后的总执行时间
+		exec_runtime	周期内的实际运行时间
+		cputime	        采样线程的当前CPU开销（归一化后的 0-100+ 数值）
+	*/</span>
+    u64 total_runtime<span class="token punctuation">,</span> exec_runtime<span class="token punctuation">,</span> cputime <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+	<span class="token keyword">struct</span> <span class="token class-name">task_struct</span> <span class="token operator">*</span>t <span class="token operator">=</span> current<span class="token punctuation">;</span>
+    total_runtime <span class="token operator">=</span> exec_runtime <span class="token operator">=</span> t<span class="token operator">-&gt;</span>se<span class="token punctuation">.</span>sum_exec_runtime<span class="token punctuation">;</span>
+
+	<span class="token comment">/*
+		jiffies 差值记录的cputime是从启动到现在过了多少毫秒；而runtime是进程在 CPU 上跑了多少纳秒；两者比值得出真实 CPU 使用率
+		total_cputime	线程启动时的 jiffies，用于计算总 wall-clock 时间
+		elapsed_cputime	上次评估 CPU 开销额度时的 jiffies，用于计算周期差
+		cur	当前 jiffies
+	*/</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">long</span> total_cputime<span class="token punctuation">,</span> elapsed_cputime<span class="token punctuation">,</span> cur<span class="token punctuation">;</span>
+    total_cputime <span class="token operator">=</span> elapsed_cputime <span class="token operator">=</span> jiffies<span class="token punctuation">;</span>
+
+	<span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">cpumask</span> <span class="token operator">*</span>cpumask<span class="token punctuation">;</span>
+    cpumask <span class="token operator">=</span> <span class="token function">cpumask_of_node</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">cpumask_empty</span><span class="token punctuation">(</span>cpumask<span class="token punctuation">)</span><span class="token punctuation">)</span>
+		<span class="token function">do_set_cpus_allowed</span><span class="token punctuation">(</span>access_sampling<span class="token punctuation">,</span> cpumask<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">kthread_should_stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">int</span> cpu<span class="token punctuation">,</span> event<span class="token punctuation">,</span> cond <span class="token operator">=</span> false<span class="token punctuation">;</span>
+    
+		<span class="token keyword">for</span> <span class="token punctuation">(</span>cpu <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> cpu <span class="token operator">&lt;</span> CPUS_PER_SOCKET<span class="token punctuation">;</span> cpu<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			<span class="token keyword">for</span> <span class="token punctuation">(</span>event <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> event <span class="token operator">&lt;</span> N_ARTMEMEVENTS<span class="token punctuation">;</span> event<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+				<span class="token keyword">do</span> <span class="token punctuation">{</span>
+					
+          做正事处理采样数据的逻辑……
+
+					<span class="token comment">/*
+						ksampled_max_sample_ratio	ring buffer 满度 上限阈值（百分比，如 80%）
+						ksampled_min_sample_ratio	ring buffer 满度 下限阈值（百分比，如 20%）
+						cond 是否继续批量处理采样的标志，这样写：如果大于80%继续处理这个cpu的这个事件，一直处理到小于20%就去下一个事件。初始化时cond是false，随着程序运行buffer的容量介于80-20其中，就取决于当前cond在上一个事件中是false还是true，如果false就只被执行一次，true就一直处理到小于20%才去下一个事件。存在随机性、不必要的跨事件状态耦合，可以改为更内部的参数。
+					*/</span>
+					<span class="token keyword">if</span> <span class="token punctuation">(</span>head <span class="token operator">&gt;</span> <span class="token punctuation">(</span>BUFFER_SIZE <span class="token operator">*</span> ksampled_max_sample_ratio <span class="token operator">/</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+						cond <span class="token operator">=</span> true<span class="token punctuation">;</span>
+					<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>head <span class="token operator">&lt;</span> <span class="token punctuation">(</span>BUFFER_SIZE <span class="token operator">*</span> ksampled_min_sample_ratio <span class="token operator">/</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+						cond <span class="token operator">=</span> false<span class="token punctuation">;</span>
+					<span class="token punctuation">}</span>
+
+          做正事处理采样数据的逻辑……
+					
+				<span class="token punctuation">}</span> <span class="token keyword">while</span> <span class="token punctuation">(</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span>	
+	    	<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>	
+		
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>ksampled_soft_cpu_quota<span class="token punctuation">)</span> <span class="token comment">/* 如果没有设置cpu使用上限，那就不用更新采样频率、不用每轮采样完休息2ms */</span>
+	    	<span class="token keyword">continue</span><span class="token punctuation">;</span>
+
+		<span class="token function">schedule_timeout_interruptible</span><span class="token punctuation">(</span>sleep_timeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+		cur <span class="token operator">=</span> jiffies<span class="token punctuation">;</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>cur <span class="token operator">-</span> elapsed_cputime<span class="token punctuation">)</span> <span class="token operator">&gt;=</span> cpucap_period<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	    	u64 cur_runtime <span class="token operator">=</span> t<span class="token operator">-&gt;</span>se<span class="token punctuation">.</span>sum_exec_runtime<span class="token punctuation">;</span>
+	    	exec_runtime <span class="token operator">=</span> cur_runtime <span class="token operator">-</span> exec_runtime<span class="token punctuation">;</span>
+	    	elapsed_cputime <span class="token operator">=</span> <span class="token function">jiffies_to_usecs</span><span class="token punctuation">(</span>cur <span class="token operator">-</span> elapsed_cputime<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token comment">/* 判断是否第一次给这个cpu开销赋值，之后的值都是指数加权移动平均，新数据占 80%，旧数据占 20% */</span>
+	    	<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>cputime<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+				u64 cur_cputime <span class="token operator">=</span> <span class="token function">div64_u64</span><span class="token punctuation">(</span>exec_runtime<span class="token punctuation">,</span> elapsed_cputime<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+				cputime <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>cur_cputime <span class="token operator">&lt;&lt;</span> <span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span>cputime <span class="token operator">&lt;&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token number">10</span><span class="token punctuation">;</span>
+	    	<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+				cputime <span class="token operator">=</span> <span class="token function">div64_u64</span><span class="token punctuation">(</span>exec_runtime<span class="token punctuation">,</span> elapsed_cputime<span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+
+			<span class="token comment">/* 更新采样频率 */</span>
+			<span class="token comment">/* pcount是采样频率数组的数量，当采样开销比预定开销高5%，且当前采样频率并不是最小的时，采取的措施*/</span>
+	    	<span class="token keyword">if</span> <span class="token punctuation">(</span>cputime <span class="token operator">&gt;</span> <span class="token punctuation">(</span>ksampled_soft_cpu_quota <span class="token operator">+</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> sample_period <span class="token operator">!=</span> pcount<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+				<span class="token keyword">unsigned</span> <span class="token keyword">long</span> tmp1 <span class="token operator">=</span> sample_period<span class="token punctuation">,</span> tmp2 <span class="token operator">=</span> sample_inst_period<span class="token punctuation">;</span>
+				<span class="token comment">/* 数值增加后，采样一次的时间变长了；（不同PEBS事件本身发生次数有数量级差距，调整频率时用到两个数组）；拿到频率数组中对应的值，用perf子系统功能函数perf_event_period更新 */</span>
+				<span class="token function">increase_sample_period</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>sample_period<span class="token punctuation">,</span> <span class="token operator">&amp;</span>sample_inst_period<span class="token punctuation">)</span><span class="token punctuation">;</span>
+				<span class="token keyword">if</span> <span class="token punctuation">(</span>tmp1 <span class="token operator">!=</span> sample_period <span class="token operator">||</span> tmp2 <span class="token operator">!=</span> sample_inst_period<span class="token punctuation">)</span>
+					<span class="token function">pebs_update_period</span><span class="token punctuation">(</span><span class="token function">get_sample_period</span><span class="token punctuation">(</span>sample_period<span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token function">get_sample_inst_period</span><span class="token punctuation">(</span>sample_inst_period<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>cputime <span class="token operator">&lt;</span> <span class="token punctuation">(</span>ksampled_soft_cpu_quota <span class="token operator">-</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> sample_period<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+				<span class="token keyword">unsigned</span> <span class="token keyword">long</span> tmp1 <span class="token operator">=</span> sample_period<span class="token punctuation">,</span> tmp2 <span class="token operator">=</span> sample_inst_period<span class="token punctuation">;</span>
+				<span class="token function">decrease_sample_period</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>sample_period<span class="token punctuation">,</span> <span class="token operator">&amp;</span>sample_inst_period<span class="token punctuation">)</span><span class="token punctuation">;</span>
+				<span class="token keyword">if</span> <span class="token punctuation">(</span>tmp1 <span class="token operator">!=</span> sample_period <span class="token operator">||</span> tmp2 <span class="token operator">!=</span> sample_inst_period<span class="token punctuation">)</span>
+						<span class="token function">pebs_update_period</span><span class="token punctuation">(</span><span class="token function">get_sample_period</span><span class="token punctuation">(</span>sample_period<span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token function">get_sample_inst_period</span><span class="token punctuation">(</span>sample_inst_period<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+			elapsed_cputime <span class="token operator">=</span> cur<span class="token punctuation">;</span>
+			exec_runtime <span class="token operator">=</span> cur_runtime<span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    total_runtime <span class="token operator">=</span> <span class="token punctuation">(</span>t<span class="token operator">-&gt;</span>se<span class="token punctuation">.</span>sum_exec_runtime<span class="token punctuation">)</span> <span class="token operator">-</span> total_runtime<span class="token punctuation">;</span> <span class="token comment">// ns</span>
+    total_cputime <span class="token operator">=</span> <span class="token function">jiffies_to_usecs</span><span class="token punctuation">(</span>jiffies <span class="token operator">-</span> total_cputime<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// us</span>
+
+    <span class="token function">printk</span><span class="token punctuation">(</span><span class="token string">"total runtime: %llu ns, total cputime: %lu us, cpu usage: %llu\n"</span><span class="token punctuation">,</span> total_runtime<span class="token punctuation">,</span> total_cputime<span class="token punctuation">,</span> <span class="token punctuation">(</span>total_runtime<span class="token punctuation">)</span> <span class="token operator">/</span> total_cputime<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2025/07/23/perf%E9%87%87%E6%A0%B7%E9%A2%91%E7%8E%87%E5%8A%A8%E6%80%81%E8%B0%83%E6%95%B4/">http://ytirus.github.io/2025/07/23/perf%E9%87%87%E6%A0%B7%E9%A2%91%E7%8E%87%E5%8A%A8%E6%80%81%E8%B0%83%E6%95%B4/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/perf/">
+                                    <span class="chip bg-color">perf</span>
+                                </a>
+                            
+                                <a href="/tags/CPU-%E5%BC%80%E9%94%80/">
+                                    <span class="chip bg-color">CPU 开销</span>
+                                </a>
+                            
+                                <a href="/tags/%E8%BF%9B%E7%A8%8B/">
+                                    <span class="chip bg-color">进程</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2025/08/02/Golang%20%E7%BB%8F%E5%85%B8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E5%85%B3%E9%94%AE%E5%AD%97/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Golang 经典数据结构与关键词">
+                        
+                        <span class="card-title">Golang 经典数据结构与关键词</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            面试常问
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2025-08-02
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Golang/">
+                        <span class="chip bg-color">Golang</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2025/07/01/%E8%87%AA%E5%AE%9A%E4%B9%89Linux%E5%86%85%E6%A0%B8%E9%A1%B5%E9%9D%A2%E8%BF%81%E7%A7%BB/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/47.jpg" class="responsive-img" alt="自定义Linux内核页面迁移">
+                        
+                        <span class="card-title">自定义Linux内核页面迁移</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本文基于 Linux 内核页面迁移机制，以4个自定义的页面迁移函数为例，讲解怎么实现定制需求的页面迁移。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-07-01
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Memory/">
+                        <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/migrate-pages/">
+                        <span class="chip bg-color">migrate_pages</span>
+                    </a>
+                    
+                    <a href="/tags/isolate-lru-page/">
+                        <span class="chip bg-color">isolate_lru_page</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">290.5k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

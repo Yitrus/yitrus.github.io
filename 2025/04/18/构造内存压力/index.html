@@ -42,7 +42,11 @@
 
     <script src="/libs/jquery/jquery.min.js"></script>
 
-<meta name="generator" content="Hexo 5.4.2">
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
 
@@ -415,8 +419,8 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/Memeory/">
-                                <span class="chip bg-color">Memeory</span>
+                            <a href="/tags/Memory/">
+                                <span class="chip bg-color">Memory</span>
                             </a>
                         
                     </div>
@@ -615,8 +619,8 @@ Triad:         142683.6     0.001728     0.001682     0.001767
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/Memeory/">
-                                    <span class="chip bg-color">Memeory</span>
+                                <a href="/tags/Memory/">
+                                    <span class="chip bg-color">Memory</span>
                                 </a>
                             
                         </div>
@@ -664,19 +668,19 @@ Triad:         142683.6     0.001728     0.001682     0.001767
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2025/04/21/Artmem-page%20migration/">
+                <a href="/2025/04/21/THP%E5%A4%A7%E9%A1%B5%E9%9D%A2%E6%89%A9%E5%B1%95/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Linux内核页面迁移流程深入解析">
+                        <img src="/medias/featureimages/33.jpg" class="responsive-img" alt="THP 大页面扩展">
                         
-                        <span class="card-title">Linux内核页面迁移流程深入解析</span>
+                        <span class="card-title">THP 大页面扩展</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            本文基于 Linux 内核页面迁移机制，以4个自定义的页面迁移函数为例，讲解怎么实现定制需求的页面迁移。
+                            page结构体复杂,介绍如何将透明大页的元数据空白填充部分用于记录页面访问信息。同时本文也是给文章“自定义Linux内核页面迁移”做铺垫。
                         
                     </div>
                     <div class="publish-info">
@@ -702,12 +706,12 @@ Triad:         142683.6     0.001728     0.001682     0.001767
                         <span class="chip bg-color">Memory</span>
                     </a>
                     
-                    <a href="/tags/migrate-pages/">
-                        <span class="chip bg-color">migrate_pages</span>
+                    <a href="/tags/struct-page/">
+                        <span class="chip bg-color">struct page</span>
                     </a>
                     
-                    <a href="/tags/isolate-lru-page/">
-                        <span class="chip bg-color">isolate_lru_page</span>
+                    <a href="/tags/THP/">
+                        <span class="chip bg-color">THP</span>
                     </a>
                     
                 </div>
@@ -721,19 +725,19 @@ Triad:         142683.6     0.001728     0.001682     0.001767
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2025/03/21/Artmem-sample%20cost/">
+                <a href="/2025/03/21/%E8%87%AA%E5%AE%9A%E4%B9%89perf%E9%87%87%E6%A0%B7%E7%9A%84%E5%86%85%E6%A0%B8%E7%BA%BF%E7%A8%8B/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/47.jpg" class="responsive-img" alt="Linux内核中的动态量化采样频率调整机制">
+                        <img src="/medias/featureimages/13.jpg" class="responsive-img" alt="自定义perf采样的内核线程">
                         
-                        <span class="card-title">Linux内核中的动态量化采样频率调整机制</span>
+                        <span class="card-title">自定义perf采样的内核线程</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            在 Linux 内核性能分析和硬件事件监控场景中，重要的性能数据通过实时采样获取。但是，采样频率过高将自身带来不容忽视的 CPU 费用，对正在分析的系统产生打扰。
+                            perf 系统调用会把采样数据 mmap 到用户空间，内核采样线程直接将数据给内核使用。
                         
                     </div>
                     <div class="publish-info">
@@ -755,16 +759,12 @@ Triad:         142683.6     0.001728     0.001682     0.001767
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/CPU/">
-                        <span class="chip bg-color">CPU</span>
-                    </a>
-                    
                     <a href="/tags/perf/">
                         <span class="chip bg-color">perf</span>
                     </a>
                     
-                    <a href="/tags/%E8%BF%9B%E7%A8%8B/">
-                        <span class="chip bg-color">进程</span>
+                    <a href="/tags/%E7%A1%AC%E4%BB%B6%E9%87%87%E6%A0%B7/">
+                        <span class="chip bg-color">硬件采样</span>
                     </a>
                     
                 </div>
@@ -911,7 +911,7 @@ Triad:         142683.6     0.001728     0.001682     0.001767
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2025</span>
+                <span id="year">2019-2026</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -920,7 +920,7 @@ Triad:         142683.6     0.001728     0.001682     0.001767
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">263.9k</span>&nbsp;字
+                class="white-color">290.5k</span>&nbsp;字
             
             
             
@@ -956,10 +956,61 @@ Triad:         142683.6     0.001728     0.001682     0.001767
 
 </div>
     </div>
+
 </footer>
 
 <div class="progress-bar"></div>
 
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
 
     <!-- 搜索遮罩框 -->
 <div id="searchModal" class="modal">

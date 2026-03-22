@@ -42,7 +42,11 @@
 
     <script src="/libs/jquery/jquery.min.js"></script>
 
-<meta name="generator" content="Hexo 5.4.2">
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
 
@@ -415,10 +419,6 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/Memory/">
-                                <span class="chip bg-color">Memory</span>
-                            </a>
-                        
                             <a href="/tags/CPU/">
                                 <span class="chip bg-color">CPU</span>
                             </a>
@@ -429,6 +429,10 @@
                         
                             <a href="/tags/Cache/">
                                 <span class="chip bg-color">Cache</span>
+                            </a>
+                        
+                            <a href="/tags/Memory/">
+                                <span class="chip bg-color">Memory</span>
                             </a>
                         
                     </div>
@@ -815,10 +819,6 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/Memory/">
-                                    <span class="chip bg-color">Memory</span>
-                                </a>
-                            
                                 <a href="/tags/CPU/">
                                     <span class="chip bg-color">CPU</span>
                                 </a>
@@ -829,6 +829,10 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
                             
                                 <a href="/tags/Cache/">
                                     <span class="chip bg-color">Cache</span>
+                                </a>
+                            
+                                <a href="/tags/Memory/">
+                                    <span class="chip bg-color">Memory</span>
                                 </a>
                             
                         </div>
@@ -880,15 +884,15 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/20.jpg" class="responsive-img" alt="perf采样">
+                        <img src="/medias/featureimages/26.jpg" class="responsive-img" alt="perf 采样">
                         
-                        <span class="card-title">perf采样</span>
+                        <span class="card-title">perf 采样</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            硬件计数器采样
+                            硬件计数器采样，从操作系统perf子模块底层设计，到用户态使用perf系统调用，是文章“自定义perf采样的内核线程”的铺垫。
                         
                     </div>
                     <div class="publish-info">
@@ -910,8 +914,12 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/perf%E7%A1%AC%E4%BB%B6%E9%87%87%E6%A0%B7/">
-                        <span class="chip bg-color">perf硬件采样</span>
+                    <a href="/tags/perf/">
+                        <span class="chip bg-color">perf</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%A1%AC%E4%BB%B6%E9%87%87%E6%A0%B7/">
+                        <span class="chip bg-color">硬件采样</span>
                     </a>
                     
                 </div>
@@ -1127,7 +1135,7 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
-                <span id="year">2019-2025</span>
+                <span id="year">2019-2026</span>
             
             <span id="year">2019</span>
             <a href="/about" target="_blank">易百分</a>
@@ -1136,7 +1144,7 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">263.9k</span>&nbsp;字
+                class="white-color">290.5k</span>&nbsp;字
             
             
             
@@ -1172,10 +1180,61 @@ lstopo output.png<span aria-hidden="true" class="line-numbers-rows"><span></span
 
 </div>
     </div>
+
 </footer>
 
 <div class="progress-bar"></div>
 
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
 
     <!-- 搜索遮罩框 -->
 <div id="searchModal" class="modal">

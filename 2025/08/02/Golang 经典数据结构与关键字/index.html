@@ -1,0 +1,1439 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Golang 经典数据结构与关键词, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>Golang 经典数据结构与关键词 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/22.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">Golang 经典数据结构与关键词</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Golang/">
+                                <span class="chip bg-color">Golang</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2025-08-02
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    5k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    19 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="1-slice"><a href="#1-slice" class="headerlink" title="1. slice"></a>1. slice</h2><h3 id="1-1-底层实现"><a href="#1-1-底层实现" class="headerlink" title="1.1 底层实现"></a>1.1 底层实现</h3><ul>
+<li>利用数组创建切片时，比如array[:] arrary [1:3]，切片的数组指针都是指向arrary的，当然从1开始切的地方地址有偏移（64位系统int偏移8字节）。</li>
+<li>切片追加元素，修改元素都是在修改底层数组，对于<strong>共享底层数组的多个切片</strong>来说，会相互产生影响。与Map一样，Slice也不是并发安全的。用copy函数。</li>
+<li>切片时如果长度为1的切片可以切[1:],返回空切片，因为要求的切片低位&lt;=高位&lt;=len.</li>
+</ul>
+<h3 id="1-2-扩容"><a href="#1-2-扩容" class="headerlink" title="1.2 扩容"></a>1.2 扩容</h3><ul>
+<li>避免重建slice的底层数组，在扩展切片时，并非按需分配，而是2的幂次方，当二的幂次方变得很大时&lt;1024，是按照1/4。所以大部分时候cap大于len。实际上还要考虑内存对齐，扩容是大于或者等于1.25 倍。</li>
+<li>扩容的影响导致原切片和传递后的切片不再有关联。</li>
+</ul>
+<h3 id="1-3-slice-与数组"><a href="#1-3-slice-与数组" class="headerlink" title="1.3 slice 与数组"></a>1.3 slice 与数组</h3><p>切片与数组：可以覆盖数组全部功能吗？那么数组存在的意义是什么？</p>
+<p><strong>- 数组</strong>是<strong>值类型</strong>，赋值或传递时会<strong>复制整个数据</strong>。这种特性在某些场景下是有用的，比如：</p>
+<ul>
+<li>确保数据不会被意外修改（因为<strong>数组每次传递副本）</strong>。</li>
+<li>对数据隔离性要求高的场景（如<strong>并发安全）</strong>。</li>
+</ul>
+<p><strong>- 切片</strong>是<strong>引用类型</strong>，赋值或传递时<strong>共享底层数据</strong>。如果多个切片引用同一个底层数组，修改一个切片可能影响其他切片。</p>
+<p><strong>- 数组</strong>更有可能<strong>在栈上分配，而切片由于额外的元数据和动态性，更容易逃逸到堆上</strong>。</p>
+<p><strong>- 强制要求数组</strong>的某些库或框架的接口（如<strong>加密库中固定长度的哈希值、固定大小的缓冲区</strong>）。</p>
+<h3 id="1-4-for-range-注意事项"><a href="#1-4-for-range-注意事项" class="headerlink" title="1.4 for range 注意事项"></a>1.4 for range 注意事项</h3><p>在<code>for a,b := range c</code>遍历中，a和b在内存中只会存在一份，即之后每次循环时遍历到的数据都是以值覆盖的方式赋给a和b，ab的内存地址始终不变。由于有这个特性，<strong>for循环里面如果开协程，不要直接把a或者b的地址传给协程</strong>。解决办法：在每次循环时，创建一个临时变量。</p>
+<hr>
+<h2 id="2-rune和go字符串"><a href="#2-rune和go字符串" class="headerlink" title="2. rune和go字符串"></a>2. rune和go字符串</h2><p><strong>（1） 底层</strong></p>
+<ul>
+<li>byte 等同于int8，常用来处理ascii字符；rune 等同于int32,常用来处理unicode或utf-8字符；</li>
+<li>Go 的<strong>字符串</strong>本质上是一个<strong>只读的字节切片（<code>[]byte</code>） <strong>，</strong>与编码无关</strong>：字符串只是字节序列，不关心内容是否是 UTF-8。虽然字符串底层是字节数组，但Go约定字符串字面量（）<strong>range 遍历等场景默认按 UTF-8 （占3字节）处理</strong>。结构体实现：</li>
+</ul>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> <span class="token builtin">string</span> <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    data <span class="token operator">*</span><span class="token builtin">byte</span>  <span class="token comment">// 指向底层字节数组的指针</span>
+    <span class="token builtin">len</span>  <span class="token builtin">int</span>    <span class="token comment">// 字符串的字节长度（非字符数！）</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p> <strong>（2）单引号，双引号，反引号的区别</strong></p>
+<ul>
+<li>单引号，表示byte类型或rune类型，对应 uint8和int32类型，<strong>默认是 rune 类型</strong>。</li>
+<li><strong>双引号，才是字符串，实际上是字符数组</strong>。可以用索引号访问某字节。</li>
+<li>反引号，表示字符串字面量，但不支持任何转义序列。字面量 raw literal string 的意思是，你定义时写的啥样，它就啥样，你有换行，它就换行。你写转义字符，它也就展示转义字符。</li>
+</ul>
+<h2 id="3-make和new"><a href="#3-make和new" class="headerlink" title="3. make和new"></a>3. make和new</h2><p><strong>（1）区别</strong></p>
+<ol>
+<li>作用变量类型不同；new给string，array分配内存；make给slice，map，channel分配内存。</li>
+<li>返回类型不一样，<strong>new返回指向变量的指针，make返回变量本身</strong>。</li>
+<li>new分配的空间被清零；<strong>make分配空间后，会进行初始化</strong>。</li>
+</ol>
+<p><strong>（2）相同</strong></p>
+<p>都是给变量分配内存, <strong>make与new对堆栈分配处理是相同的</strong>，编译器优先进行逃逸分析，逃逸的才分配到堆上。</p>
+<hr>
+<h2 id="4-map"><a href="#4-map" class="headerlink" title="4. map"></a>4. map</h2><ul>
+<li>切片、函数、map<strong>不能作为key</strong>，但通道、接口、结构体可以。在golang规范中，<strong>可比较的类型都可以作为map key</strong>。（切片底层数组指针会不一样，map hash会重排，两个函数地址一样，但闭包不同，可能行为完全不同（每个闭包都带着自己的“上下文”）。）</li>
+<li><strong>nil map未初始化</strong>，取出来的东西<strong>返回零值</strong>，一定要先初始化，否则<strong>赋值会panic</strong>（无哈希桶指针为nil）。初始化后空map是长度为空，底层已分配哈希桶结构，可安全读写。</li>
+<li><strong>map中删除一个key，它的内存会释放么？</strong> 其内存是否释放取决于值的类型。基本类型的内存由map复用，不会立即释放；由map的桶管理。引用类型的内存由GC回收，但map的桶内存不会立即缩容。</li>
+</ul>
+<h3 id="4-1-底层"><a href="#4-1-底层" class="headerlink" title="4.1 底层"></a>4.1 底层</h3><pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// map数据结构：</span>
+<span class="token keyword">type</span> hmap <span class="token keyword">struct</span><span class="token punctuation">{</span>
+    count <span class="token builtin">int</span> <span class="token comment">// 元素总个数</span>
+    flags <span class="token builtin">uint8</span>
+    B     <span class="token builtin">uint8</span> <span class="token comment">// 桶个数的对数，2^B个桶</span>
+    noverflow <span class="token builtin">uint16</span> <span class="token comment">// 溢出桶的个数</span>
+    hash0 <span class="token builtin">uint32</span> <span class="token comment">// hash种子</span>
+    
+    buckets unsafe<span class="token punctuation">.</span>Pointer <span class="token comment">// map的底层是一个桶数组，这是那个数组的指针</span>
+    oldbuckets unsafe<span class="token punctuation">.</span>Pointer <span class="token comment">// 发生桶迁移时，指向旧桶的指针</span>
+    nevacuate <span class="token builtin">uintptr</span> <span class="token comment">// 迁移进度</span>
+    
+    extra <span class="token operator">*</span>mapextra <span class="token comment">// 存map溢出桶</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// 桶的结构：</span>
+<span class="token keyword">type</span> bmap <span class="token keyword">struct</span> <span class="token punctuation">{</span> <span class="token comment">// bucketCnt=8，每个桶存8个</span>
+    tophash <span class="token punctuation">[</span>bucketCnt<span class="token punctuation">]</span><span class="token builtin">uint8</span> <span class="token comment">// key的哈希值前8位，存在时再进一步匹配key，当key hash在这里不存在时会去溢出桶访问</span>
+    
+    <span class="token comment">// 后面的字段是在编译时期动态追加的</span>
+    key <span class="token punctuation">[</span>bucketCnt<span class="token punctuation">]</span>T <span class="token comment">// 分开key、val放置主要是为了字节对齐，压缩空间</span>
+    value <span class="token punctuation">[</span>bucketCnt<span class="token punctuation">]</span>T
+    pad <span class="token builtin">uintptr</span>
+    overflow <span class="token builtin">uintptr</span> <span class="token comment">// 指向下一个桶的指针</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<ul>
+<li>map访问无序的原因：<u>map 因扩张而重新哈希时，各键值项存储位置都可能会发生改变，顺序自然也没法保证了，所以官方避免大家依赖顺序，直接打乱处理。就是for range map在开始处理循环逻辑的时候，就做了随机播种。</u></li>
+<li><strong>如果发生了哈希冲突</strong>两个key的hash值落到同一个bucket，但这个bucket还没满、负载因子也没超标未超过6.5，Go会怎么处理？将这个key插入同一个bucket的空位中，使用<strong>开放地址法</strong>解决冲突。<strong>如果当前bucket已满，则创建 overflow bucket</strong>（链表串接）。采用<strong>拉链法防止碰撞</strong>，但是链表①地址不连续没法高效利用CPU缓存；②整个map会多出存指针的开销。</li>
+</ul>
+<h3 id="4-2-map并发怎么锁"><a href="#4-2-map并发怎么锁" class="headerlink" title="4.2 map并发怎么锁"></a>4.2 map并发怎么锁</h3><p><strong>（1） 锁之间区别</strong></p>
+<p><strong>map和sync.map的区别是什么？加了锁的map和sync.map的区别？</strong> <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/HFUyiS7OH0jIPDg4rEmcLw">sync.map详解</a></p>
+<p>map非线程安全，<strong>map不支持并发读写</strong>但是可以并发读。<code>sync.RWMutex+map</code>实现简单，但是适合读多写少场景。写操作阻塞所有读写，高并发下性能差。当写操作增加会导致性能接近完全串行化。除了锁，原子操作也能达到类似并发安全的目的。<strong>sync.map</strong>在查找指定的key的时候，总会先去<strong>只读字典</strong>中寻找，并不需要锁定互斥锁。只有当read中没有，但dirty中可能会有这个key的时候，才会在锁的保护下去访问dirty。正因如此<code>sync.Map</code>的<strong>read/dirty机制会导致约30%的内存冗余</strong>。</p>
+<p>不同读写并发下怎么使用锁。（其中在竞争加剧时，相较于<strong>互斥锁</strong>[使得数据访问完全串行化了]，<strong>RWMutex</strong>需要维护更复杂的状态[读者计数、写者等待等]，导致更多原子操作和内存屏障，所以性能会下降。更进一步，<strong>分片锁</strong>是一种将<strong>互斥锁与数据分片</strong>（Sharding）结合的高性能并发控制策略。）</p>
+<pre class="mermaid">graph TD
+    A[需要并发安全?] --&gt;|Yes| B{数据规模}
+    B --&gt;|小数据量| C[全量替换map指针]
+    B --&gt;|大数据量| D{读写比例}
+    D --&gt;|读多写少| E[sync.Map]
+    D --&gt;|读写均衡| F[RWMutex+Map]
+    D --&gt;|写密集型| G[分片锁+Map]</pre>
+
+
+
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// Map指针原子替换策略,指通过原子操作（如atomic.Value）来原子性地替换整个map的指针，从而实现无锁（lock-free）的并发访问。</span>
+<span class="token keyword">var</span> config atomic<span class="token punctuation">.</span>Value <span class="token comment">// 存储map的指针</span>
+config<span class="token punctuation">.</span><span class="token function">Store</span><span class="token punctuation">(</span><span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">map</span><span class="token punctuation">[</span><span class="token builtin">string</span><span class="token punctuation">]</span><span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<table>
+<thead>
+<tr>
+<th align="center">方案</th>
+<th align="center">核心优势</th>
+<th>劣势</th>
+<th align="center">典型适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Mutex+Map</td>
+<td align="center">强一致性</td>
+<td>完全串行化</td>
+<td align="center">写密集型+低延迟要求</td>
+</tr>
+<tr>
+<td align="center">RWMutex+Map</td>
+<td align="center">读性能优化</td>
+<td>写操作仍完全互斥， 高竞争时可能不如Mutex</td>
+<td align="center">读写均衡的业务逻辑</td>
+</tr>
+<tr>
+<td align="center"><font style="background-color:#f3bb2f;">sync.Map</font></td>
+<td align="center"><font style="background-color:#f3bb2f;">读旧数据无锁(read map)</font></td>
+<td>内存占用高，写多的场景read map缓存失效，冲突变多性能急剧下降</td>
+<td align="center"><font style="background-color:#f3bb2f;">配置/元数据等读多写少</font></td>
+</tr>
+<tr>
+<td align="center"><font style="background-color:#f3bb2f;">分片锁</font></td>
+<td align="center"><font style="background-color:#f3bb2f;">减少锁竞争</font></td>
+<td><font style="background-color:#f3bb2f;">分片导致的热点放大，热点分片退化</font></td>
+<td align="center"><font style="background-color:#f3bb2f;">超高并发写入场景，KV和缓存</font></td>
+</tr>
+<tr>
+<td align="center">原子替换(Map指针)</td>
+<td align="center">零竞争</td>
+<td>内存占用翻倍</td>
+<td align="center">分钟级更新，数据量极小</td>
+</tr>
+</tbody></table>
+<p><strong>（2） 异常捕获</strong></p>
+<p>多个goroutine对同一个map写会panic，异常是否可以用defer捕获？可以捕获异常，但是只能捕获一次。</p>
+<h2 id="5-channel"><a href="#5-channel" class="headerlink" title="5. channel"></a>5. channel</h2><ul>
+<li>是协程安全的消息队列，<font style="background-color:#f3bb2f;">多协程间通信手段</font>。如果多个goroutine监听同一个channel，如果这个channel被关闭，则所有goroutine<strong>都能收到退出信号</strong>。</li>
+<li><strong>使用场景：</strong> 消息传递、消息过滤，信号广播，事件订阅与广播，请求、响应转发，任务分发，结果汇总，并发控制，限流，同步与异步。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><strong>状态\行为</strong></th>
+<th><strong>关闭（</strong><code>close</code><strong>）</strong></th>
+<th><strong>发送（</strong><code>ch &lt;- v</code><strong>）</strong></th>
+<th><strong>接收（</strong><code>&lt;-ch</code><strong>）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未初始化</td>
+<td><code>panic</code></td>
+<td>永久阻塞（所以说要make啊）</td>
+<td>永久阻塞</td>
+</tr>
+<tr>
+<td>正常</td>
+<td>成功关闭</td>
+<td>阻塞或写入（视缓冲区情况）</td>
+<td>阻塞或读取（视数据/关闭状态）</td>
+</tr>
+<tr>
+<td>已关闭</td>
+<td><code>panic</code></td>
+<td><code>panic</code></td>
+<td>读完数据后返回零值（<code>ok=false</code>）</td>
+</tr>
+</tbody></table>
+<h3 id="5-1-意义"><a href="#5-1-意义" class="headerlink" title="5.1 意义"></a>5.1 意义</h3><p><strong>go为什么要有channel？没有channel会怎样？</strong></p>
+<p>总：channel是Go并发的第一公民，如果没有它goroutine的优势就难以发挥出来。</p>
+<p>分：①goroutine之间需要<u>协作、同步、传递数据，如果没有channel，那就得用共享内存、锁、信号量等原语去实现</u>，复杂又容易出错。② Go的并发模型不是用锁管理共享资源，而是<strong>通过channel把数据交给需要的人</strong>，<strong>让资源拥有者处理自己的数据</strong>。</p>
+<p>总：是<strong>CSP</strong>（Communicating Sequential Processes）模型的体现。<em>“进程之间不共享内存，而是通过通信（发送消息）来协作”。</em></p>
+<h3 id="5-2-底层"><a href="#5-2-底层" class="headerlink" title="5.2 底层"></a>5.2 底层</h3><pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> hchan <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    elemsize <span class="token builtin">uint16</span> <span class="token comment">// 通道类型的大小</span>
+    closed <span class="token builtin">uint32</span> <span class="token comment">// 关闭状态</span>
+    elemtype <span class="token operator">*</span>_type <span class="token comment">// 通道的数据类型</span>
+
+    recvq waitq <span class="token comment">// 等待从channel中读取数据，正在被阻塞的协程队列</span>
+    sendq waitq <span class="token comment">// 等待从channel中写入数据，正在被阻塞的协程队列</span>
+    lock mutex <span class="token comment">// 并发保护，先获取互斥锁才能操作channel</span>
+    
+    <span class="token comment">// -------如果有缓冲区的话-------</span>
+    qcount <span class="token builtin">uint</span> <span class="token comment">// channel里的数据个数</span>
+    dataqsize <span class="token builtin">uint</span> <span class="token comment">// 缓冲区大小</span>
+    buf unsafe<span class="token punctuation">.</span>Pointer <span class="token comment">// 缓冲区指针，指向循环队列 （sendx和recvx是其中的下标）</span>
+    sendx <span class="token builtin">uint</span> <span class="token comment">// 缓冲区中，已经被读取的数据的位置</span>
+    recvx <span class="token builtin">uint</span> <span class="token comment">// 缓冲区中，当前已经写入的数据的位置 </span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="5-3-goroutine-接收消息细节"><a href="#5-3-goroutine-接收消息细节" class="headerlink" title="5.3 goroutine 接收消息细节"></a>5.3 goroutine 接收消息细节</h3><p>当协程A<strong>写入数据</strong>时：if recvq 有，则代表无缓冲区或者缓冲区中无数据，A要写的数据交给 recvq的第一个；if没有，那就尝试写入缓冲区；当缓冲区已满或者没有缓冲区，阻塞A这个协程，并将A加入sendq。</p>
+<pre class="mermaid">graph TD
+    A[协程A尝试写入数据] --&gt; B{recvq队列是否为空?}
+    B --&gt;|No| C[将数据直接交给recvq第一个等待者]
+    C --&gt; D[唤醒对应接收协程]
+    B --&gt;|Yes| F{缓冲区是否可用且未满?数据写入哪里等另一个协程告诉你或者放缓冲区}
+    F --&gt;|Yes| G[数据写入缓冲区]
+    F --&gt;|No| H[阻塞协程A并加入sendq队列]</pre>
+
+<ul>
+<li>协程B<strong>读取数据</strong>时：检查sendq，为空尝试从缓冲区中获取，缓冲区无则把自己也加入进去；sendq不为空，且无缓冲区，那么从第一个sendq读数据；sendq不为空，且有缓冲区，从缓冲区读数据。(但是也有看到一些书说FIFO，应该先读缓冲区)</li>
+</ul>
+<pre class="mermaid">graph TD
+    A[协程B尝试读取数据] --&gt; B{sendq队列是否为空?}
+    B --&gt;|No| H{是否有缓冲区?}
+    H --&gt;|No| C[直接从sendq第一个发送者读取数据]
+    H --&gt;|Yes| I[说明缓冲区满了，从缓冲中拿出第一个\n并唤醒一个发送goroutin写入缓冲区]
+    I --&gt; E
+    C --&gt; D[唤醒该发送者]
+    D --&gt; E[流程结束]
+    B --&gt;|Yes| F{缓冲区是否有数据?}
+    F --&gt;|Yes| G[从缓冲区读取数据]
+    G --&gt; E
+    F --&gt;|No| K[阻塞协程B并加入recvq队列]
+    K --&gt; E</pre>
+
+<h2 id="6-select"><a href="#6-select" class="headerlink" title="6. select"></a>6. select</h2><h3 id="6-1-执行"><a href="#6-1-执行" class="headerlink" title="6.1 执行"></a>6.1 执行</h3><p>select仅支持管道，而且是单协程操作。</p>
+<pre class="mermaid">graph TD    
+    C[开始执行select] --&gt; E[按随机顺序遍历所有case]
+    E --&gt; F{当前case是否就绪?}
+    F --&gt;|Yes| G[执行该case操作]
+    G --&gt; H[返回选择的case索引]
+    F --&gt;|No| I{是否遍历完所有case?}
+    I --&gt;|No| E
+    I --&gt;|Yes| J{存在default case?}
+    J --&gt;|Yes| K[执行default case]
+    K --&gt; H
+    J --&gt;|No| L[将Goroutine加入所有channel的等待队列]
+    L --&gt; M[挂起Goroutine, 等待唤醒]
+    M --&gt; N[被唤醒后重新检查所有case]
+    N --&gt; F</pre>
+
+<h3 id="6-2-超时控制"><a href="#6-2-超时控制" class="headerlink" title="6.2 超时控制"></a>6.2 超时控制</h3><p><code>select</code>可以结合<code>time.After</code>实现<strong>超时控制</strong>。但是<strong>在for循环里不要使用</strong><code>select + time.After</code>的组合会导致<strong>内存泄漏</strong>。来看一个发布订阅的简化代码：</p>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">for</span> i <span class="token operator">:=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> concurrency<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>  <span class="token comment">// 启动多个协程</span>
+    <span class="token keyword">go</span> <span class="token function">pub</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>                       <span class="token comment">// 每个协程执行 pub(i)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function">pub</span><span class="token punctuation">(</span>start <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>               <span class="token comment">// start 就是传入的 i</span>
+    <span class="token keyword">for</span> j <span class="token operator">:=</span> start<span class="token punctuation">;</span> j <span class="token operator">&lt;</span> count<span class="token punctuation">;</span> j <span class="token operator">+=</span> concurrency <span class="token punctuation">{</span>
+        <span class="token comment">// 向 subscribers[j] 发送消息，分片任务分配的经典模式，每个协程间隔处理多个订阅者</span>
+        <span class="token keyword">select</span> <span class="token punctuation">{</span>
+            <span class="token keyword">case</span> subscribers<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">&lt;-</span> msg<span class="token punctuation">:</span>  <span class="token comment">// 尝试发送消息</span>
+            <span class="token keyword">case</span> <span class="token operator">&lt;-</span>time<span class="token punctuation">.</span><span class="token function">After</span><span class="token punctuation">(</span>time<span class="token punctuation">.</span>Millisecond <span class="token operator">*</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token comment">// 底层行为：每次调用time.After()方法会创建一个新的time.Timer，并返回其通道Timer.C，每次循环执行到select时，都会调用并产生一个新的Timer（即使前一个定时器还未触发）。</span>
+            <span class="token keyword">case</span> <span class="token operator">&lt;-</span>b<span class="token punctuation">.</span>exit<span class="token punctuation">:</span>  <span class="token comment">// 监听退出信号</span>
+                <span class="token keyword">return</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>①</strong>每次执行select，无论去不去那个case都会先创建好Timer，因为<strong>当运行到 <strong><code>select</code></strong> 语句时，先初始化所有 <strong><code>case</code></strong> 的表达式，生成所有可能的 <strong><code>scase</code></strong> 对象</strong>，（<code>time.After</code> 对应的 <code>scase</code> 的 <code>kind</code> 是 <code>caseRecv</code>（接收操作））。<strong>②</strong>当一个for循环中select已经执行了，当前select实列已经没有了，没有执行到Timer这个case，<strong>由于select 的机制只是监听多个通道的就绪状态，它不负责管理通道的生命周期</strong>。已创建的Timer不会消失，它会留在Go运行时的时间堆（timer heap）中，直到5ms后触发并向通道发送数据。<strong>③</strong>这些Timer会在5ms后陆续触发，但触发前会堆积在内存中。最终导致内存泄漏（大量未释放的Timer对象）和不必要的CPU开销（处理无用的定时事件）。</p>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// 解决方案：使用NewTimer来做定时器，不需要每次都创建定时器对象，添加上time.Reset每次重新激活定时器</span>
+pub <span class="token operator">:=</span> <span class="token keyword">func</span><span class="token punctuation">(</span>start <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    idleDuration <span class="token operator">:=</span> <span class="token number">5</span> <span class="token operator">*</span> time<span class="token punctuation">.</span>Millisecond
+    idleTimeout <span class="token operator">:=</span> time<span class="token punctuation">.</span><span class="token function">NewTimer</span><span class="token punctuation">(</span>idleDuration<span class="token punctuation">)</span> <span class="token comment">// 这个协程在处理分给他的订阅者时都共用一个计时器。</span>
+    <span class="token keyword">defer</span> idleTimeout<span class="token punctuation">.</span><span class="token function">Stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// 确保函数退出时释放定时器，可以被回收</span>
+       <span class="token keyword">for</span> j <span class="token operator">:=</span> start<span class="token punctuation">;</span> j <span class="token operator">&lt;</span> count<span class="token punctuation">;</span> j <span class="token operator">+=</span> concurrency <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token operator">!</span>idleTimeout<span class="token punctuation">.</span><span class="token function">Stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+         <span class="token operator">&lt;-</span>idleTimeout<span class="token punctuation">.</span>C <span class="token comment">// drain排空channel一定要做！reset的是时间，但是timer通道里可能有上一次的残留信号</span>
+      <span class="token punctuation">}</span>
+      idleTimeout<span class="token punctuation">.</span><span class="token function">Reset</span><span class="token punctuation">(</span>idleDuration<span class="token punctuation">)</span> <span class="token comment">// 重置定时器</span>
+      <span class="token keyword">select</span> <span class="token punctuation">{</span>
+          <span class="token keyword">case</span> subscribers<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">&lt;-</span> msg<span class="token punctuation">:</span>
+          <span class="token keyword">case</span> <span class="token operator">&lt;-</span>idleTimeout<span class="token punctuation">.</span>C<span class="token punctuation">:</span>
+          <span class="token keyword">case</span> <span class="token operator">&lt;-</span>b<span class="token punctuation">.</span>exit<span class="token punctuation">:</span>
+             <span class="token keyword">return</span>
+       <span class="token punctuation">}</span>
+   <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="6-3-底层"><a href="#6-3-底层" class="headerlink" title="6.3 底层"></a>6.3 底层</h3><p>select中的每个case在运行时都是scase结构体，在编译阶段，<code>select</code> 语句会被转换为以下结构：</p>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> scase <span class="token keyword">struct</span><span class="token punctuation">{</span>
+    c <span class="token operator">*</span>hchan <span class="token comment">// 操作的 channel</span>
+    elem unsafe<span class="token punctuation">.</span>Pointer <span class="token comment">// 数据指针（发送值或接收地址）</span>
+    kind <span class="token builtin">uint16</span> <span class="token comment">// 4种类型，caseNil,caseRecv,caseSend,caseDefault,行为不同</span>
+    ……
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>caseNil <strong>运行时直接跳过它</strong>（既不执行也不阻塞）,（如果直接对<code>nil</code> channel操作，会触发<code>panic</code>；但<code>select</code>的 <code>caseNil</code>会安全跳过）用途：</p>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token comment">// 可以通过 nil channel 临时禁用某个 case（类似 disable 功能）</span>
+<span class="token keyword">var</span> ch <span class="token keyword">chan</span> <span class="token builtin">int</span>
+<span class="token keyword">if</span> enable <span class="token punctuation">{</span>
+    ch <span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token keyword">chan</span> <span class="token builtin">int</span><span class="token punctuation">)</span> <span class="token comment">// 启用</span>
+<span class="token punctuation">}</span> <span class="token comment">// 不过你disable的时候，原channel的缓冲区（如果有）会被GC回收，会丢失数据</span>
+
+<span class="token keyword">select</span> <span class="token punctuation">{</span>
+<span class="token keyword">case</span> x <span class="token operator">:=</span> <span class="token operator">&lt;-</span>ch<span class="token punctuation">:</span> <span class="token comment">// 如果ch是nil，此case被忽略</span>
+    <span class="token function">handle</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+<span class="token keyword">default</span><span class="token punctuation">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"channel disabled"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="6-4-无case阻塞"><a href="#6-4-无case阻塞" class="headerlink" title="6.4 无case阻塞"></a>6.4 无case阻塞</h3><p>空的 select{} 会永久阻塞（常用于main函数阻止退出）。**<code>select{}</code>和<code>for{}</code>阻塞有什么区别？<br>：<code>select{}</code><strong>会释放线程M，让出CPU</strong>；<code>for{}</code> 是忙等待，占满CPU核心。<u>for会不断check循环条件</u>，所以会占用CPU资源。select的话，goroutine会因为阻塞自己挂起，然后休眠，不会让cpu利用率升高。<strong>存在default语句，select将不会阻塞</strong>，但是存在default会影响性能。</p>
+<h3 id="6-5-为什么select要随机"><a href="#6-5-为什么select要随机" class="headerlink" title="6.5 为什么select要随机"></a>6.5 为什么select要随机</h3><p>初始化阶段随机数生成器（用于后续 case 的随机选择顺序，<strong>避免饥饿</strong>）</p>
+<h3 id="6-6-性能开销"><a href="#6-6-性能开销" class="headerlink" title="6.6 性能开销"></a>6.6 性能开销</h3><p>select比单独的channel操作更耗时（因需遍历和调度）</p>
+<hr>
+<h2 id="7-defer"><a href="#7-defer" class="headerlink" title="7. defer"></a>7. defer</h2><ul>
+<li>defer函数紧跟在资源打开后面，否则defer可能得不到执行，导致内存泄露。</li>
+<li>场景：释放锁，关闭文件，关闭链接；捕获panic。</li>
+</ul>
+<h3 id="7-1-执行流程"><a href="#7-1-执行流程" class="headerlink" title="7.1 执行流程"></a>7.1 执行流程</h3><ul>
+<li>defer，return，return value（函数返回值） <strong>执行顺序：首先return，其次return value，最后defer。</strong></li>
+<li>defer可以修改函数最终返回值，修改时机：<strong>有名返回值或者函数返回指针</strong>。</li>
+<li>多个<strong>defer调用顺序</strong>是LIFO（后入先出）可以理解为压入栈中。每个defer语句都对应一个<code>_defer</code> 实例，多个实例使用指针连接起来形成一个<strong>单连表</strong>，保存在gotoutine 数据结构中，每次插入<code>_defer</code>实例，均插入到链表的头部，函数结束再一次从头部取出，从而形成后进先出的效果。</li>
+</ul>
+<h3 id="7-2-原理"><a href="#7-2-原理" class="headerlink" title="7.2 原理"></a>7.2 原理</h3><table>
+<thead>
+<tr>
+<th>Go 1.13（栈分配）</th>
+<th>Go 1.14+（开放编码）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>尝试将 <code>_defer</code> 结构体<strong>分配在当前函数的栈帧上</strong>，如果 defer 出现在循环或无法静态分析的情况下（如条件判断），编译器会退回到使用旧的堆分配方式。</td>
+<td>编译时直接插入调用代码</td>
+</tr>
+<tr>
+<td>大部分静态 defer</td>
+<td>简单、少量的 defer</td>
+</tr>
+<tr>
+<td>后备机制</td>
+<td>首选机制</td>
+</tr>
+</tbody></table>
+<h3 id="7-3-如何用C语言模拟这种机制"><a href="#7-3-如何用C语言模拟这种机制" class="headerlink" title="7.3 如何用C语言模拟这种机制"></a>7.3 如何用C语言模拟这种机制</h3><p><font style="color:#FF6347;">step1：</font>首先需要用链表管理defer，参考go需要哪些参数在：</p>
+<pre class="line-numbers language-go" data-language="go"><code class="language-go"><span class="token keyword">type</span> _defer <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    siz     <span class="token builtin">int32</span>       <span class="token comment">// 参数和结果的内存大小</span>
+    started <span class="token builtin">bool</span>        <span class="token comment">// 是否已执行</span>
+    sp      <span class="token builtin">uintptr</span>     <span class="token comment">// 调用者栈指针（用于区分调用层级）</span>
+    pc      <span class="token builtin">uintptr</span>     <span class="token comment">// 程序计数器</span>
+    fn      <span class="token operator">*</span>funcval    <span class="token comment">// 要执行的函数</span>
+    _panic  <span class="token operator">*</span>_panic     <span class="token comment">// 关联的 panic</span>
+    link    <span class="token operator">*</span>_defer     <span class="token comment">// 指向下一个 defer</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<ul>
+<li>函数指针：指向需要被延迟执行的函数。</li>
+<li>参数地址：存储被延迟函数的参数。在 <code>defer</code> 语句执行时，参数会<strong>立刻被计算并拷贝</strong>到 <code>_defer</code> 结构体的特定位置。这就是为什么 <code>defer</code> 对参数的求值是“立即”的，但函数执行是“延迟”的。</li>
+<li>链表指针：指向下一个 <code>_defer</code> 结构体，形成一个链表。</li>
+<li>PC/SP 寄存器值：存储程序计数器（PC）和栈指针（SP）。这至关重要，它记录了 <code>defer</code> 语句所在的作用域。当函数返回时，运行时通过比较当前的 SP 与 <code>_defer</code> 中记录的 SP，来判断哪些 <code>defer</code> 需要在该函数返回时执行（即，只执行当前函数栈帧对应的 <code>defer</code>）。<br><font style="color:#FF6347;">step2：</font>需要一个全局的或线程局部的（Thread-Local）栈（可以用链表实现）来存储上述结构体。<br><font style="color:#FF6347;">step3：</font>手动在作用域出口执行延迟调用。<br>但是编译时直接把代码段插入好像没法在C实现，c的编译器没有那种功能。</li>
+</ul>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2025/08/02/Golang%20%E7%BB%8F%E5%85%B8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E5%85%B3%E9%94%AE%E5%AD%97/">http://ytirus.github.io/2025/08/02/Golang%20%E7%BB%8F%E5%85%B8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E5%85%B3%E9%94%AE%E5%AD%97/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Golang/">
+                                    <span class="chip bg-color">Golang</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2025/08/10/Golang%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/38.jpg" class="responsive-img" alt="Golang 内存管理">
+                        
+                        <span class="card-title">Golang 内存管理</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            逃逸分析、内存泄漏、TCMalloc、垃圾回收
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2025-08-10
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Memory/">
+                        <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/Golang/">
+                        <span class="chip bg-color">Golang</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2025/07/23/perf%E9%87%87%E6%A0%B7%E9%A2%91%E7%8E%87%E5%8A%A8%E6%80%81%E8%B0%83%E6%95%B4/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="perf采样频率动态调整">
+                        
+                        <span class="card-title">perf采样频率动态调整</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            在 Linux 内核性能分析和硬件事件监控场景中，重要的性能数据通过实时采样获取。但是，采样频率过高将自身带来不容忽视的 CPU 费用，对正在分析的系统产生打扰。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-07-23
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/perf/">
+                        <span class="chip bg-color">perf</span>
+                    </a>
+                    
+                    <a href="/tags/CPU-%E5%BC%80%E9%94%80/">
+                        <span class="chip bg-color">CPU 开销</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%BF%9B%E7%A8%8B/">
+                        <span class="chip bg-color">进程</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">290.5k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

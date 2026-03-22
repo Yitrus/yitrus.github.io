@@ -1,0 +1,1393 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="HugePage and THP 内核中的大页, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>HugePage and THP 内核中的大页 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/3.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">HugePage and THP 内核中的大页</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/THP/">
+                                <span class="chip bg-color">THP</span>
+                            </a>
+                        
+                            <a href="/tags/HugePage/">
+                                <span class="chip bg-color">HugePage</span>
+                            </a>
+                        
+                            <a href="/tags/TLB/">
+                                <span class="chip bg-color">TLB</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/OS/" class="post-category">
+                                OS
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-12-21
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    4.6k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    18 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p><a target="_blank" rel="noopener" href="https://docs.kernel.org/admin-guide/mm/transhuge.html">Transparent Hugepage Support</a></p>
+<blockquote>
+<p>虽然大页一直被人嫌弃，因为内存碎片化带来的页面规整开销和大页面分配困难、访问倾斜等。但是“存在即合理”。大页还是有些优势的比如在大内存中增加TLB的覆盖等。许多针对TLB和页面粒度大小的研究也一直没停过。PS. huge page 到底怎么写好像没有明确的说法。</p>
+</blockquote>
+<ul>
+<li>参考<a target="_blank" rel="noopener" href="https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/">Transparent Hugepages: measuring the performance impact</a>解释了透明大页的优缺点，但是主要还是讲了3个测量大页性能的方法。最后面有一个测试案列不错。</li>
+<li>了解透明巨页支持的最佳处是<a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/vm/transhuge.txt">Linux内核网站上的官方文档</a>。</li>
+<li>/proc/buddyinfo 让你<a target="_blank" rel="noopener" href="http://andorian.blogspot.com/2014/03/making-sense-of-procbuddyinfo.html">了解 Linux 机器上的可用内存碎片</a>。您可以查看每个可用订单的空闲片段，每个numa节点的不同区域。</li>
+</ul>
+<h2 id="0-大页面"><a href="#0-大页面" class="headerlink" title="0. 大页面"></a>0. 大页面</h2><p><strong>地址转换</strong>逻辑（页表遍历）由<strong>CPU的内存管理单元（MMU）</strong> 实现。MMU还具有最近使用的页面的<strong>缓存</strong>。此缓存称为转换后备缓冲区（TLB） 。</p>
+<p>虚拟地址需要转换为物理地址时，<strong>首先搜索TLB</strong>。如果找到匹配项（TLB命中），则返回物理地址，并且可以继续内存访问。但是，如果没有匹配项（称为TLB未命中），MMU通常会在<strong>页表中查找地址映射</strong>，以查看映射是否存在。<strong>页表遍历很昂贵</strong>，因为它可能<strong>需要多次内存访问</strong>（但它们可能会命中CPUL1/L2/L3缓存）。另一方面，<strong>TLB缓存大小有限，通常可以容纳数百页</strong>。</p>
+<blockquote>
+<p>在任何分页系统中，都需要考虑两个主要问题:<br>1)虚拟地址到物理地址的映射必须非常快。<br>2)如果虚拟地址空间很大，页表也会很大。<br>第一个问题是由于每次访向内存都需要进行虚拟地址到物理地址的映射，所有的指令最终都必须来自内存，并且很多指令也会访问内存中的操作数。因此，每条指令进行一两次或更多页表访问是必要的。如果执行一条指令需要1ns，页表查询必须在0.2ns之内完成，以避免映射成为一个主要瓶颈。<br>第二个问题来自现代计算机使用64位变得越来越普遍。假设页面大小为4KB，32位的地址空间将有100万页，而64位地址空间简直多到超乎想象。如果虚拟地址空间中有100万页，那么页表必然有100万条表项。另外请记住，每个进程都需要自己的页表（因为它有自己的虚拟地址空间）。（《现代操作系统》第4版，还有很多很清晰的讨论P114）<br>第一个是增加TLB大小，这很昂贵，而且不会有很大帮助（因为页表项增加后查找将变慢）。另一个是增加页面大小，因此要映射的页面更少。现代操作系统和CPU支持2MB甚至1GB的大页面。使用2MB的大页面，128GB内存变为64000页。</p>
+</blockquote>
+<p>使用更大的内存页作为映射单位有如下好处：</p>
+<ol>
+<li>减少 TLB（Translation Lookaside Buffer） 的失效情况（或者说减少page walk）。</li>
+<li>减少 页表 的内存消耗。</li>
+<li>减少 PageFault（缺页中断）的次数。</li>
+</ol>
+<p>有两个因素可以作为选择小页面的理由。随便选择一个数据很可能不会恰好装满整数个页面，多余的空间就被浪费掉了，这种浪费称为<strong>内存膨胀</strong>。另外分配大页需要连续的物理地址空间，多次分配后造成<strong>内部碎片</strong>（internal fragmentation）使得大页分配困难，需要额外后台线程做内存规整。 </p>
+<h2 id="1-static-huge-page静态大页面"><a href="#1-static-huge-page静态大页面" class="headerlink" title="1. static huge page静态大页面"></a>1. static huge page静态大页面</h2><p>静态huge page是<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/70964551">不支持swap操作</a>的，不能被换出到外部存储介质上。页面大小小于MAX_ORDER的大页称之为huge page，大于等于MAX_ORDER的大页称之为gigantic page，拿常用的举例，2MB是huge page，1GB是gigantic page。</p>
+<p>huge page和gigantic page走的是不同的分配路径。huge page相对较小，所以通过伙伴系统来分配（注意：虽然走伙伴系统，但最终它的元数据设置和普通伙伴系统页面的设置是分开处理的）。分配走的是伙伴系统核心都是<code>alloc_huge_page</code>，在大页系统初始化的时候，也会通过<code>alloc_huge_page</code>接口，提前分配物理页。</p>
+<p>在向伙伴系统申请一个大页时，如果是巨页，则优先通过CMA（Contiguous Memory Allocator）分配器分配，如果不支持CMA或者CMA内存不足，则通过指定范围连续物理页申请接口（<code>alloc_contig_pages</code>）而gigantic page页面较大，伙伴系统无法满足分配要求，所以通过连续内存分配接口<code>alloc_contig_range()</code></p>
+<blockquote>
+<p>标准大页存在两个严重的问题：<br>1、需要提前预分配好大页内存池，通过内核启动参数或者虚拟文件系统的方式。<br>2、对代码进行嵌入修改，例如使用mmap时，需要添加MAP_HUGETLB配置；或者需要挂载大页文件系统；或者使用libhugetlbfs提供的方法等。</p>
+</blockquote>
+<p>针对64位的x86-64系统，huge page的大小是2MB或者1GB，初始数目由启动时的”<code>vm.nr_hugepages</code>“ 内核参数确定，对于2MB的huge page，运行过程中可通过”<code>/proc/sys/vm/nr_hugepages</code>“修改。但对于1GB的huge page，就只能在启动时分配（且分配后不能释放），而不支持在运行时修改（系统起来后再要倒腾出1GB连续的物理内存，也怪难为内核的）</p>
+<p><strong>预留大页面</strong>的方式需要在启动内核时应用配置优点是开机时就通过bootmem分配大页，不存在因为内存碎片导致分不出大页的情况，从而保证预留的成功。需要指出的是，系统能否支持大页，支持大页的大小为多少是由其使用的处理器决定的。通过在bootargs传参在系统启动过程中预留大页，bootargs参数：预分配大页数量hugepages= 和 预分配大页的大小hugepagesz= ，更详细的使用可参看内核文档kernel-parameters.txt</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 假如我们想保留64个大页面，每个2MB，就用下面的配置：</span>
+hugepagesz <span class="token operator">=</span> 2MB， hugepages <span class="token operator">=</span> <span class="token number">64</span>
+<span class="token comment"># 还可以指定默认的大页大小。比如，我们想预留4GB内存作为大页使用，大页的大小为1GB，那么可以用以下的命令行：</span>
+<span class="token assign-left variable">default_hugepagesz</span><span class="token operator">=</span>1G <span class="token assign-left variable">hugepagesz</span><span class="token operator">=</span>1G <span class="token assign-left variable">hugepages</span><span class="token operator">=</span><span class="token number">4</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在Linux启动之后，如果想预留大页，则可以使用以下的方法来预留内存。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在非NUMA系统中，可以使用以下方法预留2MB大小的大页。</span>
+<span class="token builtin class-name">echo</span> <span class="token number">24</span> <span class="token operator">&gt;</span> /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+<span class="token comment"># 该命令预留24个大小为2MB的大页，也就是预留了2GB内存。</span>
+<span class="token comment"># 如果是在NUMA系统中，假设有两个NODE的系统中，则可以用以下的命令：</span>
+<span class="token builtin class-name">echo</span> <span class="token number">24</span> <span class="token operator">&gt;</span> /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+<span class="token builtin class-name">echo</span> <span class="token number">24</span> <span class="token operator">&gt;</span> /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+<span class="token comment"># 或者</span>
+<span class="token builtin class-name">echo</span> <span class="token number">20</span> <span class="token operator">&gt;</span> /proc/sys/vm/nr_hugepages <span class="token comment">#设置20页大页</span>
+<span class="token comment">#或者</span>
+<span class="token builtin class-name">echo</span> <span class="token number">5</span> <span class="token operator">&gt;</span> /sys/kernel/mm/hugepages/hugepages-1048576kB/nr_hugepages 
+/**
+ * 含义：通过sysfs下的文件节点申请和释放大页，保持系统中1GB的大页有5个。
+ * 若已经存在5个大页则什么都不做；若少于5个则分配够5个；
+ * 若多于5个则释放多余的大页<span class="token punctuation">(</span>前提是未被使用<span class="token punctuation">)</span>。
+**/ 
+<span class="token function">cat</span> /sys/kernel/mm/hugepages/hugepages-2048kB/free_hugepages
+// 含义：查看系统中空闲的的2MB大页的数量<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>如果希望在不修改源码的情况下运行一个程序（如 <code>redis-server</code>）并让它使用静态大页（HugeTLB），可以通过以下方式实现：<br>确保系统中已经安装了 <code>libhugetlbfs</code> 库。<br>    </p><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> libhugetlbfs-bin
+<span class="token function">sudo</span> yum <span class="token function">install</span> libhugetlbfs
+<span class="token function">sudo</span> <span class="token function">find</span> / <span class="token parameter variable">-name</span> <span class="token string">"libhugetlbfs.so"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre><br>查看是否已经按照之前的方式分配了大页面<code>grep Hugepagesize /proc/meminfo</code><br>在运行希望使用大页面的程序时：<p></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">LD_PRELOAD</span><span class="token operator">=</span>/usr/lib/libhugetlbfs.so <span class="token assign-left variable">HUGETLB_MORECORE</span><span class="token operator">=</span>yes XXX程序运行命令<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<ul>
+<li><code>LD_PRELOAD=/usr/lib/libhugetlbfs.so</code>：通过预加载 <code>libhugetlbfs</code> 库，强制应用程序使用静态大页。</li>
+<li><code>HUGETLB_MORECORE=yes</code>：该环境变量告诉 <code>libhugetlbfs</code> 将 <code>malloc</code> 分配的大内存使用静态大页。</li>
+</ul>
+<p>使用 <code>libhugetlbfs</code> 结合 <code>LD_PRELOAD</code>，可以在不修改程序源码的情况下让程序使用静态大页。这种方式适用于大多数需要使用静态大页的应用场景。</p>
+<h2 id="2-THP"><a href="#2-THP" class="headerlink" title="2. THP"></a>2. THP</h2><p>复合页（Compound Page）就是将物理上连续的两个或多个页看成一个独立的大页，它能够用来创建hugetlbfs中使用的大页（hugepage）。也能够用来创建透明大页（transparent huge page）。可是它不能用在页缓存（page cache）中，这是由于页缓存中管理的都是单个页。分配一个复合页的方式是：使用<code>alloc_pages</code>函数，參数order至少为1，且设置<code>__GFP_COMP</code>标记。由于依据复合页的定义，它通常包含2个或多个连续的物理内存页，这是由它的实现决定的，因而order参数不可能为0。</p>
+<p>transparent huge page透明大页。在Linux中自2.6.38版本开始支持THP。在应用需要huge page的时候，可通过memory compaction（内存规整）操作移动页面，以形成一个huge page，因为该过程不会被应用感知到，所以被称为”transparent”。</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">page</span> <span class="token punctuation">{</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">long</span> flags<span class="token punctuation">;</span>		<span class="token comment">/* Atomic flags, some possibly
+					 * updated asynchronously */</span>
+	<span class="token keyword">union</span> <span class="token punctuation">{</span> <span class="token comment">// 这个结构中每个struct代表一种页面类型</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        <span class="token keyword">struct</span> <span class="token punctuation">{</span>	<span class="token comment">/* Tail pages of compound page */</span>
+            <span class="token comment">// 对于尾页面（tail page），这个字段指向对应的头页面（head page）的地址</span>
+            <span class="token comment">// 位0被置为1（通过位操作实现），表示这是一个尾页面</span>
+            <span class="token comment">// 不被置为1，那么就是Head page保存整个复合页面的信息</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">long</span> compound_head<span class="token punctuation">;</span>	<span class="token comment">/* Bit zero is set */</span>
+
+			<span class="token comment">/* First tail page only */</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">char</span> compound_dtor<span class="token punctuation">;</span> <span class="token comment">// 在头页面中指定了复合页面的析构函数</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">char</span> compound_order<span class="token punctuation">;</span> <span class="token comment">// 表示该复合页面的阶数（order）。</span>
+            <span class="token comment">// 对于透明大页面（2MB的页面），compound_order=9，因为2^9 = 512个4KB的基础页面</span>
+			<span class="token class-name">atomic_t</span> compound_mapcount<span class="token punctuation">;</span> <span class="token comment">// 用于跟踪该复合页面被映射到用户空间的次数</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">int</span> compound_nr<span class="token punctuation">;</span> <span class="token comment">/* 1 &lt;&lt; compound_order */</span>
+            <span class="token comment">// 指定该复合页面包含的基础页面数目，例如1 &lt;&lt; 9 = 512</span>
+		<span class="token punctuation">}</span><span class="token punctuation">;</span>
+		<span class="token keyword">struct</span> <span class="token punctuation">{</span>	<span class="token comment">/* Second tail page of compound page */</span>
+			<span class="token keyword">unsigned</span> <span class="token keyword">long</span> _compound_pad_1<span class="token punctuation">;</span>	<span class="token comment">/* compound_head 指向复合页面的头页面 */</span>
+			<span class="token class-name">atomic_t</span> hpage_pinned_refcount<span class="token punctuation">;</span> <span class="token comment">// 在被分解时需要处理额外的引用计数？</span>
+			<span class="token comment">/* For both global and memcg */</span>
+			<span class="token keyword">struct</span> <span class="token class-name">list_head</span> deferred_list<span class="token punctuation">;</span> <span class="token comment">// 延迟释放大页面</span>
+		<span class="token punctuation">}</span><span class="token punctuation">;</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token punctuation">}</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>THP采用常规(“高阶”)内存分配路径，它<strong>要求操作系统能够找到连续且对齐的内存块</strong>。它与常规页面存在相同的问题，即碎片化。如果操作系统<strong>找不到连续的内存块，它将尝试压缩、回收或分页其他页面</strong>。**该过程成本高昂，可能会导致延迟峰值(长达几秒钟)**。此问题已在4.6 内核中得到解决(通过”延迟”选项)，如果操作系统无法分配大页面，则会回退到常规页面。</p>
+<p>维护。即使应用程序只接触1字节的内存，它也会占用整个2MB的大页面。这显然是浪费内存。所以有一个名为<strong>khugepaged的后台内核线程</strong>。它<strong>扫描页面</strong>并尝试对其<strong>进行碎片整理并折叠成一个巨大的页面</strong>。尽管它是一个后台线程，<strong>但它会锁定它使用的页面</strong>，因此也可能导致<strong>延迟峰值</strong>。另一个陷阱在于<strong>大页面拆分</strong>，并非操作系统的所有部分都适用于大页面，例如Swap。操作系统将大页面拆分为常规页面。它还可能<strong>降低性能并增加内存碎片</strong>。</p>
+<p>实现THP作为一个整体被swap out和swap in（<a href="https://link.zhihu.com/?target=https://lwn.net/Articles/758677/">参考这篇文章</a>）</p>
+<p>运行以下命令检查透明大页的状态：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> /sys/kernel/mm/transparent_hugepage/enabled<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>如果输出为 <code>[always] madvise never</code>，则透明大页功能已经开启。<br>如果输出为 <code>always madvise [never]</code>，则透明大页功能已经关闭。</p>
+<p>如果透明大页功能未开启，可以通过以下命令启用它（需要管理员权限）</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> always <span class="token operator">&gt;</span> /sys/kernel/mm/transparent_hugepage/enabled<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>调整透明大页配置，有两个可用的配置选项，分别是 <code>transparent_hugepage/defrag</code> 和 <code>transparent_hugepage/enabled</code>。<br><code>transparent_hugepage/defrag</code>：用于设置大页碎片整理的方式。<br><code>transparent_hugepage/enabled</code>：用于设置大页的启用方式。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> always <span class="token operator">&gt;</span> /sys/kernel/mm/transparent_hugepage/defrag
+<span class="token builtin class-name">echo</span> always <span class="token operator">&gt;</span> /sys/kernel/mm/transparent_hugepage/enabled<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>自己整理的大页面申请流程：<br><img src="/images/%E5%A4%A7%E9%A1%B5%E7%94%B3%E8%AF%B7%E6%B5%81%E7%A8%8B%E5%9B%BE.jpg"></p>
+<p>参考<a target="_blank" rel="noopener" href="http://cenalulu.github.io/linux/huge-page-on-numa/">Huge Page 是否是拯救性能的万能良药？</a>可以有参考。<br>参考<a target="_blank" rel="noopener" href="https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/">透明巨页：衡量性能影响</a></p>
+<h2 id="3-页表"><a href="#3-页表" class="headerlink" title="3. 页表"></a>3. 页表</h2><p>PGD (Page Global Directory) → P4D → PUD → PMD → PTE每一级页表存储下一级页表的地址，最终PTE(Page Table Entry)指向实际的物理页。一个PMD直接指向2MB的物理页（跳过PTE层级）;一个PUD直接指向 1GB 的物理页（跳过PMD和PTE层级）。在Linux中，页表本身（比如PTE、PMD、PUD表）都是由实际的物理页面承载的。<code>struct mm_struct</code>是每个进程唯一的地址空间结构，进程的所有内存映射信息都在这。当你在内核中分配一个页表页（通常在处理page fault或mmap时），你从物理页池中拿一个4KB页面作为页表。内核通过<code>struct page</code>管理这个物理页，它需要知道这个页表页是为哪个进程分配的。页表页属于某个进程，需要知道归属。</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// 存页表的物理页面的struct page中的union</span>
+<span class="token keyword">struct</span> <span class="token punctuation">{</span>
+    <span class="token keyword">unsigned</span> <span class="token keyword">long</span> _pt_pad_1<span class="token punctuation">;</span>      <span class="token comment">// 填充字段，用于对齐或覆盖共用结构</span>
+    <span class="token class-name">pgtable_t</span> pmd_huge_pte<span class="token punctuation">;</span>       <span class="token comment">// 和THP拆分有关</span>
+    <span class="token keyword">unsigned</span> <span class="token keyword">long</span> _pt_pad_2<span class="token punctuation">;</span>      <span class="token comment">// 填充字段</span>
+    <span class="token keyword">union</span> <span class="token punctuation">{</span>
+        <span class="token keyword">struct</span> <span class="token class-name">mm_struct</span> <span class="token operator">*</span>pt_mm<span class="token punctuation">;</span>          <span class="token comment">// 指向拥有该页表页的进程的mm_struct</span>
+        <span class="token class-name">atomic_t</span> pt_frag_refcount<span class="token punctuation">;</span>       <span class="token comment">// 在部分架构中用于页表碎片引用计数</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">if</span> <span class="token expression">ALLOC_SPLIT_PTLOCKS</span></span>
+    <span class="token class-name">spinlock_t</span> <span class="token operator">*</span>ptl<span class="token punctuation">;</span>              <span class="token comment">// 指向外部页表锁</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">else</span></span>
+    <span class="token class-name">spinlock_t</span> ptl<span class="token punctuation">;</span>               <span class="token comment">// 内嵌页表锁（节省空间）</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="4-TLB"><a href="#4-TLB" class="headerlink" title="4. TLB"></a>4. TLB</h2><p>通过编译优化来将频繁被访问的指令汇总到一起，放在二进制文件中的同一个地方，以提高空间局部性，这样就可以提高iTLB命中。这块放置频繁访问指令的区域，就叫热区域（Hot Text）。</p>
+<p>通过在大页面上放置热文本，可以进一步提升iTLB命中率。使用大页面iTLB条目时，单个TLB条目覆盖的代码是标准4K页面的512倍。更重要的是，当代的CPU体系结构，通常为大页面提供一些单独的TLB条目，如果我们不使用大页面，这些条目将处于空闲状态。（是吗？待考证）所以，通过使用大页面，也可以充分利用那些TLB条目。</p>
+<p>关于<a target="_blank" rel="noopener" href="https://blog.csdn.net/hanzefeng/article/details/82893317">分支预测</a>的基础知识。如果从运行的二进制文件来优化iTLB，可以考虑<a target="_blank" rel="noopener" href="https://lwn.net/Articles/680985/">LBR（Last Branch Record，最后分支记录）</a>为热函数创建优化表单<a target="_blank" rel="noopener" href="https://github.com/facebook/hhvm/tree/master/hphp/tools/hfsort">HFSort</a>工具。</p>
+<p>事实上，perf只支持所有事件的一个小子集，而CPU有数百个不同的计数器来监测性能。<br><strong>在页表中遍历所花费的 CPU 周期数</strong></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>~<span class="token punctuation">]</span><span class="token comment"># perf stat -e cycles \</span>
+<span class="token operator">&gt;</span>   <span class="token parameter variable">-e</span> cpu/event<span class="token operator">=</span>0x08,umask<span class="token operator">=</span>0x10,name<span class="token operator">=</span>dcycles/ <span class="token punctuation">\</span>
+<span class="token operator">&gt;</span>   <span class="token parameter variable">-e</span> cpu/event<span class="token operator">=</span>0x85,umask<span class="token operator">=</span>0x10,name<span class="token operator">=</span>icycles/ <span class="token punctuation">\</span>
+<span class="token operator">&gt;</span>   <span class="token parameter variable">-a</span> <span class="token parameter variable">-I</span> <span class="token number">1000</span>
+<span class="token comment">#           time             counts unit events</span>
+     <span class="token number">1.005079845</span>        <span class="token number">227,119</span>,840      cycles
+     <span class="token number">1.005079845</span>          <span class="token number">2,605</span>,237      dcycles
+     <span class="token number">1.005079845</span>            <span class="token number">806,076</span>      icycles<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>由 TLB 未命中引起的主内存读取次数</strong>;这些读取会错过 CPU 缓存，因此非常昂贵</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@PRCAPISV0003L01 ~<span class="token punctuation">]</span><span class="token comment"># perf stat -e cache-misses \</span>
+<span class="token operator">&gt;</span>   <span class="token parameter variable">-e</span> cpu/event<span class="token operator">=</span>0xbc,umask<span class="token operator">=</span>0x18,name<span class="token operator">=</span>dreads/ <span class="token punctuation">\</span>
+<span class="token operator">&gt;</span>   <span class="token parameter variable">-e</span> cpu/event<span class="token operator">=</span>0xbc,umask<span class="token operator">=</span>0x28,name<span class="token operator">=</span>ireads/ <span class="token punctuation">\</span>
+<span class="token operator">&gt;</span>   <span class="token parameter variable">-a</span> <span class="token parameter variable">-I</span> <span class="token number">1000</span>
+<span class="token comment">#           time             counts unit events</span>
+     <span class="token number">1.007177568</span>             <span class="token number">25,322</span>      cache-misses
+     <span class="token number">1.007177568</span>                 <span class="token number">23</span>      dreads
+     <span class="token number">1.007177568</span>                  <span class="token number">5</span>      ireads<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+<h2 id="5-伙伴系统内存分配的碎片"><a href="#5-伙伴系统内存分配的碎片" class="headerlink" title="5. 伙伴系统内存分配的碎片"></a>5. 伙伴系统内存分配的碎片</h2><p>随着时间的推移，分配请求将拆分、合并、拆分…这个池，直到我们到达由于缺少连续内存块而可能不得不使请求失败的地步。在这种情况下，buddyinfo proc 文件将允许您查看内存的当前碎片状态。这是一个快速的python脚本。</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment">#!/usr/bin/env python</span>
+<span class="token comment"># vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 textwidth=79 autoindent</span>
+
+<span class="token triple-quoted-string string">"""
+Python source code
+Last modified: 15 Feb 2014 - 13:38
+Last author: lmwangi at gmail  com
+Displays the available memory fragments
+by querying /proc/buddyinfo
+Example:
+# python buddyinfo.py
+"""</span>
+<span class="token keyword">import</span> optparse
+<span class="token keyword">import</span> os
+<span class="token keyword">import</span> re
+<span class="token keyword">from</span> collections <span class="token keyword">import</span> defaultdict
+<span class="token keyword">import</span> logging
+
+
+<span class="token keyword">class</span> <span class="token class-name">Logger</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> log_level<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>log_level <span class="token operator">=</span> log_level
+
+    <span class="token keyword">def</span> <span class="token function">get_formatter</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> logging<span class="token punctuation">.</span>Formatter<span class="token punctuation">(</span><span class="token string">'%(asctime)s - %(name)s - %(levelname)s - %(message)s'</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">get_handler</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> logging<span class="token punctuation">.</span>StreamHandler<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">get_logger</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""Returns a Logger instance for the specified module_name"""</span>
+        logger <span class="token operator">=</span> logging<span class="token punctuation">.</span>getLogger<span class="token punctuation">(</span><span class="token string">'main'</span><span class="token punctuation">)</span>
+        logger<span class="token punctuation">.</span>setLevel<span class="token punctuation">(</span>self<span class="token punctuation">.</span>log_level<span class="token punctuation">)</span>
+        log_handler <span class="token operator">=</span> self<span class="token punctuation">.</span>get_handler<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        log_handler<span class="token punctuation">.</span>setFormatter<span class="token punctuation">(</span>self<span class="token punctuation">.</span>get_formatter<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        logger<span class="token punctuation">.</span>addHandler<span class="token punctuation">(</span>log_handler<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> logger
+
+
+<span class="token keyword">class</span> <span class="token class-name">BuddyInfo</span><span class="token punctuation">(</span><span class="token builtin">object</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""BuddyInfo DAO"""</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> logger<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token builtin">super</span><span class="token punctuation">(</span>BuddyInfo<span class="token punctuation">,</span> self<span class="token punctuation">)</span><span class="token punctuation">.</span>__init__<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>log <span class="token operator">=</span> logger
+        self<span class="token punctuation">.</span>buddyinfo <span class="token operator">=</span> self<span class="token punctuation">.</span>load_buddyinfo<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">parse_line</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> line<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        line <span class="token operator">=</span> line<span class="token punctuation">.</span>strip<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>log<span class="token punctuation">.</span>debug<span class="token punctuation">(</span><span class="token string">"Parsing line: %s"</span> <span class="token operator">%</span> line<span class="token punctuation">)</span>
+        parsed_line <span class="token operator">=</span> re<span class="token punctuation">.</span><span class="token keyword">match</span><span class="token punctuation">(</span><span class="token string">"Node\s+(?P&lt;numa_node&gt;\d+).*zone\s+(?P&lt;zone&gt;\w+)\s+(?P&lt;nr_free&gt;.*)"</span><span class="token punctuation">,</span> line<span class="token punctuation">)</span><span class="token punctuation">.</span>groupdict<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>log<span class="token punctuation">.</span>debug<span class="token punctuation">(</span><span class="token string">"Parsed line: %s"</span> <span class="token operator">%</span> parsed_line<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> parsed_line
+
+    <span class="token keyword">def</span> <span class="token function">read_buddyinfo</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        buddyhash <span class="token operator">=</span> defaultdict<span class="token punctuation">(</span><span class="token builtin">list</span><span class="token punctuation">)</span>
+        buddyinfo <span class="token operator">=</span> <span class="token builtin">open</span><span class="token punctuation">(</span><span class="token string">"/proc/buddyinfo"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>readlines<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">for</span> line <span class="token keyword">in</span> <span class="token builtin">map</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>parse_line<span class="token punctuation">,</span> buddyinfo<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            numa_node <span class="token operator">=</span>  <span class="token builtin">int</span><span class="token punctuation">(</span>line<span class="token punctuation">[</span><span class="token string">"numa_node"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+            zone <span class="token operator">=</span> line<span class="token punctuation">[</span><span class="token string">"zone"</span><span class="token punctuation">]</span>
+            free_fragments <span class="token operator">=</span> <span class="token builtin">map</span><span class="token punctuation">(</span><span class="token builtin">int</span><span class="token punctuation">,</span> line<span class="token punctuation">[</span><span class="token string">"nr_free"</span><span class="token punctuation">]</span><span class="token punctuation">.</span>split<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            max_order <span class="token operator">=</span> <span class="token builtin">len</span><span class="token punctuation">(</span>free_fragments<span class="token punctuation">)</span>
+            fragment_sizes <span class="token operator">=</span> self<span class="token punctuation">.</span>get_order_sizes<span class="token punctuation">(</span>max_order<span class="token punctuation">)</span>
+            usage_in_bytes <span class="token operator">=</span>  <span class="token punctuation">[</span>block<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">*</span> block<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token keyword">for</span> block <span class="token keyword">in</span> <span class="token builtin">zip</span><span class="token punctuation">(</span>free_fragments<span class="token punctuation">,</span> fragment_sizes<span class="token punctuation">)</span><span class="token punctuation">]</span>
+            buddyhash<span class="token punctuation">[</span>numa_node<span class="token punctuation">]</span><span class="token punctuation">.</span>append<span class="token punctuation">(</span><span class="token punctuation">{</span>
+                <span class="token string">"zone"</span><span class="token punctuation">:</span> zone<span class="token punctuation">,</span>
+                <span class="token string">"nr_free"</span><span class="token punctuation">:</span> free_fragments<span class="token punctuation">,</span>
+                <span class="token string">"sz_fragment"</span><span class="token punctuation">:</span> fragment_sizes<span class="token punctuation">,</span>
+                <span class="token string">"usage"</span><span class="token punctuation">:</span> usage_in_bytes <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> buddyhash
+
+    <span class="token keyword">def</span> <span class="token function">load_buddyinfo</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        buddyhash <span class="token operator">=</span> self<span class="token punctuation">.</span>read_buddyinfo<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>log<span class="token punctuation">.</span>info<span class="token punctuation">(</span>buddyhash<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> buddyhash
+
+    <span class="token keyword">def</span> <span class="token function">page_size</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> os<span class="token punctuation">.</span>sysconf<span class="token punctuation">(</span><span class="token string">"SC_PAGE_SIZE"</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">get_order_sizes</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> max_order<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span>self<span class="token punctuation">.</span>page_size<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2</span><span class="token operator">**</span>order <span class="token keyword">for</span> order <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> max_order<span class="token punctuation">)</span><span class="token punctuation">]</span>
+
+    <span class="token keyword">def</span> <span class="token function">__str__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        ret_string <span class="token operator">=</span> <span class="token string">""</span>
+        width <span class="token operator">=</span> <span class="token number">20</span>
+        <span class="token keyword">for</span> node <span class="token keyword">in</span> self<span class="token punctuation">.</span>buddyinfo<span class="token punctuation">:</span>
+            ret_string <span class="token operator">+=</span> <span class="token string">"Node: %s\n"</span> <span class="token operator">%</span> node
+            <span class="token keyword">for</span> zoneinfo <span class="token keyword">in</span> self<span class="token punctuation">.</span>buddyinfo<span class="token punctuation">.</span>get<span class="token punctuation">(</span>node<span class="token punctuation">)</span><span class="token punctuation">:</span>
+                ret_string <span class="token operator">+=</span> <span class="token string">" Zone: %s\n"</span> <span class="token operator">%</span> zoneinfo<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"zone"</span><span class="token punctuation">)</span>
+                ret_string <span class="token operator">+=</span> <span class="token string">" Free KiB in zone: %.2f\n"</span> <span class="token operator">%</span> <span class="token punctuation">(</span><span class="token builtin">sum</span><span class="token punctuation">(</span>zoneinfo<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"usage"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token punctuation">(</span><span class="token number">1024.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                ret_string <span class="token operator">+=</span> <span class="token string">'\t{0:{align}{width}} {1:{align}{width}} {2:{align}{width}}\n'</span><span class="token punctuation">.</span><span class="token builtin">format</span><span class="token punctuation">(</span>
+                        <span class="token string">"Fragment size"</span><span class="token punctuation">,</span> <span class="token string">"Free fragments"</span><span class="token punctuation">,</span> <span class="token string">"Total available KiB"</span><span class="token punctuation">,</span>
+                        width<span class="token operator">=</span>width<span class="token punctuation">,</span>
+                        align<span class="token operator">=</span><span class="token string">"&lt;"</span><span class="token punctuation">)</span>
+                <span class="token keyword">for</span> idx <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token builtin">len</span><span class="token punctuation">(</span>zoneinfo<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"sz_fragment"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                    ret_string <span class="token operator">+=</span> <span class="token string">'\t{order:{align}{width}} {nr:{align}{width}} {usage:{align}{width}}\n'</span><span class="token punctuation">.</span><span class="token builtin">format</span><span class="token punctuation">(</span>
+                        width<span class="token operator">=</span>width<span class="token punctuation">,</span>
+                        align<span class="token operator">=</span><span class="token string">"&lt;"</span><span class="token punctuation">,</span>
+                        order <span class="token operator">=</span> zoneinfo<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"sz_fragment"</span><span class="token punctuation">)</span><span class="token punctuation">[</span>idx<span class="token punctuation">]</span><span class="token punctuation">,</span>
+                        nr <span class="token operator">=</span> zoneinfo<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"nr_free"</span><span class="token punctuation">)</span><span class="token punctuation">[</span>idx<span class="token punctuation">]</span><span class="token punctuation">,</span>
+                        usage <span class="token operator">=</span> zoneinfo<span class="token punctuation">.</span>get<span class="token punctuation">(</span><span class="token string">"usage"</span><span class="token punctuation">)</span><span class="token punctuation">[</span>idx<span class="token punctuation">]</span> <span class="token operator">/</span> <span class="token number">1024.0</span><span class="token punctuation">)</span>
+
+        <span class="token keyword">return</span> ret_string
+
+<span class="token keyword">def</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""Main function. Called when this file is a shell script"""</span>
+    usage <span class="token operator">=</span> <span class="token string">"usage: %prog [options]"</span>
+    parser <span class="token operator">=</span> optparse<span class="token punctuation">.</span>OptionParser<span class="token punctuation">(</span>usage<span class="token punctuation">)</span>
+    parser<span class="token punctuation">.</span>add_option<span class="token punctuation">(</span><span class="token string">"-s"</span><span class="token punctuation">,</span> <span class="token string">"--size"</span><span class="token punctuation">,</span> dest<span class="token operator">=</span><span class="token string">"size"</span><span class="token punctuation">,</span> choices<span class="token operator">=</span><span class="token punctuation">[</span><span class="token string">"B"</span><span class="token punctuation">,</span><span class="token string">"K"</span><span class="token punctuation">,</span><span class="token string">"M"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+                      action<span class="token operator">=</span><span class="token string">"store"</span><span class="token punctuation">,</span> <span class="token builtin">type</span><span class="token operator">=</span><span class="token string">"choice"</span><span class="token punctuation">,</span> <span class="token builtin">help</span><span class="token operator">=</span><span class="token string">"Return results in bytes, kib, mib"</span><span class="token punctuation">)</span>
+
+    <span class="token punctuation">(</span>options<span class="token punctuation">,</span> args<span class="token punctuation">)</span> <span class="token operator">=</span> parser<span class="token punctuation">.</span>parse_args<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    logger <span class="token operator">=</span> Logger<span class="token punctuation">(</span>logging<span class="token punctuation">.</span>DEBUG<span class="token punctuation">)</span><span class="token punctuation">.</span>get_logger<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    logger<span class="token punctuation">.</span>info<span class="token punctuation">(</span><span class="token string">"Starting...."</span><span class="token punctuation">)</span>
+    logger<span class="token punctuation">.</span>info<span class="token punctuation">(</span><span class="token string">"Parsed options: %s"</span> <span class="token operator">%</span> options<span class="token punctuation">)</span>
+    <span class="token keyword">print</span> logger
+    buddy <span class="token operator">=</span> BuddyInfo<span class="token punctuation">(</span>logger<span class="token punctuation">)</span>
+    <span class="token keyword">print</span> buddy
+
+<span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">'__main__'</span><span class="token punctuation">:</span>
+    main<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="回收的时候要被怎么拆分？"><a href="#回收的时候要被怎么拆分？" class="headerlink" title="回收的时候要被怎么拆分？"></a>回收的时候要被怎么拆分？</h2><p><a target="_blank" rel="noopener" href="https://lore.kernel.org/linux-mm/20230913164938.16918-1-vernhao@tencent.com/">https://lore.kernel.org/linux-mm/20230913164938.16918-1-vernhao@tencent.com/</a><br><a target="_blank" rel="noopener" href="https://patchew.org/linux/20230912021727.61601-1-vernhao@tencent.com/">https://patchew.org/linux/20230912021727.61601-1-vernhao@tencent.com/</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2023/12/21/hugepage-and-THP%20%E5%86%85%E6%A0%B8%E4%B8%AD%E7%9A%84%E5%A4%A7%E9%A1%B5/">http://ytirus.github.io/2023/12/21/hugepage-and-THP%20%E5%86%85%E6%A0%B8%E4%B8%AD%E7%9A%84%E5%A4%A7%E9%A1%B5/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/THP/">
+                                    <span class="chip bg-color">THP</span>
+                                </a>
+                            
+                                <a href="/tags/HugePage/">
+                                    <span class="chip bg-color">HugePage</span>
+                                </a>
+                            
+                                <a href="/tags/TLB/">
+                                    <span class="chip bg-color">TLB</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2023/12/22/FlexHM/">
+                    <div class="card-image">
+                        
+                        <img src="https://images.weserv.nl/?url=https://img-blog.csdnimg.cn/direct/3f7a437b0f0e4d81b480441ba52d12e1.png" class="responsive-img" alt="FlexHM">
+                        
+                        <span class="card-title">FlexHM</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            这应该主要是一篇全文翻译。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-12-22
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Paper/" class="post-category">
+                                    Paper
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/CCFA/">
+                        <span class="chip bg-color">CCFA</span>
+                    </a>
+                    
+                    <a href="/tags/Hybrid-Memory/">
+                        <span class="chip bg-color">Hybrid-Memory</span>
+                    </a>
+                    
+                    <a href="/tags/Cloud/">
+                        <span class="chip bg-color">Cloud</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2023/12/21/Demystifying-CXL-Memory-with-Genuine-CXL-Ready-Systems-and-Devices/">
+                    <div class="card-image">
+                        
+                        <img src="https://images.weserv.nl/?url=https://img-blog.csdnimg.cn/direct/edbc336c66274e17b4a61748b2b79ace.png" class="responsive-img" alt="Demystifying CXL Memory with Genuine CXL-Ready Systems and Devices">
+                        
+                        <span class="card-title">Demystifying CXL Memory with Genuine CXL-Ready Systems and Devices</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            比较了使用远端NUMA节点模拟CXL和真实CXL的区别，提出基于CXL高带宽高延迟的混合内存分配方案。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-12-21
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Paper/" class="post-category">
+                                    Paper
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/CCFA/">
+                        <span class="chip bg-color">CCFA</span>
+                    </a>
+                    
+                    <a href="/tags/CXL/">
+                        <span class="chip bg-color">CXL</span>
+                    </a>
+                    
+                    <a href="/tags/Machine-learning/">
+                        <span class="chip bg-color">Machine-learning</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">290.5k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
