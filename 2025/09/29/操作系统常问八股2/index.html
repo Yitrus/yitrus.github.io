@@ -465,7 +465,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    4.3k
+                    4.5k
                 </div>
                 
 
@@ -569,8 +569,8 @@ NUMA Node 2 (内核为持久内存创建的新节点)
 <h2 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h2><p>背景：<strong>生产者</strong> 是内核态的 perf 事件采样机制（可能由 NMI、PMU 或其他硬件触发），它会写入 ring buffer。<strong>消费者</strong> 是用户态程序（比如 <code>perf</code> 工具或你自己的采样线程），它从 ring buffer 读出数据。这俩线程可以运行在<strong>不同的 CPU 上</strong>，因此会有跨核缓存一致性问题。</p>
 <p>数据是否同步取决于 CPU 缓存机制，如果不通过内存屏障明确同步可能会出现：</p>
 <ul>
-<li>读取到过时的 <code>data_head</code></li>
-<li>写入的 <code>data_tail</code> 没有及时刷新  </li>
+<li>读取到过时的 <code>data_head</code>。某个 CPU 更新了缓冲区的头指针，但其他 CPU 仍旧看到旧值，导致多线程或多核环境下读写数据不一致。</li>
+<li>写入的 <code>data_tail</code> 没有及时刷新到共享内存。<br>即便“处理每个 CPU 自己的缓冲区”，在多核场景下，如果缓冲区是共享的（生产者写，消费者读），必须考虑缓存一致性问题。让CPU在下一步处理前，之前CPU处理的结果已经刷新到共享区域了，防止乱序或者内存操作重排不符合业务逻辑。</li>
 </ul>
 <p><strong>为了让消费者看到生产者“已经完成”的更新</strong>，从而安全地消费数据：</p>
 <ol>
@@ -583,7 +583,7 @@ NUMA Node 2 (内核为持久内存创建的新节点)
 </ul>
 <ol start="3">
 <li>在 perf ring buffer 消费逻辑中，这个顺序正是官方推荐的：<ul>
-<li><code>READ_ONCE(data_head)</code> —— 获取生产者写的头部位置。</li>
+<li><code>READ_ONCE(data_head)</code> —— 获取生产者写的头部位置。保证读取的原子性，读取操作发生的顺序与程序语义一致。</li>
 <li><code>smp_rmb()</code> —— 确保读取数据前不会看到被重排的旧数据。</li>
 <li>从 buffer 中读取样本数据。</li>
 <li>处理完毕后：<ul>
@@ -596,7 +596,7 @@ NUMA Node 2 (内核为持久内存创建的新节点)
 </ol>
 <p>这确保生产者不会覆盖你尚未读取的数据。</p>
 <hr>
-<h2 id="讲讲透明大页"><a href="#讲讲透明大页" class="headerlink" title="讲讲透明大页"></a>讲讲透明大页</h2><p><a target="_blank" rel="noopener" href="https://yitrus.github.io/2023/12/21/hugepage-and-THP-in-memory/">HugePage and THP in memory | Yi’s Blog</a></p>
+<h2 id="讲讲透明大页"><a href="#讲讲透明大页" class="headerlink" title="讲讲透明大页"></a>讲讲透明大页</h2><p><a target="_blank" rel="noopener" href="https://yitrus.github.io/2023/12/21/hugepage-and-THP-in-memory/">HugePage and THP 内核中的大页 | Yi’s Blog</a></p>
 <p>大页面对文件类型页的支持情况（匿名页是肯定支持的）：<br>| 特性              | 支持情况                               |<br>| ————— | ———————————- |<br>| tmpfs/shmem THP | ✅ 支持（可配置策略）                        |<br>| 普通文件映射 THP      | ⚠️ Linux 5.4+ 支持，但有严格限制（只读、可执行、对齐） |<br>| 显式大页（hugetlbfs） | ✅ 完全支持，性能最可控                       |</p>
 <hr>
 <h2 id="程序-dump-时查看出错位置"><a href="#程序-dump-时查看出错位置" class="headerlink" title="程序 dump 时查看出错位置"></a>程序 dump 时查看出错位置</h2><ul>
@@ -910,60 +910,54 @@ NUMA Node 2 (内核为持久内存创建的新节点)
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2025/09/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%B8%B8%E9%97%AE%E5%85%AB%E8%82%A12/">
+                <a href="/2025/10/02/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/27.jpg" class="responsive-img" alt="操作系统常问八股2">
+                        <img src="/medias/featureimages/46.jpg" class="responsive-img" alt="微服务链路追踪原理浅析">
                         
-                        <span class="card-title">操作系统常问八股2</span>
+                        <span class="card-title">微服务链路追踪原理浅析</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            面试爱问的操作系统相关问题
+                            从“字节码注入”到 Go 的 context：一次链路追踪原理的思考之旅
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2025-09-29
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2025-10-02
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
                             
-                            <a href="/categories/OS/" class="post-category">
-                                    OS
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
                                 </a>
                             
                             
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/Cache/">
-                        <span class="chip bg-color">Cache</span>
+                    <a href="/tags/Golang/">
+                        <span class="chip bg-color">Golang</span>
                     </a>
                     
-                    <a href="/tags/Memory/">
-                        <span class="chip bg-color">Memory</span>
+                    <a href="/tags/trace-log/">
+                        <span class="chip bg-color">trace-log</span>
                     </a>
                     
-                    <a href="/tags/TLB/">
-                        <span class="chip bg-color">TLB</span>
-                    </a>
-                    
-                    <a href="/tags/%E8%BF%9B%E7%A8%8B/">
-                        <span class="chip bg-color">进程</span>
+                    <a href="/tags/Java/">
+                        <span class="chip bg-color">Java</span>
                     </a>
                     
                 </div>
@@ -1173,7 +1167,7 @@ NUMA Node 2 (内核为持久内存创建的新节点)
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290.5k</span>&nbsp;字
+                class="white-color">303.8k</span>&nbsp;字
             
             
             

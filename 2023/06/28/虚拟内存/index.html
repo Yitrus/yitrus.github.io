@@ -468,7 +468,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    23 分
+                    24 分
                 </div>
                 
 
@@ -585,6 +585,30 @@
 <li>物理页帧，真实的RAM硅片，如MMU、DMA控制器直接使用物理地址。</li>
 </ul>
 </blockquote>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>组织对象</th>
+<th>链表字段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Buddy System 空闲链表</td>
+<td><code>struct page</code>（块的首页）</td>
+<td><code>lru</code> / <code>buddy_list</code></td>
+</tr>
+<tr>
+<td>LRU Active/Inactive</td>
+<td><code>struct page</code></td>
+<td><code>lru</code></td>
+</tr>
+<tr>
+<td>MGLRU</td>
+<td><code>struct page</code></td>
+<td><code>lru</code></td>
+</tr>
+</tbody></table>
 
                 
             </div>
@@ -950,7 +974,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290.5k</span>&nbsp;字
+                class="white-color">303.8k</span>&nbsp;字
             
             
             

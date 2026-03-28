@@ -461,7 +461,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    4.6k
+                    4.7k
                 </div>
                 
 
@@ -763,6 +763,8 @@ Example:
 <span class="token keyword">if</span> __name__ <span class="token operator">==</span> <span class="token string">'__main__'</span><span class="token punctuation">:</span>
     main<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
+<h2 id="为什么需要连续物理地址？"><a href="#为什么需要连续物理地址？" class="headerlink" title="为什么需要连续物理地址？"></a>为什么需要连续物理地址？</h2><p>大页的设计目标——用 1 个 TLB entry 覆盖更大的内存范围（如 2MB 或 1GB）。这 2MB 或 1GB 必须对应连续的物理页框PFN，否则需要多个 TLB entry。</p>
+<h2 id="为什么需要连续虚拟地址？"><a href="#为什么需要连续虚拟地址？" class="headerlink" title="为什么需要连续虚拟地址？"></a>为什么需要连续虚拟地址？</h2><p>一个页表项只能映射一个固定大小的连续区域，设置 PS=1（Page Size），直接指向 2MB/1GB 物理块。如果虚拟地址不连续，需要多个页表项，破坏大页机制。</p>
 <h2 id="回收的时候要被怎么拆分？"><a href="#回收的时候要被怎么拆分？" class="headerlink" title="回收的时候要被怎么拆分？"></a>回收的时候要被怎么拆分？</h2><p><a target="_blank" rel="noopener" href="https://lore.kernel.org/linux-mm/20230913164938.16918-1-vernhao@tencent.com/">https://lore.kernel.org/linux-mm/20230913164938.16918-1-vernhao@tencent.com/</a><br><a target="_blank" rel="noopener" href="https://patchew.org/linux/20230912021727.61601-1-vernhao@tencent.com/">https://patchew.org/linux/20230912021727.61601-1-vernhao@tencent.com/</a></p>
 
                 
@@ -1139,7 +1141,7 @@ Example:
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290.5k</span>&nbsp;字
+                class="white-color">303.8k</span>&nbsp;字
             
             
             

@@ -461,14 +461,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    3.3k
+                    3.6k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    13 分
+                    15 分
                 </div>
                 
 
@@ -771,7 +771,23 @@
     <span class="token keyword">return</span> page<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h2 id="6-透明大页扩展"><a href="#6-透明大页扩展" class="headerlink" title="6. 透明大页扩展"></a>6. 透明大页扩展</h2><p>透明大页作为复合页（Compound Page）的一种特定实现，内核用（2MB = 512 × 4KB） 512 个 struct page 组成的数组来描述它。这个数组也是一种复合页，可以将其看作元数据。传统内核中，作为透明大页的元数据仅 page[0] (头页) 和 第一、二个尾页（page[1],page[2]）被充分利用，其余部分为空白填充。可以利用复合页尾页中原本未使用的 struct page 空间，存储页面热度元数据，可以在不增加额外内存开销的情况下存储大页和基础页面的访问数据。</p>
+<h2 id="6-透明大页扩展"><a href="#6-透明大页扩展" class="headerlink" title="6. 透明大页扩展"></a>6. 透明大页扩展</h2><p>在内核的 struct page 中，有 union 成员，不同页面所使用的 union 成员不同。Linux 内核通过 compound page 来管理透明大页面，union 成员是 compound_head（基础页、slab、页表页之类的union又不一样）。一个 compound page 是由多个 struct page 组成的结构，其中：</p>
+<ul>
+<li>一个透明大页面（如 2MB 大页面）通常由 512 个连续的 4KB 页（基础页）组成。</li>
+<li>每个基础页都有一个对应的 struct page，即透明大页面的元数据是由 512 个 struct page 描述的。这个数组也是一种复合页，可以将其看作元数据。</li>
+</ul>
+<p>传统内核中，作为透明大页的元数据仅 page[0] (头页) 和 第一、二个尾页（page[1],page[2]）被充分利用，其余部分为空白填充:</p>
+<ul>
+<li>前 3 个 struct page（编号为 0-2）被内核用作管理整个透明大页面的信息：Head page（编号 0）：用于存储复合页面的元数据。</li>
+<li>前两个尾页面（编号 1 和 2）：扩展字段，用于存储复合页面的引用计数、延迟释放等信息。</li>
+<li>剩下的 509 个 struct page（编号 3-511）：通常是未使用的，因为这些页面只是被保留为基础页的占位符。</li>
+<li>每个 struct page 占用 64 字节（在大多数 64 位系统中），而一个THP有 512 个 struct page，因此总元数据大小为：64字节×512=32KB。<br>可以利用复合页尾页中原本未使用的 struct page 空间，存储页面热度元数据，可以在不增加额外内存开销的情况下存储大页和基础页面的访问数据。</li>
+</ul>
+<div class="note danger no-icon">
+一些可能容易混淆的地方：
+- THP 的 512 个 struct page 是由内核单独管理的，并且存储在内核维护的全局页框描述数组（mem_map） 中。这些元数据并不占用 THP 的物理空间。
+</div>
+
 <h3 id="6-1-数据结构"><a href="#6-1-数据结构" class="headerlink" title="6.1 数据结构"></a>6.1 数据结构</h3><p>具体来说，利用复合页的 page[3]（第三尾页）作为透明大页面的元数据页，记录透明大页面被访问的次数；page[4] 开始存储子页（组成透明大页面的基础页） 元数据。一个尾页可存储4个子页元数据，第 5-132 个尾页存 512 个透明大页子页的元数据。修改后的复合页结构如下图所示：<br><img src="/images/THP.png"></p>
 <blockquote>
 <p>对于 4kb 基础页（不是复合页面了，没有复合页的元数据结构 padding 可用了），使用页表的 padding 记录访问元数据。一个 PTE 页表管理 512 个用户页，PTE 页表的 struct page 存一个 pginfo_t * 指针，指向额外分配的 4KB 元数据页，里面存 512 个 pginfo_t。这部分会有额外开销。</p>
@@ -1298,7 +1314,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290.5k</span>&nbsp;字
+                class="white-color">303.8k</span>&nbsp;字
             
             
             

@@ -553,7 +553,7 @@ CONFIG_CGROUP_UNIFIED_SYSTEMD=y<span aria-hidden="true" class="line-numbers-rows
 <p>运行脚本<code>sudo cgexec -g memory:memhog-limiter ./memhog.sh</code>查看这个内存控制组里的pid<code>cat  /sys/fs/cgroup/memhog-limiter/cgroup.procs</code></p>
 <p><img src="https://images.weserv.nl/?url=https://img-blog.csdnimg.cn/98414239c59242a1b9a5d84302694121.png"></p>
 <p>显然没有控制住，emmmm到底什么原因？后来发现还是得在grub设置<code>systemd.unified_cgroup_hierarchy=1</code>才行。</p>
-<h2 id="2-3-内存cgroup创建原理和记账过程"><a href="#2-3-内存cgroup创建原理和记账过程" class="headerlink" title="2.3.内存cgroup创建原理和记账过程"></a>2.3.内存cgroup创建原理和记账过程</h2><p>在进程<code>task_struct</code>结构中，<code>*cgroup</code>指向了所关联的各种cgroup，对内存限制是通过<code>mem_cgroup</code>来实现的：<br><img src="/images/cgroup_task.png.jpg"></p>
+<h2 id="2-3-内存cgroup创建原理和记账过程"><a href="#2-3-内存cgroup创建原理和记账过程" class="headerlink" title="2.3.内存cgroup创建原理和记账过程"></a>2.3.内存cgroup创建原理和记账过程</h2><p>在进程<code>task_struct</code>结构中，<code>*cgroup</code>指向了所关联的各种cgroup，对内存限制是通过<code>mem_cgroup</code>来实现的：<br><img src="/images/cgroup_task.png"></p>
 <p>cgroup 框架需要管理多个子系统（如 memory_cgroup、cpu_cgroup 等），但不同子系统的控制结构可能完全不同。为了统一回调函数的参数，内核使用 struct cgroup_subsys_state 作为通用接口，而具体的子系统（如 mem_cgroup）会内嵌这个结构体： </p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// include/linux/cgroup-defs.h</span>
 
@@ -1010,7 +1010,7 @@ root          <span class="token number">12</span>       <span class="token numb
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290.5k</span>&nbsp;字
+                class="white-color">303.8k</span>&nbsp;字
             
             
             

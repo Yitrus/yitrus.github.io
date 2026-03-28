@@ -465,14 +465,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    7.1k
+                    5.3k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    25 分
+                    18 分
                 </div>
                 
 
@@ -653,161 +653,6 @@ CPU中有一个标志字段，标志着线程的运行状态。用户态和内�
 <li><strong>页表页的映射</strong>（嵌套转换）：缓存页表自身的物理地址（用于多级页表遍历）。</li>
 </ul>
 <p>TLB（Translation Lookaside Buffer）可以缓存页表项的物理地址（即页表页的物理帧号），也可以缓存 虚拟数据页面对应的物理页帧号。</p>
-<hr>
-<h2 id="典型缺页场景"><a href="#典型缺页场景" class="headerlink" title="典型缺页场景"></a>典型缺页场景</h2><p>几个大的缺页场景有了解过吗?</p>
-<table>
-<thead>
-<tr>
-<th>场景</th>
-<th>触发点</th>
-<th>缺页类型</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1. 冷启动</td>
-<td>进程刚 <code>exec()</code>，代码段/数据段第一次被访问</td>
-<td>Major</td>
-<td>磁盘→内存，把 ELF 文件读进来</td>
-</tr>
-<tr>
-<td>2. 换入换出</td>
-<td>内存紧张，kswapd 把匿名页换到 swap；进程再次访问</td>
-<td>Major</td>
-<td>把 swap 区里的页面重新读回内存</td>
-</tr>
-<tr>
-<td>3. <font style="background-color:#f3bb2f;">写时复制</font></td>
-<td><code>fork()</code> 后父子共享只读页，任一写触发 COW</td>
-<td><font style="background-color:#f3bb2f;">Minor</font></td>
-<td>页已在内存，只重映射并复制一份</td>
-</tr>
-<tr>
-<td>4. <font style="background-color:#f3bb2f;">延迟分配</font></td>
-<td>首次 <code>malloc/brk</code> 得到虚拟地址，真正写时</td>
-<td><font style="background-color:#f3bb2f;">Minor</font></td>
-<td>比如<strong>共享库页</strong>：其他进程已加载到内存，当前进程访问</td>
-</tr>
-<tr>
-<td>5. 文件映射</td>
-<td><code>mmap()</code> 文件后首次读写对应页</td>
-<td>Major</td>
-<td>文件系统→页缓存，把磁盘块搬进内存</td>
-</tr>
-<tr>
-<td>6. 巨型页回落</td>
-<td>申请 HugePage 失败，内核退而求其次用 4 KB 页</td>
-<td>Minor</td>
-<td>大页拆小页，页表重填，数据仍在内存</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="free-命令中的buffer和cache什么情况下用到"><a href="#free-命令中的buffer和cache什么情况下用到" class="headerlink" title="free 命令中的buffer和cache什么情况下用到"></a>free 命令中的buffer和cache什么情况下用到</h2><p>使用<code>free</code>命令可以查看系统的内存使用情况。</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c">free <span class="token operator">-</span>h<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p><code>-h</code>选项用于以人类可读的方式显示内存大小，例如使用GB、MB等单位。</p>
-<p>命令的输出会包含以下列：</p>
-<ol>
-<li><code>total</code>：系统内存的总量。</li>
-<li><code>used</code>：已使用的内存量。</li>
-<li><code>free</code>：空闲的内存量。</li>
-<li><code>shared</code>：用于共享内存的内存量。</li>
-<li><code>buffers</code>：用于缓冲区的内存量。</li>
-<li><code>cached</code>：用于缓存的内存量。</li>
-<li><code>available</code>：可用的内存量。</li>
-</ol>
-<blockquote>
-<p>available 是系统目前可供使用的最大内存，free是指直接可用的内存。他们的差值来源于buff/cache（虽然是已分配给缓存和缓冲区的）系统有需要的话可以拿出一部分内存给进程用。</p>
-</blockquote>
-<p>下面是一个示例输出：</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c">              total        used        free      shared  buff<span class="token operator">/</span>cache   available
-Mem<span class="token operator">:</span>           <span class="token number">7.7</span>G        <span class="token number">3.2</span>G        <span class="token number">1.5</span>G        <span class="token number">500</span>M        <span class="token number">3.0</span>G        <span class="token number">3.8</span>G
-Swap<span class="token operator">:</span>          <span class="token number">2.0</span>G        <span class="token number">1.2</span>G        <span class="token number">819</span>M<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-
-<p>在这个示例中，系统的总内存为7.7GB，已使用的内存为3.2GB，空闲的内存为1.5GB。同时，有500MB的内存用于共享，3.0GB的内存用于缓存，还有3.8GB的内存可用。</p>
-<p>“cache”部分表示操作系统所使用的<strong>文件系统缓存</strong>，也就是磁盘上的文件数据的副本，以提高读取文件的性能。这个缓存会根据系统的需求动态地调整大小。通常，较大的cache值表示系统正在积极地使用内存来缓存文件数据，以提高读写文件的速度。buffer cache,主要用于存放块设备的缓冲数据。</p>
-<hr>
-<h2 id="内存回收"><a href="#内存回收" class="headerlink" title="内存回收"></a>内存回收</h2><p>Linux内核为每个内存区域（zone）定义了三个水位（单位是页面数）：</p>
-<ul>
-<li>High (high watermark)：理想空闲内存量，异步回收的目标水位。（<code>free_pages（伙伴系统的链表） &lt; high</code> → <code>kswapd</code>启动。）</li>
-<li>Low (low watermark)：直接回收的触发阈值，低于此值会同步回收。</li>
-<li>Min (min watermark)：极端内存压力下的阈值，可能触发OOM Killer。</li>
-</ul>
-<h3 id="1-直接内存回收（Direct-Reclaim）"><a href="#1-直接内存回收（Direct-Reclaim）" class="headerlink" title="1. 直接内存回收（Direct Reclaim）"></a>1. 直接内存回收（Direct Reclaim）</h3><p>系统发现<strong>空闲内存低于最低水位（min watermark）</strong>，且无法通过其他途径（如缓存释放）获得足够内存，内核会<strong>同步阻塞当前进程</strong>，立即执行内存回收，直到释放足够内存供分配。</p>
-<p><strong>回收目标</strong>：包括页面缓存（Page Cache）、slab缓存、匿名页（可能触发交换SWAP）。</p>
-<h3 id="2-异步内存回收（Background-Reclaim）"><a href="#2-异步内存回收（Background-Reclaim）" class="headerlink" title="2. 异步内存回收（Background Reclaim）"></a>2. 异步内存回收（Background Reclaim）</h3><p>由内核线程<code>kswapd</code>在后台定期检查内存水位，若空闲内存<strong>低于高水位（high watermark）但高于最低水位（min）</strong>，<code>kswapd</code>会<strong>异步回收内存</strong>，提前释放页面。</p>
-<p><strong>回收策略</strong>：优先回收干净页面（如未修改的Page Cache），减少I/O压力。</p>
-<blockquote>
-<p>OOM Killer 的选择并非随机，而是基于一个评分算法。计算 <code>oom_score</code> 的核心思想是：<strong>在内存紧张的情况下，杀死一个进程能释放大量内存，同时造成的系统损失（代价）又最小。</strong>（父进程、用户级进程、运行时间很长的进程例如数据库服务、守护进程的分数更高）</p>
-</blockquote>
-<hr>
-<h2 id="内存碎片有哪些"><a href="#内存碎片有哪些" class="headerlink" title="内存碎片有哪些"></a>内存碎片有哪些</h2><table>
-<thead>
-<tr>
-<th>类型</th>
-<th>定义</th>
-<th>产生原因</th>
-<th>影响</th>
-<th>常见场景</th>
-<th>解决办法</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>外部碎片</td>
-<td>空闲区不连续</td>
-<td>多次分配与释放</td>
-<td>无法分配大块连续空间</td>
-<td>堆分配、OS内核</td>
-<td>压缩、分页、伙伴系统</td>
-</tr>
-<tr>
-<td>内部碎片</td>
-<td>已分配的内存块中，未被实际使用的部分</td>
-<td>固定块、对齐</td>
-<td>内存浪费</td>
-<td>malloc/slab分配器</td>
-<td>减小粒度、分级分配</td>
-</tr>
-<tr>
-<td>页碎片</td>
-<td>页内部碎片：一个页未被完全利用。      页表碎片：页表项分散或页帧映射不连续。</td>
-<td>页管理机制</td>
-<td>性能下降</td>
-<td>虚拟内存、数据库</td>
-<td>大页、NUMA优化</td>
-</tr>
-<tr>
-<td>文件碎片</td>
-<td>文件块不连续</td>
-<td>文件频繁修改</td>
-<td>I/O变慢</td>
-<td>文件系统</td>
-<td>磁盘整理、碎片整理</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="内存分配"><a href="#内存分配" class="headerlink" title="内存分配"></a>内存分配</h2><h3 id="1-伙伴系统"><a href="#1-伙伴系统" class="headerlink" title="1. 伙伴系统"></a>1. 伙伴系统</h3><p>伙伴系统一次能够分配的最大连续内存块为 $ 2^{10} $ 个页面，即 1024 个页面，4MB。<br>THP 的分配对应于 order 为 9 的内存，也从伙伴系统分配。</p>
-<h3 id="2-缺页异常"><a href="#2-缺页异常" class="headerlink" title="2. 缺页异常"></a>2. 缺页异常</h3><h4 id="Minor-Fault（次要缺页）"><a href="#Minor-Fault（次要缺页）" class="headerlink" title="Minor Fault（次要缺页）"></a>Minor Fault（次要缺页）</h4><ul>
-<li>当虚拟页没有映射到进程的页表上，但它实际上已经在物理内存中（比如共享页或已经在内存缓存中）时发生。</li>
-<li>处理这类缺页异常不需要从磁盘读取数据，只需要更新页表即可。</li>
-</ul>
-<h4 id="Major-Fault（主要缺页）"><a href="#Major-Fault（主要缺页）" class="headerlink" title="Major Fault（主要缺页）"></a>Major Fault（主要缺页）</h4><ul>
-<li>当虚拟页不在物理内存中，需要从 <strong>磁盘（swap 或文件）</strong> 读取到内存中才能继续执行时发生。</li>
-</ul>
-<h4 id="触发条件"><a href="#触发条件" class="headerlink" title="触发条件"></a>触发条件</h4><ul>
-<li>CPU 尝试访问虚拟地址对应的页，但 <strong>页表中没有有效映射</strong>。</li>
-<li>并且该页 <strong>不在物理内存中</strong>（或者被换出到 swap 区）。</li>
-<li>系统捕获到缺页异常 → 进入内核处理。</li>
-</ul>
-<h4 id="处理过程"><a href="#处理过程" class="headerlink" title="处理过程"></a>处理过程</h4><ul>
-<li>处理器将当前执行状态保存到内核栈。</li>
-<li>跳转到操作系统的缺页异常处理程序（page fault handler）。</li>
-<li>检查缺页地址：是否属于有效的虚拟内存区域（进程已经分配了虚拟内存的地址范围，或者操作系统可以为其分配（如堆或栈可按需扩展）），如果访问非法地址 → <strong><font style="background-color:#f3bb2f;">Segmentation fault</font></strong><font style="background-color:#f3bb2f;">。</font></li>
-<li>OS 查找空闲物理页：如果内存充足，直接分配（选择内存区域（zone）+伙伴系统<code>free area</code>）。如果内存不足 → 触发 <strong>页替换算法</strong>（如 LRU、Clock），选择某页换出到 swap 区释放空间。</li>
-<li>写入页内容：文件页从可执行文件或共享库文件中读取到内存；匿名页如果第一次访问，通常初始化为全零页；如果之前被换出，则从swap 区读取回内存。<font style="background-color:#f3bb2f;">major fault 的核心开销，涉及 </font><strong><font style="background-color:#f3bb2f;">磁盘 I/O</font></strong><font style="background-color:#f3bb2f;">，通常耗时几毫秒。minor fault也会到内核态，但是物理内存已经有想要的页面了，直接改页表就好了。</font></li>
-<li>更新页表：将新分配的物理页与虚拟地址映射到页表中，刷新CPU TLB</li>
-<li>返回用户态：恢复 CPU 状态，重新执行引发缺页的指令。</li>
-</ul>
 
                 
             </div>
@@ -1178,7 +1023,7 @@ Swap<span class="token operator">:</span>          <span class="token number">2.
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290.5k</span>&nbsp;字
+                class="white-color">303.8k</span>&nbsp;字
             
             
             

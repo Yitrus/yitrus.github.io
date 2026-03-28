@@ -431,6 +431,10 @@
                                 <span class="chip bg-color">memcg</span>
                             </a>
                         
+                            <a href="/tags/cgroup/">
+                                <span class="chip bg-color">cgroup</span>
+                            </a>
+                        
                     </div>
                     
                 </div>
@@ -461,14 +465,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.9k
+                    3.2k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    13 分
+                    14 分
                 </div>
                 
 
@@ -492,6 +496,7 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p>关于cgroup，memcg，还有与task之间的联系我在另一篇博客<a target="_blank" rel="noopener" href="https://yitrus.github.io/2023/10/29/cgroup%E5%92%8Cnamespace/">cgroup和namespace</a>有写。</p>
+<p>本次讨论聚焦于 Linux 内核中的内存控制子系统（memcg），系统性地梳理了 cgroup、css_set、mem_cgroup 等核心数据结构之间的关系及其作用。我们深入分析了如何通过 task_struct 获取所属 memcg 信息、mem_cgroup_per_node 的设计初衷以及它在 NUMA 架构下的意义。进一步地，讨论还涵盖了如何通过扩展 alloc_pages_vma() 实现基于 NUMA 节点的 memcg 精细化页分配限制，以及如何注册 cgroup 接口文件（cftype[]），控制和监控每个节点的内存使用。整体内容构建了一条从内核机制理解到实际内存策略定制的清晰路径。</p>
 <h2 id="1-让-memcg-统计每个-NUMA-的信息"><a href="#1-让-memcg-统计每个-NUMA-的信息" class="headerlink" title="1. 让 memcg 统计每个 NUMA 的信息"></a>1. 让 memcg 统计每个 NUMA 的信息</h2><p>在多个NUMA的系统中，一个task的内存可能从多个NUMA中分配，所以一个memcg会用<code>mem_cgroup_per_node</code>区分每个NUMA的信息。它的核心作用是实现内存控制组的NUMA局部性统计、回收和限制，确保内存资源分配和回收能够感知NUMA架构的物理拓扑。如果要在NUMA节点间做内存调度需要关注这部分，在5.15.19这个内核是没有实现按照NUMA节点粒度来限制内存分配和回收的。</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// include/linux/memcontrol.h</span>
 <span class="token keyword">struct</span> <span class="token class-name">mem_cgroup</span> <span class="token punctuation">{</span>
@@ -525,7 +530,7 @@
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h2 id="2-cgroup-控制文件增加对-NUMA-节点的控制"><a href="#2-cgroup-控制文件增加对-NUMA-节点的控制" class="headerlink" title="2. cgroup 控制文件增加对 NUMA 节点的控制"></a>2. cgroup 控制文件增加对 NUMA 节点的控制</h2><p>首先给控制文件增 NUMA 标志：</p>
+<h2 id="2-cgroup-控制文件增加对-NUMA-节点的控制"><a href="#2-cgroup-控制文件增加对-NUMA-节点的控制" class="headerlink" title="2. cgroup 控制文件增加对 NUMA 节点的控制"></a>2. cgroup 控制文件增加对 NUMA 节点的控制</h2><p>struct cgroup_subsys_state（简称 css）是 Linux 内核中 CGroup 子系统的核心数据结构之一，用于连接一个特定的 cgroup 和某个具体的控制器子系统（比如 memory、cpu、io 等）之间的状态与上下文。<br>首先给控制文件增 NUMA 标志：</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// include/linux/cgroup-defs.h</span>
 <span class="token keyword">struct</span> <span class="token class-name">cftype</span> <span class="token punctuation">{</span>
 	<span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>name<span class="token punctuation">;</span>  <span class="token comment">// 文件名，例如 "memory.limit_in_bytes"</span>
@@ -546,6 +551,7 @@
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>每个 cgroup 控制器（如 memory、cpu、blkio）都可以定义很多用户可见的控制文件，它们的行为由<code>struct cftype</code> 决定。之后增加接口会涉及到这部分的读写指针的使用。</p>
+<p>假如我有parent cgroup ，我得获取他的cgroup结构体，然后获取cgroup_subsys_state数组，遍历找到cgroup_subsys是内存的，这个时候我就能从 css 获取 mem_cgroup即拿到了关于这个parent cgroup 的内存信息。</p>
 <h3 id="2-1-将-cgroup-控制文件添加到-NUMA-节点"><a href="#2-1-将-cgroup-控制文件添加到-NUMA-节点" class="headerlink" title="2.1 将 cgroup 控制文件添加到 NUMA 节点"></a>2.1 将 cgroup 控制文件添加到 NUMA 节点</h3><p>在NUMA架构中存在多个内存节点，每个内存节点在Linux内核用<code>pg_data_t</code>类型(实际是<code>struct pglist_data</code>)来表示。要实现memcg 的 NUMA 粒度控制还需要：</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// include/linux/mmzone.h</span>
 <span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">pglist_data</span> <span class="token punctuation">{</span>
@@ -964,6 +970,10 @@ out<span class="token operator">:</span>
                                     <span class="chip bg-color">memcg</span>
                                 </a>
                             
+                                <a href="/tags/cgroup/">
+                                    <span class="chip bg-color">cgroup</span>
+                                </a>
+                            
                         </div>
                     
                 </div>
@@ -1100,12 +1110,12 @@ out<span class="token operator">:</span>
                         <span class="chip bg-color">memcg</span>
                     </a>
                     
-                    <a href="/tags/THP/">
-                        <span class="chip bg-color">THP</span>
-                    </a>
-                    
                     <a href="/tags/cgroup/">
                         <span class="chip bg-color">cgroup</span>
+                    </a>
+                    
+                    <a href="/tags/THP/">
+                        <span class="chip bg-color">THP</span>
                     </a>
                     
                 </div>
@@ -1254,7 +1264,7 @@ out<span class="token operator">:</span>
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">290.5k</span>&nbsp;字
+                class="white-color">303.8k</span>&nbsp;字
             
             
             

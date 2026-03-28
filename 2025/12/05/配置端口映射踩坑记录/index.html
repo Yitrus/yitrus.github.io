@@ -1,0 +1,1240 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="配置端口映射踩坑记录, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>配置端口映射踩坑记录 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/9.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">配置端口映射踩坑记录</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/%E7%BD%91%E7%BB%9C/">
+                                <span class="chip bg-color">网络</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2025-12-05
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    1.1k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    4 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="端口映射需求分析"><a href="#端口映射需求分析" class="headerlink" title="端口映射需求分析"></a>端口映射需求分析</h2><p><strong>1. 让外网访问Web服务</strong></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 先确认Web服务是否在运行，监听什么端口</span>
+ss <span class="token parameter variable">-tulpn</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">':80'</span>
+ss <span class="token parameter variable">-tulpn</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">':443'</span>
+
+<span class="token comment"># 如果没有Web服务，你需要安装一个（如Nginx/Apache）</span>
+<span class="token comment"># 然后将路由器的外网端口映射到服务器的80端口</span>
+<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> nginx
+
+<span class="token comment"># 启动并设置开机自启</span>
+<span class="token function">sudo</span> systemctl start nginx
+<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> nginx
+
+<span class="token comment"># 验证80端口在监听</span>
+<span class="token function">curl</span> http://localhost<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>2. 通过外网SSH连接</strong></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># SSH已经在监听某个端口（默认22或自定义）</span>
+ss <span class="token parameter variable">-tulpn</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token function">ssh</span>
+
+<span class="token comment"># 将路由器的外网SSH端口映射到服务器的SSH端口</span>
+<span class="token comment"># 例如：路由器2222 → 服务器22</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>但是哦，服务器上的22端口一般是内网用的，SSH端口映射一般选用高位端口。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 修改服务器SSH端口（比如改成 2222）</span>
+<span class="token function">sudo</span> <span class="token function">nano</span> /etc/ssh/sshd_config
+<span class="token comment"># 找到 #Port 22，改为：</span>
+Port <span class="token number">22</span>      <span class="token comment"># 保留22给内网用（可选）</span>
+Port <span class="token number">2222</span>    <span class="token comment"># 添加新端口</span>
+
+<span class="token comment"># 2. 重启SSH服务</span>
+<span class="token function">sudo</span> systemctl restart sshd
+
+<span class="token comment"># 3. 防火墙开放新端口</span>
+<span class="token comment"># Ubuntu/Debian:</span>
+<span class="token function">sudo</span> ufw allow <span class="token number">2222</span>/tcp
+
+<span class="token comment"># CentOS/RHEL:</span>
+<span class="token function">sudo</span> firewall-cmd <span class="token parameter variable">--permanent</span> --add-port<span class="token operator">=</span><span class="token number">2222</span>/tcp
+<span class="token function">sudo</span> firewall-cmd <span class="token parameter variable">--reload</span>
+
+<span class="token comment"># 4. 路由器映射</span>
+<span class="token comment"># 外网端口：2222 → 内网IP:2222</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="检查当前SSH端口"><a href="#检查当前SSH端口" class="headerlink" title="检查当前SSH端口"></a>检查当前SSH端口</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看SSH实际监听的端口</span>
+ss <span class="token parameter variable">-tlnp</span> <span class="token operator">|</span> <span class="token function">grep</span> sshd
+<span class="token function">netstat</span> <span class="token parameter variable">-tlnp</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token function">ssh</span>
+
+<span class="token comment"># 查看SSH配置</span>
+<span class="token function">sudo</span> <span class="token function">grep</span> <span class="token parameter variable">-i</span> port /etc/ssh/sshd_config
+
+<span class="token comment"># ssh登陆</span>
+<span class="token function">ssh</span> <span class="token parameter variable">-p</span> 端口号 用户名@服务器地址
+
+<span class="token comment"># 测特定端口是否开放</span>
+telnet <span class="token number">192.168</span>.1.100 <span class="token number">22</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>于是发现：能ping通机器但是ssh加上端口2222后链接被拒绝；但是端口22依然能登陆上。并且实际监听没有新添加的2222端口。</p>
+<h2 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h2><p><strong>1. 配置文件语法错误</strong></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 检查配置文件语法</span>
+<span class="token function">sudo</span> sshd <span class="token parameter variable">-t</span>
+
+<span class="token comment"># 如果有错误，会显示具体位置</span>
+<span class="token comment"># 常见错误：缺少空格，格式错误等</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>2. SSH服务没有正确重启</strong><br>其实22端口能登陆已经证明重启成功了。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看SSH服务状态</span>
+<span class="token function">sudo</span> systemctl status sshd
+<span class="token comment"># 或</span>
+<span class="token function">sudo</span> <span class="token function">service</span> <span class="token function">ssh</span> status
+
+<span class="token comment"># 查看日志中的错误信息</span>
+<span class="token function">sudo</span> journalctl <span class="token parameter variable">-u</span> sshd <span class="token parameter variable">--since</span> <span class="token string">"5 minutes ago"</span>
+<span class="token function">sudo</span> <span class="token function">tail</span> <span class="token parameter variable">-50</span> /var/log/auth.log  <span class="token comment"># Ubuntu/Debian</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>3. 端口被占用</strong><br>查看SSH实际监听的端口时已经没显示这个端口，所以应该也不是被占用了。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 检查2222端口是否被其他程序占用</span>
+<span class="token function">sudo</span> <span class="token function">lsof</span> <span class="token parameter variable">-i</span> :2222
+<span class="token function">sudo</span> ss <span class="token parameter variable">-tlnp</span> <span class="token operator">|</span> <span class="token function">grep</span> :2222<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>4. 检查SSH服务实际使用的配置文件</strong><br>前面的排查说明：Port 2222 根本没被 sshd 解析进最终配置！sshd_config 可能被 include 覆盖，Ubuntu 22.04+ 开始，真正生效的配置不一定只看 <code>/etc/ssh/sshd_config</code></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 主配置里有没有 include</span>
+<span class="token function">grep</span> <span class="token parameter variable">-i</span> include /etc/ssh/sshd_config
+<span class="token comment"># 可能输出：Include /etc/ssh/sshd_config.d/*.conf，那么需要检查这个目录</span>
+
+<span class="token function">ls</span> <span class="token parameter variable">-l</span> /etc/ssh/sshd_config.d/
+<span class="token comment"># 如果有输出50-cloud-init.conf 00-defaults.conf 可能会覆盖Port</span>
+
+<span class="token comment"># 找出到底谁在定义 Port</span>
+<span class="token function">grep</span> <span class="token parameter variable">-R</span> <span class="token string">"^Port"</span> /etc/ssh/
+
+<span class="token comment"># 如果输出如下，说明最后生效的是 50-cloud-init.conf 的 Port 22</span>
+/etc/ssh/sshd_config:Port <span class="token number">22</span>
+/etc/ssh/sshd_config:Port <span class="token number">2222</span>
+/etc/ssh/sshd_config.d/50-cloud-init.conf:Port <span class="token number">22</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>但是笔者<code>ls -l /etc/ssh/sshd_config.d/</code>里面是空的，共计0；<code>grep -R "^Port" /etc/ssh/</code>也只出现在<code>/etc/ssh/sshd_config</code></p>
+<h2 id="最终解决"><a href="#最终解决" class="headerlink" title="最终解决"></a>最终解决</h2><p>上述四个问题都不是，最后chatGPT发现了原因：不是配置问题。Ubuntu 24.04 默认行为用的是 systemd 的 socket 激活模式，ssh.socket 只监听了 22 端口，sshd_config 里的 Port 2222 被完全忽略了。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> systemctl status ssh.socket
+<span class="token comment"># 输出类似：</span>
+Loaded: loaded <span class="token punctuation">(</span>/lib/systemd/system/ssh.socket<span class="token punctuation">;</span> enabled<span class="token punctuation">)</span>
+Active: active <span class="token punctuation">(</span>listening<span class="token punctuation">)</span>
+Listen: <span class="token number">0.0</span>.0.0:22
+
+<span class="token function">sudo</span> systemctl status ssh.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>因为 ssh.service 是被 socket 拉起的，sshd 不会自己 bind 端口。在 socket 激活模式下，监听端口的是 ssh.socket，所以sshd_config 里的 Port 才会不起作用。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 关闭 socket 激活，回到传统 sshd</span>
+<span class="token function">sudo</span> systemctl disable <span class="token parameter variable">--now</span> ssh.socket
+<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> <span class="token parameter variable">--now</span> ssh.service
+<span class="token comment"># 确认 sshd 自己在监听端口</span>
+ss <span class="token parameter variable">-tlnp</span> <span class="token operator">|</span> <span class="token function">grep</span> sshd<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>在 ssh.socket 模式下，端口属于 systemd，不属于 sshd</strong></p>
+<h2 id="进一步提问"><a href="#进一步提问" class="headerlink" title="进一步提问"></a>进一步提问</h2><p>ssh.socket和ssh.service，区别是什么，为什么要有这两种启动 sshd 的方式？</p>
+<ul>
+<li>ssh.service = 传统模式（sshd 自己监听端口）</li>
+<li>ssh.socket = systemd 帮你监听端口，再“按需唤醒”sshd</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>ssh.service</th>
+<th>ssh.socket</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>谁监听端口</td>
+<td>sshd</td>
+<td>systemd</td>
+</tr>
+<tr>
+<td>Port 配置生效</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>是否常驻</td>
+<td>是</td>
+<td>否（按需）</td>
+</tr>
+<tr>
+<td>启动速度</td>
+<td>稍慢</td>
+<td>更快（懒加载）</td>
+</tr>
+<tr>
+<td>可控性</td>
+<td>高</td>
+<td>较低</td>
+</tr>
+<tr>
+<td>适合场景</td>
+<td>服务器 / 运维</td>
+<td>轻量 / 节能</td>
+</tr>
+</tbody></table>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2025/12/05/%E9%85%8D%E7%BD%AE%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/">http://ytirus.github.io/2025/12/05/%E9%85%8D%E7%BD%AE%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/%E7%BD%91%E7%BB%9C/">
+                                    <span class="chip bg-color">网络</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2025/12/15/%E8%AE%A1%E7%BD%91%E5%85%AB%E8%82%A1/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/30.jpg" class="responsive-img" alt="计算机网络常考八股">
+                        
+                        <span class="card-title">计算机网络常考八股</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            记录面试遇到的一些问题。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2025-12-15
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E7%BD%91%E7%BB%9C/">
+                        <span class="chip bg-color">网络</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2025/11/27/%E6%8E%A2%E7%A7%98proc%E5%92%8Csys%E4%B8%8B%E7%9A%84%E5%86%85%E5%AD%98%E6%8E%A5%E5%8F%A3/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/34.jpg" class="responsive-img" alt="探秘proc和sys下的内存接口">
+                        
+                        <span class="card-title">探秘proc和sys下的内存接口</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            Linux 探秘 /proc 和 /sys 下的内存接口
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-11-27
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Memory/">
+                        <span class="chip bg-color">Memory</span>
+                    </a>
+                    
+                    <a href="/tags/VFS/">
+                        <span class="chip bg-color">VFS</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">303.8k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
