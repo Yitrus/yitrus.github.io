@@ -457,7 +457,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.5k
+                    1.4k
                 </div>
                 
 
@@ -493,8 +493,7 @@
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 Linux 系统中，内存管理对开发者来说往往像一个黑盒。我们通过 <code>free</code>、<code>top</code> 看到内存使用情况，但当真正遇到内存泄漏、共享内存异常、容器内存隔离等问题时，这些常规工具就显得力不从心了。</p>
 <p>实际上，内核通过 <code>/proc</code> 和 <code>/sys</code> 暴露了一系列底层接口，可以让我们窥探物理内存的每一个角落。本文将介绍几个这样的接口，帮助你在需要时深入诊断内存问题。</p>
 <hr>
-<h2 id="一、-proc-kpageflags：每个物理页的“身份证”"><a href="#一、-proc-kpageflags：每个物理页的“身份证”" class="headerlink" title="一、/proc/kpageflags：每个物理页的“身份证”"></a>一、/proc/kpageflags：每个物理页的“身份证”</h2><h3 id="是什么？"><a href="#是什么？" class="headerlink" title="是什么？"></a>是什么？</h3><p><code>/proc/kpageflags</code> 记录了系统中<strong>每一个物理页帧（Page Frame）的标志位信息</strong>。每个物理页都有一个 64 位的位掩码，描述了该页的各种属性和状态。</p>
-<h3 id="能获取什么信息？"><a href="#能获取什么信息？" class="headerlink" title="能获取什么信息？"></a>能获取什么信息？</h3><p>通过解析这些标志位，你可以知道一个物理页是：</p>
+<h2 id="一、-proc-kpageflags：每个物理页的“身份证”"><a href="#一、-proc-kpageflags：每个物理页的“身份证”" class="headerlink" title="一、/proc/kpageflags：每个物理页的“身份证”"></a>一、/proc/kpageflags：每个物理页的“身份证”</h2><p><code>/proc/kpageflags</code> 记录了系统中<strong>每一个物理页帧（Page Frame）的标志位信息</strong>。每个物理页都有一个 64 位的位掩码，描述了该页的各种属性和状态。通过解析这些标志位，你可以知道一个物理页是：</p>
 <ul>
 <li><strong>匿名页</strong>（进程堆、栈内存）还是<strong>文件页</strong>（缓存）</li>
 <li>是否被<strong>锁定</strong>（不可换出）</li>
@@ -517,8 +516,8 @@
 <span class="token comment"># 0x0000000000000864          12345       48  __RU_lA_____a______</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
-<h2 id="二、-proc-kpagecount：物理页的引用计数"><a href="#二、-proc-kpagecount：物理页的引用计数" class="headerlink" title="二、/proc/kpagecount：物理页的引用计数"></a>二、/proc/kpagecount：物理页的引用计数</h2><h3 id="是什么？-1"><a href="#是什么？-1" class="headerlink" title="是什么？"></a>是什么？</h3><p><code>/proc/kpagecount</code> 记录了每个物理页帧的<strong>引用计数</strong>，即当前有多少个虚拟地址（或内核子系统）引用了这个物理页。</p>
-<h3 id="为什么重要？"><a href="#为什么重要？" class="headerlink" title="为什么重要？"></a>为什么重要？</h3><ul>
+<h2 id="二、-proc-kpagecount：物理页的引用计数"><a href="#二、-proc-kpagecount：物理页的引用计数" class="headerlink" title="二、/proc/kpagecount：物理页的引用计数"></a>二、/proc/kpagecount：物理页的引用计数</h2><p><code>/proc/kpagecount</code> 记录了每个物理页帧的<strong>引用计数</strong>，即当前有多少个虚拟地址（或内核子系统）引用了这个物理页。用于：</p>
+<ul>
 <li>引用计数 = 0：空闲页</li>
 <li>引用计数 = 1：被单个进程独占</li>
 <li>引用计数 &gt; 1：被共享（共享内存、文件映射、KSM 合并页）</li>
@@ -532,8 +531,7 @@
 <span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/proc/kpagecount <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">8</span> <span class="token assign-left variable">skip</span><span class="token operator">=</span><span class="token number">9</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span> <span class="token operator"><span class="token file-descriptor important">2</span>&gt;</span>/dev/null <span class="token operator">|</span> od <span class="token parameter variable">-t</span> u8<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <hr>
-<h2 id="三、-proc-kpagecgroup：物理页的-cgroup-归属"><a href="#三、-proc-kpagecgroup：物理页的-cgroup-归属" class="headerlink" title="三、/proc/kpagecgroup：物理页的 cgroup 归属"></a>三、/proc/kpagecgroup：物理页的 cgroup 归属</h2><h3 id="是什么？-2"><a href="#是什么？-2" class="headerlink" title="是什么？"></a>是什么？</h3><p><code>/proc/kpagecgroup</code> 记录了每个物理页帧所属的<strong>内存控制组（cgroup）ID</strong>，用于跟踪内存资源的隔离情况。</p>
-<h3 id="前提条件"><a href="#前提条件" class="headerlink" title="前提条件"></a>前提条件</h3><p>内核需要启用 <code>CONFIG_MEMCG</code> 配置。</p>
+<h2 id="三、-proc-kpagecgroup：物理页的-cgroup-归属"><a href="#三、-proc-kpagecgroup：物理页的-cgroup-归属" class="headerlink" title="三、/proc/kpagecgroup：物理页的 cgroup 归属"></a>三、/proc/kpagecgroup：物理页的 cgroup 归属</h2><p><code>/proc/kpagecgroup</code> 记录了每个物理页帧所属的<strong>内存控制组（cgroup）ID</strong>，用于跟踪内存资源的隔离情况。前提条件是内核需要启用 <code>CONFIG_MEMCG</code> 配置。</p>
 <h3 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h3><ul>
 <li><strong>容器内存分析</strong>：精确定位每个容器的物理页占用</li>
 <li><strong>cgroup 泄漏排查</strong>：找出未被正确释放的 cgroup 内存</li>
@@ -543,8 +541,8 @@
 <li>ID 为 0 表示页不属于任何 cgroup</li>
 </ul>
 <hr>
-<h2 id="四、-sys-kernel-mm-page-idle-bitmap：空闲页跟踪"><a href="#四、-sys-kernel-mm-page-idle-bitmap：空闲页跟踪" class="headerlink" title="四、/sys/kernel/mm/page_idle/bitmap：空闲页跟踪"></a>四、/sys/kernel/mm/page_idle/bitmap：空闲页跟踪</h2><h3 id="是什么？-3"><a href="#是什么？-3" class="headerlink" title="是什么？"></a>是什么？</h3><p>这是内核 <strong>Idle Page Tracking</strong> 功能的接口，通过位图标记哪些物理页在一段时间内未被访问。</p>
-<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><ol>
+<h2 id="四、-sys-kernel-mm-page-idle-bitmap：空闲页跟踪"><a href="#四、-sys-kernel-mm-page-idle-bitmap：空闲页跟踪" class="headerlink" title="四、/sys/kernel/mm/page_idle/bitmap：空闲页跟踪"></a>四、/sys/kernel/mm/page_idle/bitmap：空闲页跟踪</h2><p>这是内核 <strong>Idle Page Tracking</strong> 功能的接口，通过位图标记哪些物理页在一段时间内未被访问。工作原理：</p>
+<ol>
 <li>用户空间向位图写入标记，通知内核哪些页应被视为空闲</li>
 <li>内核通过硬件 <code>PG_idle</code> 标志或软件模拟跟踪页面访问</li>
 <li>长期未访问的页被标记为“空闲”，可供回收或共享</li>
@@ -619,9 +617,6 @@
 <li><strong>内核版本差异</strong>：接口格式和标志位可能随内核版本变化，使用前请参考对应内核文档（<code>Documentation/admin-guide/mm/</code>）</li>
 <li><strong>不是日常工具</strong>：这些是调试和分析接口，不适合在生产环境频繁调用</li>
 </ol>
-<hr>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Linux 内核通过 <code>/proc</code> 和 <code>/sys</code> 提供了丰富的内存信息接口，让我们能够深入了解物理内存的使用情况。无论是排查内存泄漏、分析共享内存，还是优化容器内存隔离，这些接口都是强大的工具。</p>
-<p>下次当你遇到棘手的内存问题时，不妨试试这些“隐藏”的接口，它们可能会给你意想不到的答案。</p>
 <hr>
 <p><strong>参考文档</strong></p>
 <ul>
@@ -979,7 +974,7 @@
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">303.8k</span>&nbsp;字
+                class="white-color">316.8k</span>&nbsp;字
             
             
             

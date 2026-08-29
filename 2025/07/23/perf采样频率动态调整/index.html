@@ -461,7 +461,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.5k
+                    1.6k
                 </div>
                 
 
@@ -495,7 +495,7 @@
 <ul>
 <li>从 Perf Events 的 ring buffer 里读取样本</li>
 <li>处理样本数据</li>
-<li>根据自身实际 CPU 时间占用率，动态调整采样频率<br>这篇文章的介绍将略过采样和处理样本的部分，因为采样在之前博客里详细分析过（TODO）。这里主要调整的参数是<code>struct perf_event_attr sample_period</code></li>
+<li>根据自身实际 CPU 时间占用率，动态调整采样频率<br>这篇文章将略过采样和处理样本的部分，相关实现已在《<a href="/2025/03/21/%E8%87%AA%E5%AE%9A%E4%B9%89perf%E9%87%87%E6%A0%B7%E7%9A%84%E5%86%85%E6%A0%B8%E7%BA%BF%E7%A8%8B/">自定义 perf 采样的内核线程</a>》中详细介绍；Perf 子系统与 ring buffer 的基础原理可参考《<a href="/2024/06/07/perf%E9%87%87%E6%A0%B7/">perf 采样</a>》。这里主要调整的参数是 <code>struct perf_event_attr sample_period</code>。</li>
 </ul>
 <h2 id="二、线程初始化"><a href="#二、线程初始化" class="headerlink" title="二、线程初始化"></a>二、线程初始化</h2><h3 id="1-CPU-线程给定"><a href="#1-CPU-线程给定" class="headerlink" title="1. CPU 线程给定"></a>1. CPU 线程给定</h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">cpumask</span> <span class="token operator">*</span>cpumask <span class="token operator">=</span> <span class="token function">cpumask_of_node</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">cpumask_empty</span><span class="token punctuation">(</span>cpumask<span class="token punctuation">)</span><span class="token punctuation">)</span>
@@ -1010,7 +1010,7 @@ elapsed_cputime <span class="token operator">=</span> <span class="token functio
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">303.8k</span>&nbsp;字
+                class="white-color">316.8k</span>&nbsp;字
             
             
             
