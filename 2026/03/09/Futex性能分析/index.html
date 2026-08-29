@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析, Yi&#39;s Blog">
+    <meta name="keywords" content="Futex 性能分析, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析 | Yi&#39;s Blog</title>
+    <title>Futex 性能分析 | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -298,12 +298,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/47.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析</h1> -->
+                    <!-- <h1 class="description center-align post-title">Futex 性能分析</h1> -->
                 </div>
             </div>
         </div>
@@ -419,20 +419,20 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/R/">
-                                <span class="chip bg-color">R</span>
+                            <a href="/tags/Futex/">
+                                <span class="chip bg-color">Futex</span>
                             </a>
                         
-                            <a href="/tags/RNA-Seq/">
-                                <span class="chip bg-color">RNA-Seq</span>
+                            <a href="/tags/eBPF/">
+                                <span class="chip bg-color">eBPF</span>
                             </a>
                         
-                            <a href="/tags/DESeq2/">
-                                <span class="chip bg-color">DESeq2</span>
+                            <a href="/tags/libbpf/">
+                                <span class="chip bg-color">libbpf</span>
                             </a>
                         
-                            <a href="/tags/edgeR/">
-                                <span class="chip bg-color">edgeR</span>
+                            <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
+                                <span class="chip bg-color">性能分析</span>
                             </a>
                         
                     </div>
@@ -443,8 +443,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/Code-Development/" class="post-category">
-                                Code & Development
+                            <a href="/categories/OS/" class="post-category">
+                                OS
                             </a>
                         
                     </div>
@@ -456,7 +456,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2026-03-02
+                    2026-03-09
                 </div>
                 
 
@@ -465,14 +465,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    954
+                    1.8k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    4 分
+                    6 分
                 </div>
                 
 
@@ -495,89 +495,183 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>RNA-Seq 差异表达分析通常需要三类输入：基因表达计数矩阵、样本分组信息和基因注释。DESeq2 与 edgeR 都以原始整数 counts 为输入，通过负二项分布建模分析组间差异，但在标准化、离散度估计和统计检验上采用了不同实现。</p>
-<h2 id="一、准备数据"><a href="#一、准备数据" class="headerlink" title="一、准备数据"></a>一、准备数据</h2><pre class="line-numbers language-r" data-language="r"><code class="language-r">library<span class="token punctuation">(</span>dplyr<span class="token punctuation">)</span>
-library<span class="token punctuation">(</span>tibble<span class="token punctuation">)</span>
-library<span class="token punctuation">(</span>DESeq2<span class="token punctuation">)</span>
-library<span class="token punctuation">(</span>edgeR<span class="token punctuation">)</span>
-
-counts <span class="token operator">&lt;-</span> read.csv<span class="token punctuation">(</span><span class="token string">"airway_counts.csv"</span><span class="token punctuation">,</span> check.names <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">)</span>
-metadata <span class="token operator">&lt;-</span> read.csv<span class="token punctuation">(</span><span class="token string">"airway_metadata.csv"</span><span class="token punctuation">,</span> row.names <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span>
-anno <span class="token operator">&lt;-</span> read.csv<span class="token punctuation">(</span><span class="token string">"annotables_grch38.csv"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>表达矩阵应当每行对应一个基因、每列对应一个样本，metadata 每行对应一个样本。正式分析前首先确认二者顺序一致：</p>
-<pre class="line-numbers language-r" data-language="r"><code class="language-r">stopifnot<span class="token punctuation">(</span>all<span class="token punctuation">(</span>colnames<span class="token punctuation">(</span>counts<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">==</span> rownames<span class="token punctuation">(</span>metadata<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-stopifnot<span class="token punctuation">(</span>all<span class="token punctuation">(</span>counts<span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">==</span> round<span class="token punctuation">(</span>as.matrix<span class="token punctuation">(</span>counts<span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-
-<p>DESeq2 和 edgeR 需要原始整数计数，不能直接使用 TPM、FPKM、CPM 或经过缩放的数据。原始代码中的文件名是 <code>airway_scaledcounts.csv</code>，因此必须先确认文件内容；如果确实是 scaled counts，应回到比对或定量结果重新取得 raw counts。</p>
-<p>基因注释可以通过基因 ID 合并，但不建议简单使用 <code>distinct(symbol)</code> 丢弃重复 symbol，因为多个 Ensembl ID 可能映射到同一个 symbol。更稳妥的方式是保留稳定基因 ID 作为行名，将 symbol 作为结果注释；如果业务确实需要按 symbol 合并，应明确采用求和或其他规则。</p>
-<h2 id="二、使用-DESeq2"><a href="#二、使用-DESeq2" class="headerlink" title="二、使用 DESeq2"></a>二、使用 DESeq2</h2><pre class="line-numbers language-r" data-language="r"><code class="language-r">count_matrix <span class="token operator">&lt;-</span> counts <span class="token operator">|</span><span class="token operator">&gt;</span>
-  column_to_rownames<span class="token punctuation">(</span><span class="token string">"gene_id"</span><span class="token punctuation">)</span> <span class="token operator">|</span><span class="token operator">&gt;</span>
-  as.matrix<span class="token punctuation">(</span><span class="token punctuation">)</span>
-
-metadata<span class="token operator">$</span>dex <span class="token operator">&lt;-</span> relevel<span class="token punctuation">(</span>factor<span class="token punctuation">(</span>metadata<span class="token operator">$</span>dex<span class="token punctuation">)</span><span class="token punctuation">,</span> ref <span class="token operator">=</span> <span class="token string">"control"</span><span class="token punctuation">)</span>
-
-dds <span class="token operator">&lt;-</span> DESeqDataSetFromMatrix<span class="token punctuation">(</span>
-  countData <span class="token operator">=</span> count_matrix<span class="token punctuation">,</span>
-  colData <span class="token operator">=</span> metadata<span class="token punctuation">,</span>
-  design <span class="token operator">=</span> <span class="token operator">~</span> dex
-<span class="token punctuation">)</span>
-
-dds <span class="token operator">&lt;-</span> DESeq<span class="token punctuation">(</span>dds<span class="token punctuation">)</span>
-resultsNames<span class="token punctuation">(</span>dds<span class="token punctuation">)</span>
-
-res <span class="token operator">&lt;-</span> results<span class="token punctuation">(</span>dds<span class="token punctuation">,</span> contrast <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"dex"</span><span class="token punctuation">,</span> <span class="token string">"treated"</span><span class="token punctuation">,</span> <span class="token string">"control"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-res <span class="token operator">&lt;-</span> as.data.frame<span class="token punctuation">(</span>res<span class="token punctuation">)</span>
-res<span class="token operator">$</span>gene_id <span class="token operator">&lt;-</span> rownames<span class="token punctuation">(</span>res<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p><code>DESeq()</code> 已经依次完成 size factor、离散度和模型估计，一般不需要在它之后再次调用 <code>estimateSizeFactors()</code>。如果需要查看标准化计数，可以使用：</p>
-<pre class="line-numbers language-r" data-language="r"><code class="language-r">normalized_counts <span class="token operator">&lt;-</span> counts<span class="token punctuation">(</span>dds<span class="token punctuation">,</span> normalized <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
-<p>三组实验仍然使用同一设计公式，只需要重新构建包含正确分组的 <code>dds</code>，再分别提取对比结果：</p>
-<pre class="line-numbers language-r" data-language="r"><code class="language-r">metadata<span class="token operator">$</span>dex <span class="token operator">&lt;-</span> factor<span class="token punctuation">(</span>metadata<span class="token operator">$</span>dex<span class="token punctuation">,</span> levels <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"a"</span><span class="token punctuation">,</span> <span class="token string">"b"</span><span class="token punctuation">,</span> <span class="token string">"c"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-
-dds3 <span class="token operator">&lt;-</span> DESeqDataSetFromMatrix<span class="token punctuation">(</span>
-  countData <span class="token operator">=</span> count_matrix<span class="token punctuation">,</span>
-  colData <span class="token operator">=</span> metadata<span class="token punctuation">,</span>
-  design <span class="token operator">=</span> <span class="token operator">~</span> dex
-<span class="token punctuation">)</span>
-dds3 <span class="token operator">&lt;-</span> DESeq<span class="token punctuation">(</span>dds3<span class="token punctuation">)</span>
-
-res_b_vs_a <span class="token operator">&lt;-</span> results<span class="token punctuation">(</span>dds3<span class="token punctuation">,</span> contrast <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"dex"</span><span class="token punctuation">,</span> <span class="token string">"b"</span><span class="token punctuation">,</span> <span class="token string">"a"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-res_c_vs_a <span class="token operator">&lt;-</span> results<span class="token punctuation">(</span>dds3<span class="token punctuation">,</span> contrast <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"dex"</span><span class="token punctuation">,</span> <span class="token string">"c"</span><span class="token punctuation">,</span> <span class="token string">"a"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>只修改外部 <code>metadata$dex</code> 不会自动改变已经创建的 <code>dds</code>，因此分组改变后应重新创建 DESeqDataSet，或者显式修改 <code>colData(dds)</code> 后重新拟合。</p>
-<h2 id="三、使用-edgeR"><a href="#三、使用-edgeR" class="headerlink" title="三、使用 edgeR"></a>三、使用 edgeR</h2><pre class="line-numbers language-r" data-language="r"><code class="language-r">group <span class="token operator">&lt;-</span> factor<span class="token punctuation">(</span>metadata<span class="token operator">$</span>dex<span class="token punctuation">,</span> levels <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"control"</span><span class="token punctuation">,</span> <span class="token string">"treated"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-
-dge <span class="token operator">&lt;-</span> DGEList<span class="token punctuation">(</span>counts <span class="token operator">=</span> count_matrix<span class="token punctuation">,</span> group <span class="token operator">=</span> group<span class="token punctuation">)</span>
-dge <span class="token operator">&lt;-</span> calcNormFactors<span class="token punctuation">(</span>dge<span class="token punctuation">)</span>
-
-design <span class="token operator">&lt;-</span> model.matrix<span class="token punctuation">(</span><span class="token operator">~</span> <span class="token number">0</span> <span class="token operator">+</span> group<span class="token punctuation">)</span>
-colnames<span class="token punctuation">(</span>design<span class="token punctuation">)</span> <span class="token operator">&lt;-</span> levels<span class="token punctuation">(</span>group<span class="token punctuation">)</span>
-
-dge <span class="token operator">&lt;-</span> estimateDisp<span class="token punctuation">(</span>dge<span class="token punctuation">,</span> design<span class="token punctuation">,</span> robust <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
-plotMDS<span class="token punctuation">(</span>dge<span class="token punctuation">)</span>
-plotBCV<span class="token punctuation">(</span>dge<span class="token punctuation">)</span>
-
-fit <span class="token operator">&lt;-</span> glmQLFit<span class="token punctuation">(</span>dge<span class="token punctuation">,</span> design<span class="token punctuation">,</span> robust <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
-contrast <span class="token operator">&lt;-</span> makeContrasts<span class="token punctuation">(</span>treated <span class="token operator">-</span> control<span class="token punctuation">,</span> levels <span class="token operator">=</span> design<span class="token punctuation">)</span>
-test <span class="token operator">&lt;-</span> glmQLFTest<span class="token punctuation">(</span>fit<span class="token punctuation">,</span> contrast <span class="token operator">=</span> contrast<span class="token punctuation">)</span>
-deg <span class="token operator">&lt;-</span> topTags<span class="token punctuation">(</span>test<span class="token punctuation">,</span> n <span class="token operator">=</span> <span class="token number">Inf</span><span class="token punctuation">)</span><span class="token operator">$</span>table
-
-write.csv<span class="token punctuation">(</span>deg<span class="token punctuation">,</span> <span class="token string">"edger-treated-vs-control.csv"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p><code>plotMDS()</code> 用于观察样本间整体距离，<code>plotBCV()</code> 用于查看生物学变异。<code>makeContrasts(treated - control)</code> 明确表示 treated 相对 control 的变化方向；反过来写会使 logFC 符号相反。</p>
-<h2 id="四、结果解释与检查"><a href="#四、结果解释与检查" class="headerlink" title="四、结果解释与检查"></a>四、结果解释与检查</h2><p>DESeq2 常用 <code>log2FoldChange</code>、<code>pvalue</code> 和 <code>padj</code>，edgeR 常用 <code>logFC</code>、<code>PValue</code> 和 <code>FDR</code>。两种工具的显著基因不一定完全相同，比较结果时要保持输入基因集合、样本分组和 contrast 方向一致。</p>
-<p>分析完成后至少检查：</p>
+                <p>在《Futex 概述》中已经介绍了 Futex 的用户态快速路径，以及发生竞争后进入内核等待、唤醒的过程。本文继续讨论一个更偏实践的问题：怎样利用 eBPF 观测 Futex，并从采集结果中识别锁竞争和调度延迟。</p>
+<p>本文关注观测方案、指标和实验结果。libbpf 程序加载、attach、Map 读取以及 probe 没有触发等问题，单独整理在《<a href="/2026/02/16/%E4%BD%BF%E7%94%A8libbpf%E8%B0%83%E8%AF%95Futex-eBPF%E7%A8%8B%E5%BA%8F/">使用 libbpf 调试 Futex eBPF 程序</a>》中。</p>
+<h2 id="一、观测目标与追踪点"><a href="#一、观测目标与追踪点" class="headerlink" title="一、观测目标与追踪点"></a>一、观测目标与追踪点</h2><p>Futex 没有竞争时主要在用户态通过原子操作完成，只有等待或唤醒等慢路径才会进入内核。因此，仅追踪 Futex 系统调用无法得到所有加锁操作，却很适合回答以下问题：</p>
 <ol>
-<li>counts 是否为非负整数。</li>
-<li>counts 列名是否与 metadata 行名完全对应。</li>
-<li>参考组和对比方向是否符合问题定义。</li>
-<li>是否存在极低表达基因，是否需要预过滤。</li>
-<li>多重检验校正后是否仍然显著。</li>
-<li>样本在 MDS/PCA 中是否按实验组分离，是否存在离群点。</li>
+<li>哪些线程频繁进入 <code>FUTEX_WAIT</code>？</li>
+<li>一次等待从进入内核到返回经历了多长时间？</li>
+<li><code>FUTEX_WAKE</code> 实际唤醒了多少线程，是否存在无效唤醒？</li>
+<li>哪些 Futex 地址形成热点？</li>
+<li>锁竞争是否导致延迟关键任务长时间等待？</li>
 </ol>
-<p>原始代码展示了两套工具的完整轮廓，但数据对象在修改分组后没有重新创建、重复 symbol 被直接删除、contrast 方向和拼写也存在问题。将数据对应关系固定下来，再分别运行两套模型，结果才具有可解释性。</p>
+<div class="note warning no-icon">
+eBPF 只能直接看见进入内核的 Futex 慢路径。没有进入系统调用的用户态快速路径不会被统计，因此文中的“竞争次数”不能等同于应用执行的全部加锁次数。
+</div>
+
+<p><strong>Tracepoint</strong></p>
+<p>优先检查系统是否提供 <code>syscalls:sys_enter_futex</code> 和 <code>syscalls:sys_exit_futex</code>。进入时保存 <code>pid/tid</code>、<code>uaddr</code>、<code>futex_op</code> 和时间戳；退出时找回开始时间并结合返回值计算耗时。</p>
+<p>Tracepoint 接口相对稳定，适合先做系统调用级观测。</p>
+<p><strong>fentry/fexit 或 kprobe/kretprobe</strong></p>
+<p>如果需要区分 <code>futex_wait</code>、<code>futex_wake</code> 和 PI Futex 等内核路径，可以追踪对应内核函数。该方案能取得更贴近内核实现的参数，但函数名和签名可能随内核版本变化。</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token function">SEC</span><span class="token punctuation">(</span><span class="token string">"fentry/__futex_wait"</span><span class="token punctuation">)</span>
+<span class="token keyword">int</span> <span class="token function">BPF_PROG</span><span class="token punctuation">(</span>trace_futex_wait<span class="token punctuation">,</span> u32 <span class="token operator">*</span>uaddr<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> flags<span class="token punctuation">,</span> u32 val<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token comment">/* 保存地址、线程和开始时间 */</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>Uprobe</strong></p>
+<p>Uprobe 可以观察 <code>pthread_mutex_lock()</code> 等用户态函数，理论上能够补充用户态快速路径，但依赖具体 libc 或应用二进制。对于高频锁操作，其观测开销也更值得警惕，因此本文暂不把它作为默认方案。</p>
+<p><strong>当前开销记录</strong></p>
+<p>下面的数据来自现有实验笔记。发表前必须补充测试命令、内核版本、重复次数和统计方法，并重新验证。</p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>当前记录的单次开销</th>
+<th>稳定性</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tracepoint</td>
+<td>约 130 ns</td>
+<td>高</td>
+<td>系统调用级观测</td>
+</tr>
+<tr>
+<td>fentry/fexit</td>
+<td>fentry 约 48 ns，fexit 约 76 ns</td>
+<td>取决于内核函数</td>
+<td>内核函数级观测</td>
+</tr>
+<tr>
+<td>Uprobe</td>
+<td>尚无可靠结果</td>
+<td>依赖用户态符号</td>
+<td>补充用户态快速路径</td>
+</tr>
+</tbody></table>
+<h2 id="二、从事件中得到哪些指标"><a href="#二、从事件中得到哪些指标" class="headerlink" title="二、从事件中得到哪些指标"></a>二、从事件中得到哪些指标</h2><p><strong>等待次数与等待延迟</strong></p>
+<p>对每个 <code>FUTEX_WAIT</code> 记录进入和返回时间，统计等待次数、平均值、P50、P95、P99 和最大等待时间。相比平均值，长尾分位数更容易暴露少量但严重的锁竞争。</p>
+<p><strong>唤醒次数与返回值</strong></p>
+<p>对 <code>FUTEX_WAKE</code> 记录请求唤醒数量和系统调用返回值。返回值表示实际唤醒的线程数，可以识别无效唤醒、惊群风险以及 wait/wake 数量长期不匹配的场景。</p>
+<p><strong>热点 Futex</strong></p>
+<p>将进程与 <code>uaddr</code> 组合成 key，按地址累计等待次数、总延迟和直方图。直接记录地址时要考虑地址复用和信息暴露；跨进程共享 Futex 也不能仅凭虚拟地址判断是否对应同一个内核 Futex key。</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">futex_key</span> <span class="token punctuation">{</span>
+    __u32 tgid<span class="token punctuation">;</span>
+    __u64 uaddr<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">hist</span> <span class="token punctuation">{</span>
+    <span class="token keyword">char</span> comm<span class="token punctuation">[</span><span class="token number">16</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    __u64 slots<span class="token punctuation">[</span>MAX_SLOTS<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    __u64 count<span class="token punctuation">;</span>
+    __u64 total_ns<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>PI Futex 与优先级反转</strong></p>
+<p>对 <code>FUTEX_LOCK_PI</code>、<code>FUTEX_UNLOCK_PI</code> 单独分类，观察高优先级线程等待低优先级持锁线程的时间。仅凭 wait/wake 事件无法准确恢复全部 owner 关系，还需要结合调度事件或 PI Futex 内核状态验证。</p>
+<h2 id="三、Map、数据处理与观测开销"><a href="#三、Map、数据处理与观测开销" class="headerlink" title="三、Map、数据处理与观测开销"></a>三、Map、数据处理与观测开销</h2><p>一类 Map 保存线程进入 Futex 时的时间，另一类 Map 保存按锁地址聚合的统计结果。</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">start <span class="token operator">=</span> <span class="token function">bpf_ktime_get_ns</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">bpf_map_update_elem</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>starts<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tid<span class="token punctuation">,</span> <span class="token operator">&amp;</span>start<span class="token punctuation">,</span> BPF_ANY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+startp <span class="token operator">=</span> <span class="token function">bpf_map_lookup_elem</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>starts<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tid<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>startp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    delta <span class="token operator">=</span> <span class="token function">bpf_ktime_get_ns</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token operator">*</span>startp<span class="token punctuation">;</span>
+    <span class="token comment">/* 更新 count、total_ns 和 log2 histogram */</span>
+    <span class="token function">bpf_map_delete_elem</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>starts<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tid<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>bpf_map_update_elem()</code> 的标志含义如下：</p>
+<table>
+<thead>
+<tr>
+<th>标志</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>BPF_ANY</code></td>
+<td>key 存在时覆盖，不存在时插入</td>
+</tr>
+<tr>
+<td><code>BPF_NOEXIST</code></td>
+<td>仅在 key 不存在时插入</td>
+</tr>
+<tr>
+<td><code>BPF_EXIST</code></td>
+<td>仅在 key 已存在时更新</td>
+</tr>
+</tbody></table>
+<p>开始时间通常允许覆盖，使用 <code>BPF_ANY</code> 更符合“保存最近一次进入时间”的语义；如果业务要求发现重复进入，可使用 <code>BPF_NOEXIST</code> 并单独统计冲突。</p>
+<p><strong>控制观测开销</strong></p>
+<p>Futex 是高频事件，观测工具本身可能改变系统行为：</p>
+<ol>
+<li>尽早按 <code>tgid</code>、cgroup 或操作类型过滤。</li>
+<li>在 BPF Map 中聚合直方图，避免逐条发送事件。</li>
+<li>只在定位问题时采集调用栈。</li>
+<li>对极高频地址进行抽样。</li>
+<li>记录丢失事件，避免把不完整数据当成真实结果。</li>
+</ol>
+<p>参考实现可以查看 BCC/libbpf-tools 中的 <a target="_blank" rel="noopener" href="https://sources.debian.org/src/bpfcc/0.31.0%2Bds-7/libbpf-tools/futexctn.bpf.c/"><code>futexctn</code></a>。</p>
+<h2 id="四、实验设计、结果与调度联系"><a href="#四、实验设计、结果与调度联系" class="headerlink" title="四、实验设计、结果与调度联系"></a>四、实验设计、结果与调度联系</h2><p>发表前需要补齐 CPU 型号、SMT 状态、内核配置、libbpf/clang/bpftool 版本、测试负载、采样时长、绑核方式和重复次数。</p>
+<p>建议至少比较：不加载工具的基线、只加载不输出、Map 聚合、Ring Buffer 逐条输出，以及开启/关闭 PID 或 cgroup 过滤。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th align="right">Futex 调用次数</th>
+<th align="right">平均等待</th>
+<th align="right">P99 等待</th>
+<th align="right">工具 CPU 开销</th>
+<th align="right">丢失事件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>基线</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">-</td>
+</tr>
+<tr>
+<td>Map 聚合</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+</tr>
+<tr>
+<td>Ring Buffer 输出</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+<td align="right">待补</td>
+</tr>
+</tbody></table>
+<div class="note primary no-icon">
+目前已有观测方案和指标设计，但尚没有足以发表的完整结果。正式发布前应以可复现数据替换“待补”，并说明测量误差。
+</div>
+
+<p><strong>与 LAVD 的联系</strong></p>
+<p>如果能可靠识别锁持有者，可以尝试让 LAVD 优先调度阻塞延迟关键任务的持锁线程。LAVD 的用户态控制流程可以参考《<a href="/2026/02/20/sched-ext%E4%B8%8Escx-lavd%E7%94%A8%E6%88%B7%E6%80%81%E5%89%8D%E7%AB%AF%E8%A7%A3%E6%9E%90/">sched_ext 与 scx_lavd 用户态前端解析</a>》。不过，普通 Futex 很难只依靠 wait/wake 恢复 owner，仍需结合用户态锁语义、调度事件和历史获取模式。</p>
+<p>重点评估：Futex holder boost 是否降低关键任务 P99/P999 等待时间，以及它是否导致普通任务吞吐下降或产生新的优先级反转。</p>
+<h2 id="五、小结"><a href="#五、小结" class="headerlink" title="五、小结"></a>五、小结</h2><p>Futex 性能观测的重点不是简单统计系统调用次数，而是建立等待线程、Futex 地址、唤醒结果和调度延迟之间的关系。下一步需要补齐可复现实验数据，再判断 Futex holder boost 对 LAVD 是否确实有效。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>Brendan Gregg，《Systems Performance》</li>
+<li>Brendan Gregg，《BPF Performance Tools》及中文版《BPF 之巅》</li>
+<li>David Calavera、Lorenzo Fontana，《Linux Observability with BPF》及中文版《Linux 内核观测技术 BPF》</li>
+<li><a target="_blank" rel="noopener" href="https://www.brendangregg.com/">Brendan Gregg 个人网站</a></li>
+<li><a target="_blank" rel="noopener" href="https://ebpf.io/">eBPF 官方网站</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/iovisor">IO Visor 项目</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/zoidbergwill/awesome-ebpf">awesome-ebpf 资料索引</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.tcpdump.org/papers/bpf-usenix93.pdf">The BSD Packet Filter: A New Architecture for User-level Packet Capture</a></li>
+</ul>
 
                 
             </div>
@@ -604,7 +698,7 @@ write.csv<span class="token punctuation">(</span>deg<span class="token punctuati
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://ytirus.github.io/2026/03/02/RNA-Seq%E5%B7%AE%E5%BC%82%E8%A1%A8%E8%BE%BE%E5%88%86%E6%9E%90/">http://ytirus.github.io/2026/03/02/RNA-Seq%E5%B7%AE%E5%BC%82%E8%A1%A8%E8%BE%BE%E5%88%86%E6%9E%90/</a>
+                    <a href="http://ytirus.github.io/2026/03/09/Futex%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">http://ytirus.github.io/2026/03/09/Futex%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -642,20 +736,20 @@ write.csv<span class="token punctuation">(</span>deg<span class="token punctuati
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/R/">
-                                    <span class="chip bg-color">R</span>
+                                <a href="/tags/Futex/">
+                                    <span class="chip bg-color">Futex</span>
                                 </a>
                             
-                                <a href="/tags/RNA-Seq/">
-                                    <span class="chip bg-color">RNA-Seq</span>
+                                <a href="/tags/eBPF/">
+                                    <span class="chip bg-color">eBPF</span>
                                 </a>
                             
-                                <a href="/tags/DESeq2/">
-                                    <span class="chip bg-color">DESeq2</span>
+                                <a href="/tags/libbpf/">
+                                    <span class="chip bg-color">libbpf</span>
                                 </a>
                             
-                                <a href="/tags/edgeR/">
-                                    <span class="chip bg-color">edgeR</span>
+                                <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
+                                    <span class="chip bg-color">性能分析</span>
                                 </a>
                             
                         </div>
@@ -703,7 +797,68 @@ write.csv<span class="token punctuation">(</span>deg<span class="token punctuati
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2026/03/03/GCC-G++%E4%B8%8EWindows-SDK/">
+                <a href="/2026/03/23/%E4%BD%BF%E7%94%A8libbpf%E8%B0%83%E8%AF%95Futex-eBPF%E7%A8%8B%E5%BA%8F/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/41.jpg" class="responsive-img" alt="使用 libbpf 调试 Futex eBPF 程序">
+                        
+                        <span class="card-title">使用 libbpf 调试 Futex eBPF 程序</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            以 futexlat 为例，记录 eBPF 程序从编译、加载、attach 到 BPF Map 读取和 probe 触发的排查方法。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2026-03-23
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/OS/" class="post-category">
+                                    OS
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Futex/">
+                        <span class="chip bg-color">Futex</span>
+                    </a>
+                    
+                    <a href="/tags/eBPF/">
+                        <span class="chip bg-color">eBPF</span>
+                    </a>
+                    
+                    <a href="/tags/libbpf/">
+                        <span class="chip bg-color">libbpf</span>
+                    </a>
+                    
+                    <a href="/tags/BPF-Map/">
+                        <span class="chip bg-color">BPF Map</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/02/23/GCC-G++%E4%B8%8EWindows-SDK/">
                     <div class="card-image">
                         
                         
@@ -719,9 +874,9 @@ write.csv<span class="token punctuation">(</span>deg<span class="token punctuati
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2026-03-03
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-02-23
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -755,71 +910,6 @@ write.csv<span class="token punctuation">(</span>deg<span class="token punctuati
                     
                     <a href="/tags/MinGW/">
                         <span class="chip bg-color">MinGW</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2026/02/20/sched-ext%E4%B8%8Escx-lavd%E7%94%A8%E6%88%B7%E6%80%81%E5%89%8D%E7%AB%AF%E8%A7%A3%E6%9E%90/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="sched_ext 与 scx_lavd 用户态前端解析">
-                        
-                        <span class="card-title">sched_ext 与 scx_lavd 用户态前端解析</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            从混部调度需求出发，介绍 sched_ext、DSQ 和 scx_lavd，并分析其 Rust 用户态前端的参数、生命周期与监控逻辑。
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2026-02-20
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/OS/" class="post-category">
-                                    OS
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/eBPF/">
-                        <span class="chip bg-color">eBPF</span>
-                    </a>
-                    
-                    <a href="/tags/sched-ext/">
-                        <span class="chip bg-color">sched_ext</span>
-                    </a>
-                    
-                    <a href="/tags/Rust/">
-                        <span class="chip bg-color">Rust</span>
-                    </a>
-                    
-                    <a href="/tags/scx-lavd/">
-                        <span class="chip bg-color">scx_lavd</span>
-                    </a>
-                    
-                    <a href="/tags/%E8%B0%83%E5%BA%A6%E5%99%A8/">
-                        <span class="chip bg-color">调度器</span>
                     </a>
                     
                 </div>

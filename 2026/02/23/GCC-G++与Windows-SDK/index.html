@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="Futex 性能分析, Yi&#39;s Blog">
+    <meta name="keywords" content="GCC、G++ 与 Windows SDK：C/C++ 混合编译和头文件排查, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>Futex 性能分析 | Yi&#39;s Blog</title>
+    <title>GCC、G++ 与 Windows SDK：C/C++ 混合编译和头文件排查 | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -298,12 +298,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">Futex 性能分析</h1> -->
+                    <!-- <h1 class="description center-align post-title">GCC、G++ 与 Windows SDK：C/C++ 混合编译和头文件排查</h1> -->
                 </div>
             </div>
         </div>
@@ -419,20 +419,24 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/Futex/">
-                                <span class="chip bg-color">Futex</span>
+                            <a href="/tags/GCC/">
+                                <span class="chip bg-color">GCC</span>
                             </a>
                         
-                            <a href="/tags/eBPF/">
-                                <span class="chip bg-color">eBPF</span>
+                            <a href="/tags/C/">
+                                <span class="chip bg-color">C</span>
                             </a>
                         
-                            <a href="/tags/libbpf/">
-                                <span class="chip bg-color">libbpf</span>
+                            <a href="/tags/C/">
+                                <span class="chip bg-color">C++</span>
                             </a>
                         
-                            <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
-                                <span class="chip bg-color">性能分析</span>
+                            <a href="/tags/Windows-SDK/">
+                                <span class="chip bg-color">Windows SDK</span>
+                            </a>
+                        
+                            <a href="/tags/MinGW/">
+                                <span class="chip bg-color">MinGW</span>
                             </a>
                         
                     </div>
@@ -443,8 +447,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/OS/" class="post-category">
-                                OS
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
                             </a>
                         
                     </div>
@@ -456,7 +460,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2026-02-15
+                    2026-02-23
                 </div>
                 
 
@@ -465,14 +469,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.8k
+                    1.3k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    6 分
+                    4 分
                 </div>
                 
 
@@ -495,183 +499,79 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>在《Futex 概述》中已经介绍了 Futex 的用户态快速路径，以及发生竞争后进入内核等待、唤醒的过程。本文继续讨论一个更偏实践的问题：怎样利用 eBPF 观测 Futex，并从采集结果中识别锁竞争和调度延迟。</p>
-<p>本文关注观测方案、指标和实验结果。libbpf 程序加载、attach、Map 读取以及 probe 没有触发等问题，单独整理在《<a href="/2026/02/16/%E4%BD%BF%E7%94%A8libbpf%E8%B0%83%E8%AF%95Futex-eBPF%E7%A8%8B%E5%BA%8F/">使用 libbpf 调试 Futex eBPF 程序</a>》中。</p>
-<h2 id="一、观测目标与追踪点"><a href="#一、观测目标与追踪点" class="headerlink" title="一、观测目标与追踪点"></a>一、观测目标与追踪点</h2><p>Futex 没有竞争时主要在用户态通过原子操作完成，只有等待或唤醒等慢路径才会进入内核。因此，仅追踪 Futex 系统调用无法得到所有加锁操作，却很适合回答以下问题：</p>
-<ol>
-<li>哪些线程频繁进入 <code>FUTEX_WAIT</code>？</li>
-<li>一次等待从进入内核到返回经历了多长时间？</li>
-<li><code>FUTEX_WAKE</code> 实际唤醒了多少线程，是否存在无效唤醒？</li>
-<li>哪些 Futex 地址形成热点？</li>
-<li>锁竞争是否导致延迟关键任务长时间等待？</li>
-</ol>
-<div class="note warning no-icon">
-eBPF 只能直接看见进入内核的 Futex 慢路径。没有进入系统调用的用户态快速路径不会被统计，因此文中的“竞争次数”不能等同于应用执行的全部加锁次数。
-</div>
+                <p><code>gcc file.c</code> 和 <code>g++ file.cpp</code> 看上去只是命令不同，背后却涉及语言前端、默认链接库、ABI 和目标平台工具链。尤其在 Windows 上使用 MinGW 编译 Windows SDK 代码时，“已经找到头文件”和“这套编译器能够使用该头文件”是两件事。</p>
+<h2 id="一、从源文件到可执行文件"><a href="#一、从源文件到可执行文件" class="headerlink" title="一、从源文件到可执行文件"></a>一、从源文件到可执行文件</h2><p>编译过程可以分为预处理、编译、汇编和链接。<code>-c</code> 表示只生成目标文件，不执行最终链接：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">gcc <span class="token parameter variable">-c</span> c_part.c <span class="token parameter variable">-o</span> c_part.o
+g++ <span class="token parameter variable">-c</span> cpp_part.cpp <span class="token parameter variable">-o</span> cpp_part.o
+g++ c_part.o cpp_part.o <span class="token parameter variable">-o</span> app<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<p><strong>Tracepoint</strong></p>
-<p>优先检查系统是否提供 <code>syscalls:sys_enter_futex</code> 和 <code>syscalls:sys_exit_futex</code>。进入时保存 <code>pid/tid</code>、<code>uaddr</code>、<code>futex_op</code> 和时间戳；退出时找回开始时间并结合返回值计算耗时。</p>
-<p>Tracepoint 接口相对稳定，适合先做系统调用级观测。</p>
-<p><strong>fentry/fexit 或 kprobe/kretprobe</strong></p>
-<p>如果需要区分 <code>futex_wait</code>、<code>futex_wake</code> 和 PI Futex 等内核路径，可以追踪对应内核函数。该方案能取得更贴近内核实现的参数，但函数名和签名可能随内核版本变化。</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token function">SEC</span><span class="token punctuation">(</span><span class="token string">"fentry/__futex_wait"</span><span class="token punctuation">)</span>
-<span class="token keyword">int</span> <span class="token function">BPF_PROG</span><span class="token punctuation">(</span>trace_futex_wait<span class="token punctuation">,</span> u32 <span class="token operator">*</span>uaddr<span class="token punctuation">,</span> <span class="token keyword">unsigned</span> <span class="token keyword">int</span> flags<span class="token punctuation">,</span> u32 val<span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    <span class="token comment">/* 保存地址、线程和开始时间 */</span>
-    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>混合工程通常分别用 C 和 C++ 编译器生成目标文件，最终使用 <code>g++</code> 链接，因为它会自动加入 C++ 标准库和相应运行时。使用 <code>gcc</code> 链接 C++ 目标文件也可以，但需要自行补齐 C++ 库，容易出现未定义符号。</p>
+<p>不能简单地用 <code>g++ file.c file.cpp</code> 代替上述流程。<code>g++</code> 会把输入当成 C++ 处理，原本合法的 C 代码未必符合 C++ 规则。C 头文件供 C++ 调用时，还需要处理符号修饰：</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifdef</span> <span class="token expression">__cplusplus</span></span>
+<span class="token keyword">extern</span> <span class="token string">"C"</span> <span class="token punctuation">{</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
 
-<p><strong>Uprobe</strong></p>
-<p>Uprobe 可以观察 <code>pthread_mutex_lock()</code> 等用户态函数，理论上能够补充用户态快速路径，但依赖具体 libc 或应用二进制。对于高频锁操作，其观测开销也更值得警惕，因此本文暂不把它作为默认方案。</p>
-<p><strong>当前开销记录</strong></p>
-<p>下面的数据来自现有实验笔记。发表前必须补充测试命令、内核版本、重复次数和统计方法，并重新验证。</p>
-<table>
-<thead>
-<tr>
-<th>技术</th>
-<th>当前记录的单次开销</th>
-<th>稳定性</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Tracepoint</td>
-<td>约 130 ns</td>
-<td>高</td>
-<td>系统调用级观测</td>
-</tr>
-<tr>
-<td>fentry/fexit</td>
-<td>fentry 约 48 ns，fexit 约 76 ns</td>
-<td>取决于内核函数</td>
-<td>内核函数级观测</td>
-</tr>
-<tr>
-<td>Uprobe</td>
-<td>尚无可靠结果</td>
-<td>依赖用户态符号</td>
-<td>补充用户态快速路径</td>
-</tr>
-</tbody></table>
-<h2 id="二、从事件中得到哪些指标"><a href="#二、从事件中得到哪些指标" class="headerlink" title="二、从事件中得到哪些指标"></a>二、从事件中得到哪些指标</h2><p><strong>等待次数与等待延迟</strong></p>
-<p>对每个 <code>FUTEX_WAIT</code> 记录进入和返回时间，统计等待次数、平均值、P50、P95、P99 和最大等待时间。相比平均值，长尾分位数更容易暴露少量但严重的锁竞争。</p>
-<p><strong>唤醒次数与返回值</strong></p>
-<p>对 <code>FUTEX_WAKE</code> 记录请求唤醒数量和系统调用返回值。返回值表示实际唤醒的线程数，可以识别无效唤醒、惊群风险以及 wait/wake 数量长期不匹配的场景。</p>
-<p><strong>热点 Futex</strong></p>
-<p>将进程与 <code>uaddr</code> 组合成 key，按地址累计等待次数、总延迟和直方图。直接记录地址时要考虑地址复用和信息暴露；跨进程共享 Futex 也不能仅凭虚拟地址判断是否对应同一个内核 Futex key。</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">futex_key</span> <span class="token punctuation">{</span>
-    __u32 tgid<span class="token punctuation">;</span>
-    __u64 uaddr<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">c_api</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token keyword">struct</span> <span class="token class-name">hist</span> <span class="token punctuation">{</span>
-    <span class="token keyword">char</span> comm<span class="token punctuation">[</span><span class="token number">16</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    __u64 slots<span class="token punctuation">[</span>MAX_SLOTS<span class="token punctuation">]</span><span class="token punctuation">;</span>
-    __u64 count<span class="token punctuation">;</span>
-    __u64 total_ns<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifdef</span> <span class="token expression">__cplusplus</span></span>
+<span class="token punctuation">}</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><strong>PI Futex 与优先级反转</strong></p>
-<p>对 <code>FUTEX_LOCK_PI</code>、<code>FUTEX_UNLOCK_PI</code> 单独分类，观察高优先级线程等待低优先级持锁线程的时间。仅凭 wait/wake 事件无法准确恢复全部 owner 关系，还需要结合调度事件或 PI Futex 内核状态验证。</p>
-<h2 id="三、Map、数据处理与观测开销"><a href="#三、Map、数据处理与观测开销" class="headerlink" title="三、Map、数据处理与观测开销"></a>三、Map、数据处理与观测开销</h2><p>一类 Map 保存线程进入 Futex 时的时间，另一类 Map 保存按锁地址聚合的统计结果。</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c">start <span class="token operator">=</span> <span class="token function">bpf_ktime_get_ns</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token function">bpf_map_update_elem</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>starts<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tid<span class="token punctuation">,</span> <span class="token operator">&amp;</span>start<span class="token punctuation">,</span> BPF_ANY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<h2 id="二、头文件是怎样被找到的"><a href="#二、头文件是怎样被找到的" class="headerlink" title="二、头文件是怎样被找到的"></a>二、头文件是怎样被找到的</h2><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">"local.h"</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;system.h&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
-startp <span class="token operator">=</span> <span class="token function">bpf_map_lookup_elem</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>starts<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tid<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span> <span class="token punctuation">(</span>startp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    delta <span class="token operator">=</span> <span class="token function">bpf_ktime_get_ns</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token operator">*</span>startp<span class="token punctuation">;</span>
-    <span class="token comment">/* 更新 count、total_ns 和 log2 histogram */</span>
-    <span class="token function">bpf_map_delete_elem</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>starts<span class="token punctuation">,</span> <span class="token operator">&amp;</span>tid<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>双引号通常先搜索当前源文件附近，再搜索编译器 include path；尖括号主要按 include path 搜索。项目自己的头文件一般使用双引号，系统或第三方库使用尖括号。</p>
+<p>额外目录通过 <code>-I</code> 指定：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">g++ <span class="token parameter variable">-I</span> C:/project/include <span class="token parameter variable">-I</span> C:/third_party/include main.cpp <span class="token parameter variable">-o</span> app<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p><code>bpf_map_update_elem()</code> 的标志含义如下：</p>
-<table>
-<thead>
-<tr>
-<th>标志</th>
-<th>行为</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>BPF_ANY</code></td>
-<td>key 存在时覆盖，不存在时插入</td>
-</tr>
-<tr>
-<td><code>BPF_NOEXIST</code></td>
-<td>仅在 key 不存在时插入</td>
-</tr>
-<tr>
-<td><code>BPF_EXIST</code></td>
-<td>仅在 key 已存在时更新</td>
-</tr>
-</tbody></table>
-<p>开始时间通常允许覆盖，使用 <code>BPF_ANY</code> 更符合“保存最近一次进入时间”的语义；如果业务要求发现重复进入，可使用 <code>BPF_NOEXIST</code> 并单独统计冲突。</p>
-<p><strong>控制观测开销</strong></p>
-<p>Futex 是高频事件，观测工具本身可能改变系统行为：</p>
-<ol>
-<li>尽早按 <code>tgid</code>、cgroup 或操作类型过滤。</li>
-<li>在 BPF Map 中聚合直方图，避免逐条发送事件。</li>
-<li>只在定位问题时采集调用栈。</li>
-<li>对极高频地址进行抽样。</li>
-<li>记录丢失事件，避免把不完整数据当成真实结果。</li>
-</ol>
-<p>参考实现可以查看 BCC/libbpf-tools 中的 <a target="_blank" rel="noopener" href="https://sources.debian.org/src/bpfcc/0.31.0%2Bds-7/libbpf-tools/futexctn.bpf.c/"><code>futexctn</code></a>。</p>
-<h2 id="四、实验设计、结果与调度联系"><a href="#四、实验设计、结果与调度联系" class="headerlink" title="四、实验设计、结果与调度联系"></a>四、实验设计、结果与调度联系</h2><p>发表前需要补齐 CPU 型号、SMT 状态、内核配置、libbpf/clang/bpftool 版本、测试负载、采样时长、绑核方式和重复次数。</p>
-<p>建议至少比较：不加载工具的基线、只加载不输出、Map 聚合、Ring Buffer 逐条输出，以及开启/关闭 PID 或 cgroup 过滤。</p>
-<table>
-<thead>
-<tr>
-<th>场景</th>
-<th align="right">Futex 调用次数</th>
-<th align="right">平均等待</th>
-<th align="right">P99 等待</th>
-<th align="right">工具 CPU 开销</th>
-<th align="right">丢失事件</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>基线</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">-</td>
-</tr>
-<tr>
-<td>Map 聚合</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-</tr>
-<tr>
-<td>Ring Buffer 输出</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-<td align="right">待补</td>
-</tr>
-</tbody></table>
-<div class="note primary no-icon">
-目前已有观测方案和指标设计，但尚没有足以发表的完整结果。正式发布前应以可复现数据替换“待补”，并说明测量误差。
-</div>
+<p>调试时可以让编译器打印真实搜索路径：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">g++ <span class="token parameter variable">-v</span> <span class="token parameter variable">-E</span> main.cpp <span class="token parameter variable">-o</span> NUL<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p><strong>与 LAVD 的联系</strong></p>
-<p>如果能可靠识别锁持有者，可以尝试让 LAVD 优先调度阻塞延迟关键任务的持锁线程。LAVD 的用户态控制流程可以参考《<a href="/2026/02/20/sched-ext%E4%B8%8Escx-lavd%E7%94%A8%E6%88%B7%E6%80%81%E5%89%8D%E7%AB%AF%E8%A7%A3%E6%9E%90/">sched_ext 与 scx_lavd 用户态前端解析</a>》。不过，普通 Futex 很难只依靠 wait/wake 恢复 owner，仍需结合用户态锁语义、调度事件和历史获取模式。</p>
-<p>重点评估：Futex holder boost 是否降低关键任务 P99/P999 等待时间，以及它是否导致普通任务吞吐下降或产生新的优先级反转。</p>
-<h2 id="五、小结"><a href="#五、小结" class="headerlink" title="五、小结"></a>五、小结</h2><p>Futex 性能观测的重点不是简单统计系统调用次数，而是建立等待线程、Futex 地址、唤醒结果和调度延迟之间的关系。下一步需要补齐可复现实验数据，再判断 Futex holder boost 对 LAVD 是否确实有效。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
-<li>Brendan Gregg，《Systems Performance》</li>
-<li>Brendan Gregg，《BPF Performance Tools》及中文版《BPF 之巅》</li>
-<li>David Calavera、Lorenzo Fontana，《Linux Observability with BPF》及中文版《Linux 内核观测技术 BPF》</li>
-<li><a target="_blank" rel="noopener" href="https://www.brendangregg.com/">Brendan Gregg 个人网站</a></li>
-<li><a target="_blank" rel="noopener" href="https://ebpf.io/">eBPF 官方网站</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/iovisor">IO Visor 项目</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/zoidbergwill/awesome-ebpf">awesome-ebpf 资料索引</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.tcpdump.org/papers/bpf-usenix93.pdf">The BSD Packet Filter: A New Architecture for User-level Packet Capture</a></li>
+<p>在 Makefile 中，预处理选项通常放在 <code>CPPFLAGS</code>，C 与 C++ 编译选项分别放在 <code>CFLAGS</code>、<code>CXXFLAGS</code>：</p>
+<pre class="line-numbers language-makefile" data-language="makefile"><code class="language-makefile">CPPFLAGS <span class="token operator">+=</span> -IC<span class="token punctuation">:</span>/project/<span class="token keyword">include</span>
+CFLAGS   <span class="token operator">+=</span> -Wall
+CXXFLAGS <span class="token operator">+=</span> -Wall -std<span class="token operator">=</span>c++17<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>环境变量 <code>C_INCLUDE_PATH</code> 和 <code>CPLUS_INCLUDE_PATH</code> 也能添加搜索目录，但项目构建更适合使用明确的 <code>-I</code> 或构建系统配置，避免依赖机器全局状态。</p>
+<h2 id="三、为什么复制头文件仍然编译失败"><a href="#三、为什么复制头文件仍然编译失败" class="headerlink" title="三、为什么复制头文件仍然编译失败"></a>三、为什么复制头文件仍然编译失败</h2><p>把 <code>TraceLoggingProvider.h</code> 复制到源码目录仍可能失败，原因包括：</p>
+<ul>
+<li>源码仍使用尖括号且当前目录不在实际搜索路径中。</li>
+<li>头文件继续包含其他 Windows SDK 头文件。</li>
+<li>依赖特定编译器宏、语言扩展或内建类型。</li>
+<li>编译通过后仍缺少对应库，最终在链接阶段失败。</li>
+<li>SDK 版本、目标架构和工具链 ABI 不一致。</li>
 </ul>
+<p>可以用完整路径或双引号做一次诊断，但不建议把 SDK 头文件零散复制到项目中。正确做法是安装完整 SDK，并使用与其匹配的工具链和构建环境。</p>
+<h2 id="四、MSVC、MinGW-与-MSYS2"><a href="#四、MSVC、MinGW-与-MSYS2" class="headerlink" title="四、MSVC、MinGW 与 MSYS2"></a>四、MSVC、MinGW 与 MSYS2</h2><p>MSVC 是 Microsoft 的 C/C++ 工具链，与 Windows SDK 和 Visual Studio 构建系统配套。MinGW-w64 提供 GCC、Windows API 头文件和 import libraries，使 GCC 能生成 Windows 程序。MSYS2 则提供软件包管理和类 Unix 的构建环境，其中可以安装 MinGW-w64 工具链。</p>
+<p>三者的关系不是“安装 GCC 后再把 Windows SDK 路径加进去”这么简单。Windows SDK 的部分接口使用 MSVC 环境验证，MinGW 自带的是另一套经过适配的 Windows 头文件和库。一个 SDK 头文件在磁盘上存在，不代表当前 MinGW 版本能够直接编译它。</p>
+<p>检查当前实际工具链：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">where gcc
+where g++
+gcc <span class="token parameter variable">--version</span>
+g++ <span class="token parameter variable">--version</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在 MSYS2 中还要确认使用的是 MinGW/UCRT 终端和对应的编译器，而不是只面向 MSYS 运行时的工具。</p>
+<h2 id="五、TraceLoggingProvider-h-案例"><a href="#五、TraceLoggingProvider-h-案例" class="headerlink" title="五、TraceLoggingProvider.h 案例"></a>五、TraceLoggingProvider.h 案例</h2><p><code>TraceLoggingProvider.h</code> 属于 Windows SDK，用于生成 Windows ETW TraceLogging 事件。代码通常类似：</p>
+<p>Windows ETW 与 TraceLogging 的整体结构可参考《<a href="/2024/12/26/Windows-ETW%E6%A1%86%E6%9E%B6/">Windows ETW 框架</a>》；Linux 下的兼容实现则可参考《<a href="/2024/12/28/Linux-LTTng%E6%A1%86%E6%9E%B6/">Linux LTTng 框架</a>》。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifdef</span> <span class="token expression">_WIN32</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;windows.h&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;TraceLoggingProvider.h&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">else</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;tracelogging/TraceLoggingProvider.h&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这里应优先使用标准的 <code>_WIN32</code> 宏，而不是只判断 <code>WIN32</code>。如果 Windows 分支使用原生 ETW TraceLogging，最稳妥的是在 Visual Studio Developer Command Prompt 中使用 MSVC，并由项目配置选择 Windows SDK 版本。</p>
+<p>如果目标平台是 Linux，<code>&lt;tracelogging/TraceLoggingProvider.h&gt;</code> 通常来自 LTTng 相关的兼容实现，需要安装对应开发包并按其文档链接 LTTng 库；它不是 Windows SDK 中同名文件的简单复制品。</p>
+<p>排查顺序如下：</p>
+<ol>
+<li>确认实际进入了哪个 <code>#ifdef</code> 分支。</li>
+<li>确认使用的编译器和目标平台。</li>
+<li>用预处理命令检查 include 搜索路径。</li>
+<li>确认头文件属于哪个 SDK 或开发包。</li>
+<li>确认它依赖的其他头文件和链接库完整。</li>
+<li>对 Windows 原生 TraceLogging 优先使用 MSVC；对 Linux 兼容实现使用对应的 LTTng 工具链。</li>
+</ol>
+<p>因此，<code>fatal error: TraceLoggingProvider.h: No such file or directory</code> 有时确实只是 <code>-I</code> 配置问题，但如果加路径和复制文件都无效，就应该转向检查平台分支、SDK 完整性和工具链兼容性，而不是继续堆叠 include path。</p>
 
                 
             </div>
@@ -698,7 +598,7 @@ startp <span class="token operator">=</span> <span class="token function">bpf_ma
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://ytirus.github.io/2026/02/15/Futex%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">http://ytirus.github.io/2026/02/15/Futex%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/</a>
+                    <a href="http://ytirus.github.io/2026/02/23/GCC-G++%E4%B8%8EWindows-SDK/">http://ytirus.github.io/2026/02/23/GCC-G++%E4%B8%8EWindows-SDK/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -736,20 +636,24 @@ startp <span class="token operator">=</span> <span class="token function">bpf_ma
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/Futex/">
-                                    <span class="chip bg-color">Futex</span>
+                                <a href="/tags/GCC/">
+                                    <span class="chip bg-color">GCC</span>
                                 </a>
                             
-                                <a href="/tags/eBPF/">
-                                    <span class="chip bg-color">eBPF</span>
+                                <a href="/tags/C/">
+                                    <span class="chip bg-color">C</span>
                                 </a>
                             
-                                <a href="/tags/libbpf/">
-                                    <span class="chip bg-color">libbpf</span>
+                                <a href="/tags/C/">
+                                    <span class="chip bg-color">C++</span>
                                 </a>
                             
-                                <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
-                                    <span class="chip bg-color">性能分析</span>
+                                <a href="/tags/Windows-SDK/">
+                                    <span class="chip bg-color">Windows SDK</span>
+                                </a>
+                            
+                                <a href="/tags/MinGW/">
+                                    <span class="chip bg-color">MinGW</span>
                                 </a>
                             
                         </div>
@@ -797,24 +701,24 @@ startp <span class="token operator">=</span> <span class="token function">bpf_ma
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2026/02/16/%E4%BD%BF%E7%94%A8libbpf%E8%B0%83%E8%AF%95Futex-eBPF%E7%A8%8B%E5%BA%8F/">
+                <a href="/2026/03/09/Futex%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/41.jpg" class="responsive-img" alt="使用 libbpf 调试 Futex eBPF 程序">
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="Futex 性能分析">
                         
-                        <span class="card-title">使用 libbpf 调试 Futex eBPF 程序</span>
+                        <span class="card-title">Futex 性能分析</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            以 futexlat 为例，记录 eBPF 程序从编译、加载、attach 到 BPF Map 读取和 probe 触发的排查方法。
+                            使用 eBPF 观测 Futex 的等待与唤醒路径，分析锁竞争、等待延迟和观测工具自身开销，是《Futex 概述》的后续。
                         
                     </div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2026-02-16
+                            <i class="far fa-clock fa-fw icon-date"></i>2026-03-09
                         </span>
                         <span class="publish-author">
                             
@@ -843,8 +747,8 @@ startp <span class="token operator">=</span> <span class="token function">bpf_ma
                         <span class="chip bg-color">libbpf</span>
                     </a>
                     
-                    <a href="/tags/BPF-Map/">
-                        <span class="chip bg-color">BPF Map</span>
+                    <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
+                        <span class="chip bg-color">性能分析</span>
                     </a>
                     
                 </div>

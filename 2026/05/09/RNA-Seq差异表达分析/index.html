@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="使用 libbpf 调试 Futex eBPF 程序, Yi&#39;s Blog">
+    <meta name="keywords" content="使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析, Yi&#39;s Blog">
     <meta name="description" content="">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
 </script>
 
 
-    <title>使用 libbpf 调试 Futex eBPF 程序 | Yi&#39;s Blog</title>
+    <title>使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析 | Yi&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/medias/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
@@ -298,12 +298,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/41.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/47.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <!-- <h1 class="description center-align post-title">使用 libbpf 调试 Futex eBPF 程序</h1> -->
+                    <!-- <h1 class="description center-align post-title">使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析</h1> -->
                 </div>
             </div>
         </div>
@@ -419,20 +419,20 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/Futex/">
-                                <span class="chip bg-color">Futex</span>
+                            <a href="/tags/R/">
+                                <span class="chip bg-color">R</span>
                             </a>
                         
-                            <a href="/tags/eBPF/">
-                                <span class="chip bg-color">eBPF</span>
+                            <a href="/tags/RNA-Seq/">
+                                <span class="chip bg-color">RNA-Seq</span>
                             </a>
                         
-                            <a href="/tags/libbpf/">
-                                <span class="chip bg-color">libbpf</span>
+                            <a href="/tags/DESeq2/">
+                                <span class="chip bg-color">DESeq2</span>
                             </a>
                         
-                            <a href="/tags/BPF-Map/">
-                                <span class="chip bg-color">BPF Map</span>
+                            <a href="/tags/edgeR/">
+                                <span class="chip bg-color">edgeR</span>
                             </a>
                         
                     </div>
@@ -443,8 +443,8 @@
                     <div class="post-cate">
                         <i class="fas fa-bookmark fa-fw icon-category"></i>
                         
-                            <a href="/categories/OS/" class="post-category">
-                                OS
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
                             </a>
                         
                     </div>
@@ -456,7 +456,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2026-02-16
+                    2026-05-09
                 </div>
                 
 
@@ -465,14 +465,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.3k
+                    954
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    5 分
+                    4 分
                 </div>
                 
 
@@ -495,173 +495,89 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>使用 libbpf + skeleton 编写 Futex 工具时，问题通常出现在四个阶段：对象没有正确生成、程序没有通过 verifier、程序没有 attach 到预期 hook，或者程序已经运行但 Map 中没有数据。几个阶段的表现很像，必须从前向后逐层排查。</p>
-<h2 id="一、从编译结果确认对象是否完整"><a href="#一、从编译结果确认对象是否完整" class="headerlink" title="一、从编译结果确认对象是否完整"></a>一、从编译结果确认对象是否完整</h2><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">clang <span class="token parameter variable">-O2</span> <span class="token parameter variable">-g</span> <span class="token parameter variable">-target</span> bpf <span class="token parameter variable">-c</span> futexlat.bpf.c <span class="token parameter variable">-o</span> futexlat.bpf.o
-bpftool gen skeleton futexlat.bpf.o <span class="token operator">&gt;</span> futexlat.skel.h
-clang futexlat.c <span class="token parameter variable">-lbpf</span> <span class="token parameter variable">-lelf</span> <span class="token parameter variable">-lz</span> <span class="token parameter variable">-o</span> futexlat<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+                <p>RNA-Seq 差异表达分析通常需要三类输入：基因表达计数矩阵、样本分组信息和基因注释。DESeq2 与 edgeR 都以原始整数 counts 为输入，通过负二项分布建模分析组间差异，但在标准化、离散度估计和统计检验上采用了不同实现。</p>
+<h2 id="一、准备数据"><a href="#一、准备数据" class="headerlink" title="一、准备数据"></a>一、准备数据</h2><pre class="line-numbers language-r" data-language="r"><code class="language-r">library<span class="token punctuation">(</span>dplyr<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>tibble<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>DESeq2<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>edgeR<span class="token punctuation">)</span>
 
-<p>CO-RE 依赖有效 BTF：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">bpftool feature probe
-bpftool btf dump <span class="token function">file</span> /sys/kernel/btf/vmlinux <span class="token operator">|</span> <span class="token function">head</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+counts <span class="token operator">&lt;-</span> read.csv<span class="token punctuation">(</span><span class="token string">"airway_counts.csv"</span><span class="token punctuation">,</span> check.names <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">)</span>
+metadata <span class="token operator">&lt;-</span> read.csv<span class="token punctuation">(</span><span class="token string">"airway_metadata.csv"</span><span class="token punctuation">,</span> row.names <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span>
+anno <span class="token operator">&lt;-</span> read.csv<span class="token punctuation">(</span><span class="token string">"annotables_grch38.csv"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p>出现 <code>failed to find valid kernel BTF</code> 或 <code>struct_ops requires kernel CONFIG_DEBUG_INFO_BTF=y</code> 时，应先检查内核配置和工具版本。</p>
-<p><strong>确认 Map 已进入 skeleton</strong></p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> <span class="token parameter variable">-A3</span> hists futexlat.skel.h<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>表达矩阵应当每行对应一个基因、每列对应一个样本，metadata 每行对应一个样本。正式分析前首先确认二者顺序一致：</p>
+<pre class="line-numbers language-r" data-language="r"><code class="language-r">stopifnot<span class="token punctuation">(</span>all<span class="token punctuation">(</span>colnames<span class="token punctuation">(</span>counts<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">==</span> rownames<span class="token punctuation">(</span>metadata<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+stopifnot<span class="token punctuation">(</span>all<span class="token punctuation">(</span>counts<span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">==</span> round<span class="token punctuation">(</span>as.matrix<span class="token punctuation">(</span>counts<span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
-<p>预期存在：</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token punctuation">{</span>
-    <span class="token keyword">struct</span> <span class="token class-name">bpf_map</span> <span class="token operator">*</span>hists<span class="token punctuation">;</span>
-<span class="token punctuation">}</span> maps<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>DESeq2 和 edgeR 需要原始整数计数，不能直接使用 TPM、FPKM、CPM 或经过缩放的数据。原始代码中的文件名是 <code>airway_scaledcounts.csv</code>，因此必须先确认文件内容；如果确实是 scaled counts，应回到比对或定量结果重新取得 raw counts。</p>
+<p>基因注释可以通过基因 ID 合并，但不建议简单使用 <code>distinct(symbol)</code> 丢弃重复 symbol，因为多个 Ensembl ID 可能映射到同一个 symbol。更稳妥的方式是保留稳定基因 ID 作为行名，将 symbol 作为结果注释；如果业务确实需要按 symbol 合并，应明确采用求和或其他规则。</p>
+<h2 id="二、使用-DESeq2"><a href="#二、使用-DESeq2" class="headerlink" title="二、使用 DESeq2"></a>二、使用 DESeq2</h2><pre class="line-numbers language-r" data-language="r"><code class="language-r">count_matrix <span class="token operator">&lt;-</span> counts <span class="token operator">|</span><span class="token operator">&gt;</span>
+  column_to_rownames<span class="token punctuation">(</span><span class="token string">"gene_id"</span><span class="token punctuation">)</span> <span class="token operator">|</span><span class="token operator">&gt;</span>
+  as.matrix<span class="token punctuation">(</span><span class="token punctuation">)</span>
 
-<p>如果 <code>maps.hists</code> 不存在，应检查 <code>.bpf.c</code> 中的 Map 定义、section 和实际编译输入，而不是继续修改查询逻辑。</p>
-<p>如果 BPF 侧已经调用 <code>bpf_map_lookup_or_try_init(&amp;hists, ...)</code>，并继续向 <code>histp-&gt;comm</code> 或直方图槽位写入，就能够确认该 Map 确实被程序引用，不应把问题简单归因于编译器删除未使用 Map。</p>
-<h2 id="二、分开检查-open、load-和-attach"><a href="#二、分开检查-open、load-和-attach" class="headerlink" title="二、分开检查 open、load 和 attach"></a>二、分开检查 open、load 和 attach</h2><pre class="line-numbers language-c" data-language="c"><code class="language-c">obj <span class="token operator">=</span> <span class="token function">futexlat_bpf__open</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>obj<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">fprintf</span><span class="token punctuation">(</span><span class="token constant">stderr</span><span class="token punctuation">,</span> <span class="token string">"failed to open BPF object\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+metadata<span class="token operator">$</span>dex <span class="token operator">&lt;-</span> relevel<span class="token punctuation">(</span>factor<span class="token punctuation">(</span>metadata<span class="token operator">$</span>dex<span class="token punctuation">)</span><span class="token punctuation">,</span> ref <span class="token operator">=</span> <span class="token string">"control"</span><span class="token punctuation">)</span>
 
-err <span class="token operator">=</span> <span class="token function">futexlat_bpf__load</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">fprintf</span><span class="token punctuation">(</span><span class="token constant">stderr</span><span class="token punctuation">,</span> <span class="token string">"failed to load BPF object: %d\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">goto</span> cleanup<span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+dds <span class="token operator">&lt;-</span> DESeqDataSetFromMatrix<span class="token punctuation">(</span>
+  countData <span class="token operator">=</span> count_matrix<span class="token punctuation">,</span>
+  colData <span class="token operator">=</span> metadata<span class="token punctuation">,</span>
+  design <span class="token operator">=</span> <span class="token operator">~</span> dex
+<span class="token punctuation">)</span>
 
-err <span class="token operator">=</span> <span class="token function">futexlat_bpf__attach</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">fprintf</span><span class="token punctuation">(</span><span class="token constant">stderr</span><span class="token punctuation">,</span> <span class="token string">"failed to attach BPF programs: %d\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">goto</span> cleanup<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+dds <span class="token operator">&lt;-</span> DESeq<span class="token punctuation">(</span>dds<span class="token punctuation">)</span>
+resultsNames<span class="token punctuation">(</span>dds<span class="token punctuation">)</span>
 
-<p>开启 <code>libbpf_set_print(libbpf_print_fn)</code>，同时查看：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dmesg</span> <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-n</span> <span class="token number">50</span>
-bpftool prog list <span class="token operator">|</span> <span class="token function">grep</span> futex
-<span class="token function">sudo</span> <span class="token function">cat</span> /sys/kernel/debug/tracing/trace_pipe<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+res <span class="token operator">&lt;-</span> results<span class="token punctuation">(</span>dds<span class="token punctuation">,</span> contrast <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"dex"</span><span class="token punctuation">,</span> <span class="token string">"treated"</span><span class="token punctuation">,</span> <span class="token string">"control"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+res <span class="token operator">&lt;-</span> as.data.frame<span class="token punctuation">(</span>res<span class="token punctuation">)</span>
+res<span class="token operator">$</span>gene_id <span class="token operator">&lt;-</span> rownames<span class="token punctuation">(</span>res<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h2 id="三、检查-Map-fd、迭代逻辑和共享结构"><a href="#三、检查-Map-fd、迭代逻辑和共享结构" class="headerlink" title="三、检查 Map fd、迭代逻辑和共享结构"></a>三、检查 Map fd、迭代逻辑和共享结构</h2><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> fd <span class="token operator">=</span> <span class="token function">bpf_map__fd</span><span class="token punctuation">(</span>obj<span class="token operator">-&gt;</span>maps<span class="token punctuation">.</span>hists<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span> <span class="token punctuation">(</span>fd <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">fprintf</span><span class="token punctuation">(</span><span class="token constant">stderr</span><span class="token punctuation">,</span> <span class="token string">"invalid hists map fd: %d\n"</span><span class="token punctuation">,</span> fd<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>DESeq()</code> 已经依次完成 size factor、离散度和模型估计，一般不需要在它之后再次调用 <code>estimateSizeFactors()</code>。如果需要查看标准化计数，可以使用：</p>
+<pre class="line-numbers language-r" data-language="r"><code class="language-r">normalized_counts <span class="token operator">&lt;-</span> counts<span class="token punctuation">(</span>dds<span class="token punctuation">,</span> normalized <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<p><code>EBADF</code> 表示无效文件描述符，与“Map 为空”不是一回事。Map 为空时，<code>bpf_map_get_next_key()</code> 返回失败，用户态应结束迭代，不能继续拿未初始化的 <code>next_key</code> 做 lookup。</p>
-<p>可以先写一个只打印 fd、调用一次 <code>bpf_map_get_next_key()</code> 的最小程序，暂时移除格式化输出和直方图遍历。若 fd 为正数但 lookup 仍失败，再检查 Map 类型、key/value 大小和传入指针，而不是继续排查 load 阶段。</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c">__u32 key<span class="token punctuation">,</span> next_key<span class="token punctuation">;</span>
-<span class="token keyword">int</span> err <span class="token operator">=</span> <span class="token function">bpf_map_get_next_key</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>next_key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<p>三组实验仍然使用同一设计公式，只需要重新构建包含正确分组的 <code>dds</code>，再分别提取对比结果：</p>
+<pre class="line-numbers language-r" data-language="r"><code class="language-r">metadata<span class="token operator">$</span>dex <span class="token operator">&lt;-</span> factor<span class="token punctuation">(</span>metadata<span class="token operator">$</span>dex<span class="token punctuation">,</span> levels <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"a"</span><span class="token punctuation">,</span> <span class="token string">"b"</span><span class="token punctuation">,</span> <span class="token string">"c"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 
-<span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">struct</span> <span class="token class-name">hist</span> hist <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">bpf_map_lookup_elem</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>next_key<span class="token punctuation">,</span> <span class="token operator">&amp;</span>hist<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">fprintf</span><span class="token punctuation">(</span><span class="token constant">stderr</span><span class="token punctuation">,</span> <span class="token string">"lookup failed: %s\n"</span><span class="token punctuation">,</span> <span class="token function">strerror</span><span class="token punctuation">(</span>errno<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        <span class="token keyword">break</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-    key <span class="token operator">=</span> next_key<span class="token punctuation">;</span>
-    err <span class="token operator">=</span> <span class="token function">bpf_map_get_next_key</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> <span class="token operator">&amp;</span>key<span class="token punctuation">,</span> <span class="token operator">&amp;</span>next_key<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+dds3 <span class="token operator">&lt;-</span> DESeqDataSetFromMatrix<span class="token punctuation">(</span>
+  countData <span class="token operator">=</span> count_matrix<span class="token punctuation">,</span>
+  colData <span class="token operator">=</span> metadata<span class="token punctuation">,</span>
+  design <span class="token operator">=</span> <span class="token operator">~</span> dex
+<span class="token punctuation">)</span>
+dds3 <span class="token operator">&lt;-</span> DESeq<span class="token punctuation">(</span>dds3<span class="token punctuation">)</span>
 
-<div class="note warning no-icon">
-错误日志应同时保留函数返回值和 `errno`。只打印一个 `-9`，无法判断它来自 libbpf、系统调用包装还是程序自己的错误转换。
-</div>
+res_b_vs_a <span class="token operator">&lt;-</span> results<span class="token punctuation">(</span>dds3<span class="token punctuation">,</span> contrast <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"dex"</span><span class="token punctuation">,</span> <span class="token string">"b"</span><span class="token punctuation">,</span> <span class="token string">"a"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+res_c_vs_a <span class="token operator">&lt;-</span> results<span class="token punctuation">(</span>dds3<span class="token punctuation">,</span> contrast <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"dex"</span><span class="token punctuation">,</span> <span class="token string">"c"</span><span class="token punctuation">,</span> <span class="token string">"a"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><strong>检查共享结构体</strong></p>
-<p>用户态和 BPF 侧必须使用一致的 key/value 布局，尤其要检查字段类型、顺序、数组长度和对齐。</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">MAX_SLOTS</span> <span class="token expression"><span class="token number">64</span></span></span>
-<span class="token keyword">struct</span> <span class="token class-name">hist</span> <span class="token punctuation">{</span>
-    <span class="token keyword">char</span> comm<span class="token punctuation">[</span><span class="token number">16</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    __u64 slots<span class="token punctuation">[</span>MAX_SLOTS<span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>只修改外部 <code>metadata$dex</code> 不会自动改变已经创建的 <code>dds</code>，因此分组改变后应重新创建 DESeqDataSet，或者显式修改 <code>colData(dds)</code> 后重新拟合。</p>
+<h2 id="三、使用-edgeR"><a href="#三、使用-edgeR" class="headerlink" title="三、使用 edgeR"></a>三、使用 edgeR</h2><pre class="line-numbers language-r" data-language="r"><code class="language-r">group <span class="token operator">&lt;-</span> factor<span class="token punctuation">(</span>metadata<span class="token operator">$</span>dex<span class="token punctuation">,</span> levels <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">"control"</span><span class="token punctuation">,</span> <span class="token string">"treated"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 
-<p>最好将共享结构放进同一个头文件。结构体不一致通常不会使 fd 无效，却会造成读取失败或数据错位。</p>
-<h2 id="四、程序已-attach，为什么仍然没有数据"><a href="#四、程序已-attach，为什么仍然没有数据" class="headerlink" title="四、程序已 attach，为什么仍然没有数据"></a>四、程序已 attach，为什么仍然没有数据</h2><p>Map 存在且 fd 正常，却没有任何 key 时，可以增加临时计数器：</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">volatile</span> __u32 switch_counter<span class="token punctuation">;</span>
+dge <span class="token operator">&lt;-</span> DGEList<span class="token punctuation">(</span>counts <span class="token operator">=</span> count_matrix<span class="token punctuation">,</span> group <span class="token operator">=</span> group<span class="token punctuation">)</span>
+dge <span class="token operator">&lt;-</span> calcNormFactors<span class="token punctuation">(</span>dge<span class="token punctuation">)</span>
 
-<span class="token keyword">static</span> __always_inline <span class="token keyword">int</span> <span class="token function">handle_switch</span><span class="token punctuation">(</span><span class="token comment">/* ... */</span><span class="token punctuation">)</span>
-<span class="token punctuation">{</span>
-    <span class="token function">__sync_fetch_and_add</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>switch_counter<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+design <span class="token operator">&lt;-</span> model.matrix<span class="token punctuation">(</span><span class="token operator">~</span> <span class="token number">0</span> <span class="token operator">+</span> group<span class="token punctuation">)</span>
+colnames<span class="token punctuation">(</span>design<span class="token punctuation">)</span> <span class="token operator">&lt;-</span> levels<span class="token punctuation">(</span>group<span class="token punctuation">)</span>
 
-<p>用户态读取 <code>obj-&gt;bss-&gt;switch_counter</code>，或在 BPF 程序中临时加入 <code>bpf_printk()</code> 并观察 <code>trace_pipe</code>。</p>
-<p><strong>过滤条件和测试负载</strong></p>
-<p>如果目标 PID 没有进入 Futex 慢路径，Map 为空是正常结果。调试阶段可以暂时设置：</p>
-<pre class="line-numbers language-c" data-language="c"><code class="language-c">obj<span class="token operator">-&gt;</span>rodata<span class="token operator">-&gt;</span>targ_tgid <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+dge <span class="token operator">&lt;-</span> estimateDisp<span class="token punctuation">(</span>dge<span class="token punctuation">,</span> design<span class="token punctuation">,</span> robust <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+plotMDS<span class="token punctuation">(</span>dge<span class="token punctuation">)</span>
+plotBCV<span class="token punctuation">(</span>dge<span class="token punctuation">)</span>
 
-<p>再制造可控负载：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> stress-ng <span class="token parameter variable">--futex</span> <span class="token number">2</span> <span class="token parameter variable">--timeout</span> 5s
-<span class="token function">grep</span> futex_wait /proc/kallsyms<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+fit <span class="token operator">&lt;-</span> glmQLFit<span class="token punctuation">(</span>dge<span class="token punctuation">,</span> design<span class="token punctuation">,</span> robust <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+contrast <span class="token operator">&lt;-</span> makeContrasts<span class="token punctuation">(</span>treated <span class="token operator">-</span> control<span class="token punctuation">,</span> levels <span class="token operator">=</span> design<span class="token punctuation">)</span>
+test <span class="token operator">&lt;-</span> glmQLFTest<span class="token punctuation">(</span>fit<span class="token punctuation">,</span> contrast <span class="token operator">=</span> contrast<span class="token punctuation">)</span>
+deg <span class="token operator">&lt;-</span> topTags<span class="token punctuation">(</span>test<span class="token punctuation">,</span> n <span class="token operator">=</span> <span class="token number">Inf</span><span class="token punctuation">)</span><span class="token operator">$</span>table
 
-<p>全局模式有数据、指定 PID 后无数据时，应优先检查 PID/TGID 语义和过滤条件；测试负载也无法触发时，再检查 attach 点和内核符号。</p>
-<p>对于原始 <code>futexlat</code>，还要确认 <code>handle_switch()</code> 是否确实位于已 attach 的 <code>futex_wait</code>、<code>futex_wake</code> 或相应返回探针路径中。仅仅生成了 skeleton，并不能证明这些回调在当前内核和测试负载下会执行。</p>
-<h2 id="五、将-struct-ops-问题分开并形成排查顺序"><a href="#五、将-struct-ops-问题分开并形成排查顺序" class="headerlink" title="五、将 struct_ops 问题分开并形成排查顺序"></a>五、将 struct_ops 问题分开并形成排查顺序</h2><p>LAVD 等 <code>sched_ext</code> 程序可能出现 <code>failed to load: -22</code>。<code>BPF_STRUCT_OPS</code> 依赖内核 BTF、对应内核功能和结构定义，不应与 Futex kprobe/tracepoint 问题混在一起。</p>
-<p>当前实验笔记还记录过 <code>errno 22 (EINVAL)</code> 和 <code>errno 14 (EFAULT)</code>。这两个 errno 只能说明 loader 最终收到的错误，不能单独作为根因；发表前需要保留对应的完整 verifier 日志、内核版本和触发命令。</p>
-<pre class="line-numbers language-text" data-language="text"><code class="language-text">[Warn] libbpf: prog 'lavd_select_cpu': failed to load: -22
-[Warn] libbpf: failed to load BPF skeleton 'bpf_bpf': -22
-Error: Failed to load BPF program: Invalid argument (os error 22)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+write.csv<span class="token punctuation">(</span>deg<span class="token punctuation">,</span> <span class="token string">"edger-treated-vs-control.csv"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> /sys/kernel/sched_ext/state /sys/kernel/sched_ext/*/ops <span class="token operator"><span class="token file-descriptor important">2</span>&gt;</span>/dev/null
-bpftool struct_ops list
-bpftool btf dump <span class="token function">file</span> /sys/kernel/btf/vmlinux <span class="token operator">|</span> <span class="token function">head</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-
-<p><strong>推荐排查顺序</strong></p>
-<table>
-<thead>
-<tr>
-<th>顺序</th>
-<th>检查项</th>
-<th>目标</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>BTF、编译和 skeleton</td>
-<td>对象及 Map 已生成</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>open</code></td>
-<td>skeleton 可以打开</td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>load</code> 与 verifier</td>
-<td>程序进入内核</td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>attach</code></td>
-<td>hook 已建立</td>
-</tr>
-<tr>
-<td>5</td>
-<td>Map fd</td>
-<td>用户态句柄有效</td>
-</tr>
-<tr>
-<td>6</td>
-<td>计数器和 <code>trace_pipe</code></td>
-<td>程序实际执行</td>
-</tr>
-<tr>
-<td>7</td>
-<td>PID/TGID 和测试负载</td>
-<td>确实存在事件</td>
-</tr>
-<tr>
-<td>8</td>
-<td>Map 迭代和结构体</td>
-<td>数据读取正确</td>
-</tr>
-</tbody></table>
-<p>按阶段排查后，“程序没有加载”“probe 没触发”和“Map 本来为空”就不会再混为同一个问题。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
-<li>David Calavera、Lorenzo Fontana，《Linux Observability with BPF》及中文版《Linux 内核观测技术 BPF》</li>
-<li>Brendan Gregg，《BPF Performance Tools》及中文版《BPF 之巅》</li>
-<li><a target="_blank" rel="noopener" href="https://ebpf.io/">eBPF 官方网站</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/iovisor">IO Visor 项目</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/zoidbergwill/awesome-ebpf">awesome-ebpf 资料索引</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.brendangregg.com/">Brendan Gregg 个人网站</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.tcpdump.org/papers/bpf-usenix93.pdf">The BSD Packet Filter: A New Architecture for User-level Packet Capture</a></li>
-</ul>
+<p><code>plotMDS()</code> 用于观察样本间整体距离，<code>plotBCV()</code> 用于查看生物学变异。<code>makeContrasts(treated - control)</code> 明确表示 treated 相对 control 的变化方向；反过来写会使 logFC 符号相反。</p>
+<h2 id="四、结果解释与检查"><a href="#四、结果解释与检查" class="headerlink" title="四、结果解释与检查"></a>四、结果解释与检查</h2><p>DESeq2 常用 <code>log2FoldChange</code>、<code>pvalue</code> 和 <code>padj</code>，edgeR 常用 <code>logFC</code>、<code>PValue</code> 和 <code>FDR</code>。两种工具的显著基因不一定完全相同，比较结果时要保持输入基因集合、样本分组和 contrast 方向一致。</p>
+<p>分析完成后至少检查：</p>
+<ol>
+<li>counts 是否为非负整数。</li>
+<li>counts 列名是否与 metadata 行名完全对应。</li>
+<li>参考组和对比方向是否符合问题定义。</li>
+<li>是否存在极低表达基因，是否需要预过滤。</li>
+<li>多重检验校正后是否仍然显著。</li>
+<li>样本在 MDS/PCA 中是否按实验组分离，是否存在离群点。</li>
+</ol>
+<p>原始代码展示了两套工具的完整轮廓，但数据对象在修改分组后没有重新创建、重复 symbol 被直接删除、contrast 方向和拼写也存在问题。将数据对应关系固定下来，再分别运行两套模型，结果才具有可解释性。</p>
 
                 
             </div>
@@ -688,7 +604,7 @@ bpftool btf dump <span class="token function">file</span> /sys/kernel/btf/vmlinu
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://ytirus.github.io/2026/02/16/%E4%BD%BF%E7%94%A8libbpf%E8%B0%83%E8%AF%95Futex-eBPF%E7%A8%8B%E5%BA%8F/">http://ytirus.github.io/2026/02/16/%E4%BD%BF%E7%94%A8libbpf%E8%B0%83%E8%AF%95Futex-eBPF%E7%A8%8B%E5%BA%8F/</a>
+                    <a href="http://ytirus.github.io/2026/05/09/RNA-Seq%E5%B7%AE%E5%BC%82%E8%A1%A8%E8%BE%BE%E5%88%86%E6%9E%90/">http://ytirus.github.io/2026/05/09/RNA-Seq%E5%B7%AE%E5%BC%82%E8%A1%A8%E8%BE%BE%E5%88%86%E6%9E%90/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -726,20 +642,20 @@ bpftool btf dump <span class="token function">file</span> /sys/kernel/btf/vmlinu
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/Futex/">
-                                    <span class="chip bg-color">Futex</span>
+                                <a href="/tags/R/">
+                                    <span class="chip bg-color">R</span>
                                 </a>
                             
-                                <a href="/tags/eBPF/">
-                                    <span class="chip bg-color">eBPF</span>
+                                <a href="/tags/RNA-Seq/">
+                                    <span class="chip bg-color">RNA-Seq</span>
                                 </a>
                             
-                                <a href="/tags/libbpf/">
-                                    <span class="chip bg-color">libbpf</span>
+                                <a href="/tags/DESeq2/">
+                                    <span class="chip bg-color">DESeq2</span>
                                 </a>
                             
-                                <a href="/tags/BPF-Map/">
-                                    <span class="chip bg-color">BPF Map</span>
+                                <a href="/tags/edgeR/">
+                                    <span class="chip bg-color">edgeR</span>
                                 </a>
                             
                         </div>
@@ -783,29 +699,92 @@ bpftool btf dump <span class="token function">file</span> /sys/kernel/btf/vmlinu
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
-                <a href="/2026/02/18/Linux-CPU%E8%B0%83%E5%BA%A6%E4%B8%8Esched-ext%E5%9F%BA%E7%A1%80/">
+                <a href="/2026/05/09/RNA-Seq%E5%B7%AE%E5%BC%82%E8%A1%A8%E8%BE%BE%E5%88%86%E6%9E%90/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/27.jpg" class="responsive-img" alt="Linux CPU 调度与 sched_ext 基础：从任务唤醒到 CPU 执行">
+                        <img src="/medias/featureimages/47.jpg" class="responsive-img" alt="使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析">
                         
-                        <span class="card-title">Linux CPU 调度与 sched_ext 基础：从任务唤醒到 CPU 执行</span>
+                        <span class="card-title">使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            按照任务唤醒、入队、选取、上下文切换和停止运行的顺序，介绍 Linux CPU 调度主流程，以及 sched_ext、struct sched_ext_ops、DSQ 与用户态加载程序之间的关系。
+                            从表达矩阵、样本信息和基因注释出发，分别使用 DESeq2 与 edgeR 完成 RNA-Seq 差异表达分析，并记录容易出错的数据对应关系。
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2026-02-18
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-05-09
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
                         </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/R/">
+                        <span class="chip bg-color">R</span>
+                    </a>
+                    
+                    <a href="/tags/RNA-Seq/">
+                        <span class="chip bg-color">RNA-Seq</span>
+                    </a>
+                    
+                    <a href="/tags/DESeq2/">
+                        <span class="chip bg-color">DESeq2</span>
+                    </a>
+                    
+                    <a href="/tags/edgeR/">
+                        <span class="chip bg-color">edgeR</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/04/23/sched-ext%E4%B8%8Escx-lavd%E7%94%A8%E6%88%B7%E6%80%81%E5%89%8D%E7%AB%AF%E8%A7%A3%E6%9E%90/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/1.jpg" class="responsive-img" alt="sched_ext 与 scx_lavd 用户态前端解析">
+                        
+                        <span class="card-title">sched_ext 与 scx_lavd 用户态前端解析</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            从混部调度需求出发，介绍 sched_ext、DSQ 和 scx_lavd，并分析其 Rust 用户态前端的参数、生命周期与监控逻辑。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-04-23
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-bookmark fa-fw icon-category"></i>
@@ -829,69 +808,16 @@ bpftool btf dump <span class="token function">file</span> /sys/kernel/btf/vmlinu
                         <span class="chip bg-color">sched_ext</span>
                     </a>
                     
-                    <a href="/tags/CPU-%E8%B0%83%E5%BA%A6/">
-                        <span class="chip bg-color">CPU 调度</span>
+                    <a href="/tags/Rust/">
+                        <span class="chip bg-color">Rust</span>
                     </a>
                     
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2026/02/15/Futex%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="Futex 性能分析">
-                        
-                        <span class="card-title">Futex 性能分析</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            使用 eBPF 观测 Futex 的等待与唤醒路径，分析锁竞争、等待延迟和观测工具自身开销，是《Futex 概述》的后续。
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2026-02-15
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/OS/" class="post-category">
-                                    OS
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/Futex/">
-                        <span class="chip bg-color">Futex</span>
+                    <a href="/tags/scx-lavd/">
+                        <span class="chip bg-color">scx_lavd</span>
                     </a>
                     
-                    <a href="/tags/eBPF/">
-                        <span class="chip bg-color">eBPF</span>
-                    </a>
-                    
-                    <a href="/tags/libbpf/">
-                        <span class="chip bg-color">libbpf</span>
-                    </a>
-                    
-                    <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
-                        <span class="chip bg-color">性能分析</span>
+                    <a href="/tags/%E8%B0%83%E5%BA%A6%E5%99%A8/">
+                        <span class="chip bg-color">调度器</span>
                     </a>
                     
                 </div>
