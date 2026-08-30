@@ -775,9 +775,9 @@
             
             <tag> Memory </tag>
             
-            <tag> struct page </tag>
-            
             <tag> THP </tag>
+            
+            <tag> struct page </tag>
             
         </tags>
       
@@ -1647,11 +1647,11 @@
             
             <tag> NUMA </tag>
             
+            <tag> proc </tag>
+            
             <tag> 虚拟文件系统 </tag>
             
             <tag> Kernel-Crashed </tag>
-            
-            <tag> proc </tag>
             
         </tags>
       
@@ -1676,13 +1676,13 @@
       
         <tags>
             
+            <tag> 虚拟文件系统 </tag>
+            
             <tag> 后台守护进程 </tag>
             
             <tag> 内核线程 </tag>
             
             <tag> 文件系统 </tag>
-            
-            <tag> 虚拟文件系统 </tag>
             
         </tags>
       
