@@ -775,9 +775,9 @@
             
             <tag> Memory </tag>
             
-            <tag> THP </tag>
-            
             <tag> struct page </tag>
+            
+            <tag> THP </tag>
             
         </tags>
       
