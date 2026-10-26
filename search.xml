@@ -3,21 +3,6 @@
   
   
     
-    
-    
-    <entry>
-      <title></title>
-      <link href="/2026/09/26/%E6%9C%AA%E5%91%BD%E5%90%8D/"/>
-      <url>/2026/09/26/%E6%9C%AA%E5%91%BD%E5%90%8D/</url>
-      
-        <content type="html"><![CDATA[]]></content>
-      
-      
-      
-    </entry>
-    
-    
-    
     <entry>
       <title>JAX 101（八）：用 lax.scan 表达重复层与循环状态</title>
       <link href="/2026/07/04/JAX-101-08-lax-scan%E4%B8%8E%E5%B1%82%E5%A0%86%E5%8F%A0/"/>
@@ -99,11 +84,11 @@
             
             <tag> JAX </tag>
             
-            <tag> 自动微分 </tag>
-            
             <tag> Transformer </tag>
             
             <tag> 大语言模型 </tag>
+            
+            <tag> 自动微分 </tag>
             
         </tags>
       
@@ -225,9 +210,9 @@
             
             <tag> 自动微分 </tag>
             
-            <tag> vmap </tag>
-            
             <tag> JIT </tag>
+            
+            <tag> vmap </tag>
             
         </tags>
       
@@ -1910,11 +1895,11 @@
             
             <tag> NUMA </tag>
             
+            <tag> 虚拟文件系统 </tag>
+            
             <tag> Kernel-Crashed </tag>
             
             <tag> proc </tag>
-            
-            <tag> 虚拟文件系统 </tag>
             
         </tags>
       
@@ -1939,13 +1924,13 @@
       
         <tags>
             
-            <tag> 虚拟文件系统 </tag>
-            
             <tag> 后台守护进程 </tag>
             
             <tag> 内核线程 </tag>
             
             <tag> 文件系统 </tag>
+            
+            <tag> 虚拟文件系统 </tag>
             
         </tags>
       
@@ -2111,9 +2096,9 @@
             
             <tag> CCFA </tag>
             
-            <tag> RDMA </tag>
-            
             <tag> CXL </tag>
+            
+            <tag> RDMA </tag>
             
         </tags>
       
