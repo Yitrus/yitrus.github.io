@@ -1,0 +1,13 @@
+Source: https://docs.jax.dev/en/latest/101/convolutions.html
+Authors: The JAX Authors
+Retrieved: 2026-10-26
+
+kernel-and-input.png https://docs.jax.dev/en/latest/_images/eec5608c5255192766467283c6e5b7df2401b0a3b6d182408adc9c71f086e0b0.png
+same-padding.png https://docs.jax.dev/en/latest/_images/6490701f9e6339802bedfd29ed15ac9fbfbd4bc03958affd583d83af1728806d.png
+stride-2.png https://docs.jax.dev/en/latest/_images/6f7501cddf784695eeee284ff983196528526656d5d835b64e36dbe449c387cd.png
+kernel-dilation.png https://docs.jax.dev/en/latest/_images/2412526e0f4164d705af05be3262738da16654364a2fa1e77634425edd74c17d.png
+transposed-convolution.png https://docs.jax.dev/en/latest/_images/2b951839870af6689a70c0a451b1d0876ff7c8c330e11195af14dfe6e8333ec9.png
+conv1d-input.png https://docs.jax.dev/en/latest/_images/f529b8f88101a5211d9fbc1765fd6c8f119a96aac2036ff6b212e3de383b3af2.png
+conv1d-output.png https://docs.jax.dev/en/latest/_images/5d3d6b796bbdbed36d5c494e5b4bb00320b958bfa00c2e6bb32b6f68edae89a3.png
+conv3d-input.png https://docs.jax.dev/en/latest/_images/6b7330c7f4ec6fb4c73eb51059f2731ff253572c6743ba49d641c177f2a490bc.png
+conv3d-output.png https://docs.jax.dev/en/latest/_images/7dac02cc354c6ce2bc0e36bcef417766c8d30f4f80df4d5196ffb86465447d18.png

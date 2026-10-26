@@ -423,16 +423,16 @@
                                 <span class="chip bg-color">JAX</span>
                             </a>
                         
-                            <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
-                                <span class="chip bg-color">自动微分</span>
-                            </a>
-                        
                             <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
                                 <span class="chip bg-color">大语言模型</span>
                             </a>
                         
                             <a href="/tags/Transformer/">
                                 <span class="chip bg-color">Transformer</span>
+                            </a>
+                        
+                            <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
+                                <span class="chip bg-color">自动微分</span>
                             </a>
                         
                     </div>
@@ -465,14 +465,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.2k
+                    4.8k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    5 分
+                    18 分
                 </div>
                 
 
@@ -505,6 +505,24 @@
   → lm_head [B,T,V]<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>每个位置输出 <code>V</code> 个 logits，用来预测下一个 token。</p>
+<h3 id="1-1-先看懂结构中的名字"><a href="#1-1-先看懂结构中的名字" class="headerlink" title="1.1 先看懂结构中的名字"></a>1.1 先看懂结构中的名字</h3><p>这里的 <code>B</code> 是 batch 中的序列数，<code>T</code> 是序列长度，<code>D</code> 是每个 token 的隐藏向量维度，<code>V</code> 是词表大小。模型的任务，是把整数 token id 转成向量，结合上下文加工这些向量，最后输出词表中各个候选 token 的分数。</p>
+<p><strong>Embedding（嵌入）是把离散编号转换成可学习的向量。</strong> token id 只是词表里的编号，例如编号 100 并不比编号 50 多一倍语义。我们准备一张 <code>[V,D]</code> 的参数表，每个 token 对应一行，输入哪个 id，就取出哪一行向量。这张表会随训练更新，使向量逐渐包含对预测有用的信息。本例还使用位置嵌入（position embedding），给不同位置分配可学习的向量，让模型区分 token 在序列中的位置。</p>
+<p><strong>Transformer 是一种以注意力机制组织序列计算的网络结构。</strong> 本文采用 decoder-only 形式：只堆叠带因果约束的 Transformer block，没有独立的 encoder，也没有读取 encoder 输出的交叉注意力。每个 block 主要包含两个计算分支：注意力负责从允许访问的上下文中汇集信息，MLP 负责进一步加工每个位置的特征。多个 block 堆叠后，后面的层可以继续利用前面已经加工过的表示。</p>
+<p><strong>RMSNorm 是按均方根缩放向量的归一化层。</strong> 它对一个 token 的 <code>D</code> 个特征计算均方根，用这个尺度去除原向量，再乘以可学习的缩放参数。作用是控制进入后续计算的数值尺度，帮助训练保持稳定。它与 LayerNorm 的区别之一，是不先减去特征均值。本文把归一化放在注意力和 MLP 之前，这种组织方式通常称为 Pre-Norm。RMSNorm 的具体定义可参见<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1910.07467">原论文</a>。</p>
+<p><strong>Residual（残差连接）就是把一个分支的输出加回它的输入：<code>x + F(x)</code>。</strong> 可以把 <code>x</code> 看成已有表示，<code>F(x)</code> 看成这一层补充的修正。这样每层可以在原表示上逐步修改，同时为反向梯度提供更直接的传播路径。为了能逐元素相加，分支输出必须回到与输入一致的 <code>[B,T,D]</code> 形状。</p>
+<p><strong>MLP（多层感知机）是这里的前馈网络，也常写成 FFN。</strong> 本文使用两次线性变换，中间接 GELU 激活：先把特征从 <code>D</code> 维扩展到 <code>4D</code>，经过非线性变换后，再投影回 <code>D</code> 维。注意力在不同 token 之间交换信息，MLP 则对每个位置的向量单独做特征变换，各位置共享同一套 MLP 参数。</p>
+<p><strong>MTP（Multi-Token Prediction，多 token 预测）是另一项概念。</strong> 普通 next-token 训练让每个位置预测紧随其后的一个 token；MTP 则增加对多个未来 token 的预测目标，具体实现可能增加预测模块和辅助损失，例如 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2412.19437">DeepSeek-V3 技术报告</a>中的设计。本文结构图和代码使用的是 MLP，没有实现 MTP。训练时同时计算序列中所有位置的 next-token loss，也仍然属于普通 next-token 训练：每个位置只负责自己的下一个 token。</p>
+<p>最后的 <strong><code>lm_head</code> 是语言模型的输出投影</strong>，把每个位置的 <code>D</code> 维隐藏表示变成 <code>V</code> 个 logits。训练时把这些分数送入交叉熵损失；生成时，才根据解码策略选择下一个 token。</p>
+<h3 id="1-2-为什么迷你模型也这样搭"><a href="#1-2-为什么迷你模型也这样搭" class="headerlink" title="1.2 为什么迷你模型也这样搭"></a>1.2 为什么迷你模型也这样搭</h3><p>这里的“迷你”主要体现在词表、隐藏维度、层数和序列长度较小，但仍然保留一条完整的语言模型计算路径。Embedding 解决离散输入的表示问题，位置表示提供顺序信息，因果注意力结合历史上下文，MLP 提供非线性特征加工，归一化与残差连接支持多层计算，输出投影再把隐藏表示映射回词表。保留这套结构，后面才能用小规模实验理解大模型里的前向、反向和参数更新。</p>
+<p>搭建这类教学模型时，常见做法是先选一套明确的结构配方，并保持各层接口一致。本文采用以下约定：</p>
+<ul>
+<li>主干中的隐藏状态统一为 <code>[B,T,D]</code>，注意力头数 <code>H</code> 能整除 <code>D</code>，每个头的维度为 <code>D/H</code>。</li>
+<li>每个 block 保持输入输出形状不变，便于残差相加和重复堆叠；MLP 只在分支内部扩宽。</li>
+<li>使用因果 mask，并把输入与目标错开一个 token，让训练目标与自回归生成一致。</li>
+<li>使用 Pre-Norm，并在最后一个 block 后增加一次归一化，再接输出投影。</li>
+<li>先采用容易核对的普通多头注意力、GELU MLP 和独立输出权重，跑通小 batch，再逐步引入更复杂的结构与性能优化。</li>
+</ul>
+<p>这些是本文选择的常见搭法。不同模型会采用 LayerNorm 或 RMSNorm、学习式位置嵌入或 RoPE、GELU 或门控 MLP 等不同配方。做 AI Infra 时，应先明确参考模型的配方，再做数值对齐；这些差异都会改变计算，不能在性能优化时随意替换。原始 Transformer 的注意力、前馈网络和残差结构可参考 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a>，本文采用的是其中一些组件与后续常见设计的组合。</p>
 <h2 id="2-基础组件"><a href="#2-基础组件" class="headerlink" title="2. 基础组件"></a>2. 基础组件</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> math
 <span class="token keyword">import</span> jax
 <span class="token keyword">import</span> jax<span class="token punctuation">.</span>numpy <span class="token keyword">as</span> jnp
@@ -518,6 +536,8 @@
     <span class="token keyword">return</span> <span class="token punctuation">(</span>x_f32 <span class="token operator">/</span> rms<span class="token punctuation">)</span><span class="token punctuation">.</span>astype<span class="token punctuation">(</span>x<span class="token punctuation">.</span>dtype<span class="token punctuation">)</span> <span class="token operator">*</span> scale<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>RMSNorm 对最后一维归一化。<code>scale</code> 的形状是 <code>[D]</code>，广播到 <code>[B,T,D]</code>。</p>
+<p><code>linear</code> 中的 <code>x @ w</code> 只变换最后一维特征。例如 <code>x</code> 是 <code>[B,T,D]</code>、<code>w</code> 是 <code>[D,Dout]</code>，输出就是 <code>[B,T,Dout]</code>，batch 和序列维保持不变。本例省去 bias，便于把注意力放在矩阵形状和数据流上。</p>
+<p><code>rms_norm</code> 会为每个 token 独立计算一个尺度，不跨 batch 或序列位置求平均。<code>keepdims=True</code> 保留最后一维，方便广播；<code>eps</code> 则避免全零或很小的向量导致除零、放大数值误差。平方和均值先用 FP32 计算，有助于降低低精度归约的风险。不过最终输出 dtype 还会受到 <code>scale</code> 的 dtype 和类型提升规则影响，后续引入混合精度时，应明确参数、归约和输出各自使用什么精度。</p>
 <h2 id="3-因果多头自注意力"><a href="#3-因果多头自注意力" class="headerlink" title="3. 因果多头自注意力"></a>3. 因果多头自注意力</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">causal_self_attention</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> x<span class="token punctuation">,</span> num_heads<span class="token punctuation">)</span><span class="token punctuation">:</span>
     <span class="token comment"># x: [B, T, D]</span>
     B<span class="token punctuation">,</span> T<span class="token punctuation">,</span> D <span class="token operator">=</span> x<span class="token punctuation">.</span>shape
@@ -548,7 +568,13 @@
     <span class="token keyword">return</span> linear<span class="token punctuation">(</span>params<span class="token punctuation">[</span><span class="token string">"wo"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> context<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>因果 mask 是语言模型与双向 encoder 的重要区别：训练时虽然一次输入整个序列，但位置 <code>t</code> 不能偷看未来 token。</p>
+<h3 id="3-1-Q、K、V-各负责什么"><a href="#3-1-Q、K、V-各负责什么" class="headerlink" title="3.1 Q、K、V 各负责什么"></a>3.1 Q、K、V 各负责什么</h3><p>同一份输入 <code>x</code> 经过三个不同的投影得到 Q、K、V。可以把 Q（query）理解为“当前位置要寻找什么信息”，K（key）理解为“各位置提供什么线索”，V（value）则是“匹配后实际取回的内容”。这些含义是理解计算的类比，投影矩阵本身都是训练学出来的。</p>
+<p><code>q @ kᵀ</code> 为每个查询位置计算它与各个候选位置的匹配分数；沿最后一维做 softmax，将分数转换成权重；<code>weights @ v</code> 再按权重汇总内容。比如预测句尾时，某个头可以对前面相关的主体信息分配较大权重，但不会人为指定某个头必须学习某种语法关系。</p>
+<p>多头的做法，是把 <code>D</code> 维投影拆成 <code>H</code> 组 <code>Dh</code> 维表示，让各头用各自的分数和权重汇总上下文，再拼回 <code>[B,T,D]</code>，经 <code>wo</code> 混合各头的结果。拆头和合头时，<code>reshape</code>、<code>transpose</code> 的顺序很关键；shape 对上了，也要确认维度的语义没有被打乱。</p>
+<h3 id="3-2-缩放与-mask-为什么放在这里"><a href="#3-2-缩放与-mask-为什么放在这里" class="headerlink" title="3.2 缩放与 mask 为什么放在这里"></a>3.2 缩放与 mask 为什么放在这里</h3><p>点积会累加 <code>Dh</code> 个分量，在常见的初始化假设下，分数的波动随维度增大。除以 <code>sqrt(Dh)</code> 是为了控制分数尺度，避免 softmax 过早变得过于尖锐。这是注意力中的维度缩放，与生成时人为调节采样分布的温度是不同的用途。</p>
+<p>mask 中保留对角线，是因为当前位置的输入 token 已经给定，可以用它预测下一个 token；对角线右边才是未来输入。被屏蔽的位置设成负无穷，softmax 后权重为 0。本例没有 padding，每一行至少能看到自身；以后合并 padding mask 时，要留意整行都被屏蔽会导致 softmax 出现无效数值。</p>
 <p>生产代码通常使用融合的 scaled-dot-product attention/FlashAttention 实现，以降低中间 <code>[T,T]</code> 矩阵的内存开销。</p>
+<p>这里显式生成 <code>[B,H,T,T]</code> 的分数和权重，容易读懂，但内存占用会随序列长度平方增长。替换融合实现时，重点核对缩放系数、因果 mask 的方向、维度布局和计算精度，并一起验证前向结果与反向梯度。</p>
 <h2 id="4-MLP-与-Transformer-block"><a href="#4-MLP-与-Transformer-block" class="headerlink" title="4. MLP 与 Transformer block"></a>4. MLP 与 Transformer block</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">mlp</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">:</span>
     h <span class="token operator">=</span> jax<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>gelu<span class="token punctuation">(</span>linear<span class="token punctuation">(</span>params<span class="token punctuation">[</span><span class="token string">"w1"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> x<span class="token punctuation">)</span><span class="token punctuation">)</span>
     <span class="token keyword">return</span> linear<span class="token punctuation">(</span>params<span class="token punctuation">[</span><span class="token string">"w2"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> h<span class="token punctuation">)</span>
@@ -563,6 +589,8 @@
     <span class="token keyword">return</span> x<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>残差连接让每一层学习对已有表示的修正，也为深层网络提供更直接的梯度路径。</p>
+<p>MLP 的两个权重形状分别是 <code>[D,4D]</code> 和 <code>[4D,D]</code>。中间的 GELU 提供非线性；如果去掉激活，连续两个无 bias 的线性变换可以合并成一次矩阵乘法，表达能力就不同了。<code>4D</code> 是传统 FFN 中常见的扩展宽度，也是本例的选择；采用 SwiGLU 等门控结构时，中间维度通常需要结合参数量和计算量重新设置。</p>
+<p><code>block</code> 中第一次赋值完成注意力分支的残差更新，第二次 MLP 使用的是已经更新后的 <code>x</code>。两处分支都先做 RMSNorm，再计算分支输出，最后加回未经过该次归一化的主干输入。这个顺序定义了本文的 Pre-Norm block；做算子融合或重排代码时，应保持这条依赖关系。</p>
 <h2 id="5-参数初始化"><a href="#5-参数初始化" class="headerlink" title="5. 参数初始化"></a>5. 参数初始化</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">normal</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> shape<span class="token punctuation">,</span> scale<span class="token operator">=</span><span class="token number">0.02</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
     <span class="token keyword">return</span> scale <span class="token operator">*</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>normal<span class="token punctuation">(</span>key<span class="token punctuation">,</span> shape<span class="token punctuation">)</span>
 
@@ -596,6 +624,9 @@
     <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这里为教学清晰度保留独立的 <code>lm_head</code>。许多语言模型会让输出投影与 token embedding 共享权重（weight tying）。</p>
+<p>共享时，可以用 embedding 表的转置完成输出投影：<code>x @ token_embedding.T</code>，从而复用 <code>[V,D]</code> 的参数。是否共享属于模型配置，需要训练和加载 checkpoint 时保持一致。</p>
+<p>每个随机权重使用独立拆出的 key，避免相同形状的矩阵因复用 key 而初始化成相同数值。归一化的 <code>scale</code> 初始化为全 1，使初始归一化不再叠加额外的逐通道缩放。</p>
+<p>固定标准差 <code>0.02</code> 是这里方便演示的初始化方案。模型扩宽、加深后，需要结合层宽、残差分支和参考训练配方重新检查初始化尺度，观察激活与梯度是否稳定。参数表中的形状也可以用于估算参数量：本例每个 block 的四个注意力矩阵共 <code>4D²</code>，两个 MLP 矩阵共 <code>8D²</code>，再加两组 RMSNorm 的 <code>2D</code> 个参数。</p>
 <h2 id="6-完整前向传播"><a href="#6-完整前向传播" class="headerlink" title="6. 完整前向传播"></a>6. 完整前向传播</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">model</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> token_ids<span class="token punctuation">,</span> num_heads<span class="token punctuation">)</span><span class="token punctuation">:</span>
     <span class="token comment"># token_ids: [B,T]</span>
     _<span class="token punctuation">,</span> T <span class="token operator">=</span> token_ids<span class="token punctuation">.</span>shape
@@ -610,6 +641,8 @@
     <span class="token keyword">return</span> linear<span class="token punctuation">(</span>params<span class="token punctuation">[</span><span class="token string">"lm_head"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> x<span class="token punctuation">)</span>               <span class="token comment"># [B,T,V]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>层数是 Python 列表长度，对一个模型配置来说是静态的，因此这个循环可在 tracing 时展开。层数很大或需要更紧凑的编译表示时，可以进一步学习 <code>jax.lax.scan</code>。</p>
+<p><code>token_embedding[token_ids]</code> 是按 id 查表，输入应当是合法范围内的整数；<code>position_embedding[:T]</code> 给当前序列的每个位置取出一个向量，并沿 batch 维广播相加。这里要求 <code>T &lt;= max_seq_len</code>，因为位置表只初始化了这么多行。后续换成 RoPE 时，位置处理会进入 Q、K 的计算，不能简单沿用这里的位置表相加逻辑。</p>
+<p>输出 <code>[B,T,V]</code> 同时包含所有位置对其下一个 token 的预测分数。训练时可以并行计算所有位置的 loss；生成时则通常取最后一个位置的 logits，选出新 token 后继续生成。本例每次处理完整输入前缀，适合验证模型计算，实际解码会使用 KV cache 复用历史 K、V。</p>
 <h2 id="7-损失与训练步骤"><a href="#7-损失与训练步骤" class="headerlink" title="7. 损失与训练步骤"></a>7. 损失与训练步骤</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">cross_entropy</span><span class="token punctuation">(</span>logits<span class="token punctuation">,</span> targets<span class="token punctuation">)</span><span class="token punctuation">:</span>
     log_probs <span class="token operator">=</span> jax<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>log_softmax<span class="token punctuation">(</span>logits<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
     chosen <span class="token operator">=</span> jnp<span class="token punctuation">.</span>take_along_axis<span class="token punctuation">(</span>
@@ -632,6 +665,10 @@
     <span class="token keyword">return</span> new_params<span class="token punctuation">,</span> loss<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>为避免 <code>num_heads</code> 的动态/静态问题，教学示例直接在 jitted 函数中固定为 4。更整洁的课程版本可以把模型配置放在闭包中，或使用 <code>static_argnames</code>。</p>
+<h3 id="7-1-输入和标签如何对齐"><a href="#7-1-输入和标签如何对齐" class="headerlink" title="7.1 输入和标签如何对齐"></a>7.1 输入和标签如何对齐</h3><p>对于一段 token 序列 <code>[a,b,c,d]</code>，通常构造 <code>inputs = [a,b,c]</code>、<code>targets = [b,c,d]</code>。位置 0 看见 <code>a</code>，预测 <code>b</code>；位置 1 看见 <code>a,b</code>，预测 <code>c</code>。因果 mask 防止模型读取后续输入，标签右移则定义了每个位置到底预测什么。两者需要配合，否则可能出现训练 loss 很低、实际生成却不正常的情况。</p>
+<p><code>log_softmax</code> 直接得到各个 token 的对数概率，通常比先 softmax 再取 log 更稳定。<code>take_along_axis</code> 按正确目标 id，从词表维选出对应的对数概率，再取负数、求平均，就是交叉熵。本例默认所有位置都有效；如果加入 padding 或只训练回答部分，需要改为按有效位置的 loss 求和，再除以有效 token 数，并处理有效数量为 0 的情况。</p>
+<h3 id="7-2-一次训练步骤做了什么"><a href="#7-2-一次训练步骤做了什么" class="headerlink" title="7.2 一次训练步骤做了什么"></a>7.2 一次训练步骤做了什么</h3><p><code>value_and_grad</code> 对参数树求导，返回这一步更新前的 loss 和梯度；<code>jax.tree.map</code> 再按相同的树结构逐项执行 SGD 更新。返回的 <code>new_params</code> 是更新后的参数，而 <code>loss</code> 对应更新之前的那次前向计算。如果要观察本次更新后的 loss，需要用新参数再计算一次。</p>
+<p>这里使用固定学习率的普通 SGD，便于理解完整链路。实际语言模型训练通常还会组织 AdamW 状态、学习率调度、梯度裁剪等逻辑。先用这个简单版本确认前向、反向和更新正确，再接入更复杂的训练状态，排查问题会更容易。</p>
 <h2 id="8-最小运行检查"><a href="#8-最小运行检查" class="headerlink" title="8. 最小运行检查"></a>8. 最小运行检查</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python">V<span class="token punctuation">,</span> T<span class="token punctuation">,</span> D<span class="token punctuation">,</span> H<span class="token punctuation">,</span> L <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">2</span>
 key <span class="token operator">=</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>key<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
 params <span class="token operator">=</span> init_model<span class="token punctuation">(</span>key<span class="token punctuation">,</span> V<span class="token punctuation">,</span> T<span class="token punctuation">,</span> D<span class="token punctuation">,</span> L<span class="token punctuation">)</span>
@@ -646,7 +683,9 @@ logits <span class="token operator">=</span> model<span class="token punctuation
 params<span class="token punctuation">,</span> loss <span class="token operator">=</span> train_step<span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch<span class="token punctuation">)</span>
 <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token builtin">float</span><span class="token punctuation">(</span>loss<span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p>在真正训练前，至少做以下检查：</p>
+<p>这个例子先用人造数据检查模型是否能运行。</p>
+<p>这里的 token id 按顺序循环，<code>targets = (inputs + 1) % V</code> 对应这个人造序列的下一个 token，因此构成一个容易学习的玩具任务。真实文本应该先分词，再从同一段序列构造错开一位的输入和标签，不能直接把 token id 加 1 当作真实的下一个词。<code>V=32</code>、<code>D=64</code>、<code>L=2</code> 等配置主要用于快速运行和检查计算路径。</p>
+<p>运行一次能输出形状和 loss，说明基本调用链路可以执行；接下来还应检查：</p>
 <ul>
 <li>logits shape 是否为 <code>[B,T,V]</code>；</li>
 <li>所有参数和梯度是否为有限值；</li>
@@ -654,6 +693,8 @@ params<span class="token punctuation">,</span> loss <span class="token operator"
 <li>改变未来 token 后，较早位置的 logits 是否保持不变（验证因果 mask）；</li>
 <li>参数量是否与手算数量级一致。</li>
 </ul>
+<p>本例没有 bias，也没有共享 embedding 与输出权重，总参数量为 <code>2VD + max_seq_len × D + L × (12D² + 2D) + D</code>，代入上面的配置是 <strong>103,744</strong>。可以把参数树各叶子的元素数相加，与这个数字比较，帮助发现漏初始化或多注册参数的问题。</p>
+<p>验证因果性时，应固定参数和其他条件，只替换位置 <code>k</code> 及之后的输入，比较 <code>k</code> 之前的 logits。做小 batch 过拟合检查时，固定数据和初始化，观察多步 loss 是否明显下降；如果无法下降，先核对标签偏移、mask、梯度和实际参数变化，再扩大模型规模。</p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这个模型已经包含大语言模型的核心数学结构，但离生产训练还有很长距离：</p>
 <ul>
 <li>tokenizer、数据管线、padding mask；</li>
@@ -664,7 +705,7 @@ params<span class="token punctuation">,</span> loss <span class="token operator"
 <li>多设备 sharding、张量/数据并行；</li>
 <li>FlashAttention、KV cache 和高性能解码。</li>
 </ul>
-<p>大型框架在替我们组织哪些数组、函数变换、状态和并行计算。</p>
+<p>回过头看，大型框架就在替我们组织这些数组、函数变换、训练状态和并行计算。这个迷你模型可以作为后续实验的参考版本：每引入一项结构变化或性能优化，先检查对应模块的形状、前向数值和梯度，再比较小规模训练的 loss 走势，逐步建立对实现的信心。</p>
 
                 
             </div>
@@ -733,16 +774,16 @@ params<span class="token punctuation">,</span> loss <span class="token operator"
                                     <span class="chip bg-color">JAX</span>
                                 </a>
                             
-                                <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
-                                    <span class="chip bg-color">自动微分</span>
-                                </a>
-                            
                                 <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
                                     <span class="chip bg-color">大语言模型</span>
                                 </a>
                             
                                 <a href="/tags/Transformer/">
                                     <span class="chip bg-color">Transformer</span>
+                                </a>
+                            
+                                <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
+                                    <span class="chip bg-color">自动微分</span>
                                 </a>
                             
                         </div>
@@ -1047,7 +1088,7 @@ params<span class="token punctuation">,</span> loss <span class="token operator"
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">331k</span>&nbsp;字
+                class="white-color">339.3k</span>&nbsp;字
             
             
             

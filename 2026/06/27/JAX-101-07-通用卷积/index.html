@@ -525,7 +525,7 @@ ax<span class="token punctuation">[</span><span class="token number">0</span><sp
 ax<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>imshow<span class="token punctuation">(</span>img<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
 ax<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>set_title<span class="token punctuation">(</span><span class="token string">"original image"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="https://docs.jax.dev/en/latest/_images/edd3b298b36ee1148abac769d3b01fcbd0a7cf791bd10a5b4ddf8177293cd2e5.png" alt="对角边缘卷积核与彩色方块输入图像"></p>
+<p><img src="/images/jax-101-convolutions/kernel-and-input.png" alt="对角边缘卷积核与彩色方块输入图像"></p>
 <blockquote>
 <p>图 1：对角边缘检测核与 NHWC 合成输入图像。图片来自 JAX 官方卷积教程。</p>
 </blockquote>
@@ -576,7 +576,7 @@ ax<span class="token punctuation">[</span><span class="token number">1</span><sp
 <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"out shape:"</span><span class="token punctuation">,</span> out<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># (1, 200, 198, 3)</span>
 plt<span class="token punctuation">.</span>imshow<span class="token punctuation">(</span>np<span class="token punctuation">.</span>array<span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="https://docs.jax.dev/en/latest/_images/4f294e49875b0aafe41f8feb4994c4ebe91156df1f960c22d3c99e2aea22656f.png" alt="SAME padding 的二维卷积结果"></p>
+<p><img src="/images/jax-101-convolutions/same-padding.png" alt="SAME padding 的二维卷积结果"></p>
 <blockquote>
 <p>图 2：<code>SAME</code> padding、stride 1 的二维卷积输出。<code>VALID</code> 不添加 padding，因此会进一步缩小空间尺寸。</p>
 </blockquote>
@@ -586,7 +586,7 @@ plt<span class="token punctuation">.</span>imshow<span class="token punctuation"
 <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"out shape:"</span><span class="token punctuation">,</span> out<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># (1, 100, 99, 3)</span>
 plt<span class="token punctuation">.</span>imshow<span class="token punctuation">(</span>np<span class="token punctuation">.</span>array<span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="https://docs.jax.dev/en/latest/_images/eff4d86f55c8582caaf4cdb11c7281f86d643564733749d3071e1f2c816271fb.png" alt="stride 2 的二维卷积输出"></p>
+<p><img src="/images/jax-101-convolutions/stride-2.png" alt="stride 2 的二维卷积输出"></p>
 <blockquote>
 <p>图 3：两个空间方向的 stride 均为 2，输出分辨率减半。</p>
 </blockquote>
@@ -598,7 +598,7 @@ plt<span class="token punctuation">.</span>imshow<span class="token punctuation"
 <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"out shape:"</span><span class="token punctuation">,</span> out<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># (1, 176, 174, 3)</span>
 plt<span class="token punctuation">.</span>imshow<span class="token punctuation">(</span>np<span class="token punctuation">.</span>array<span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="https://docs.jax.dev/en/latest/_images/3b4d810010557cf2ec71fd1e4817993e5c3db05d88a9223e33b0640728714b00.png" alt="kernel dilation 为 12 的空洞卷积"></p>
+<p><img src="/images/jax-101-convolutions/kernel-dilation.png" alt="kernel dilation 为 12 的空洞卷积"></p>
 <blockquote>
 <p>图 4：原文用较大的 dilation 让采样点间隔更明显。</p>
 </blockquote>
@@ -614,7 +614,7 @@ plt<span class="token punctuation">.</span>imshow<span class="token punctuation"
 <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"out shape:"</span><span class="token punctuation">,</span> out<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># (1, 400, 396, 3)</span>
 plt<span class="token punctuation">.</span>imshow<span class="token punctuation">(</span>np<span class="token punctuation">.</span>array<span class="token punctuation">(</span>out<span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="https://docs.jax.dev/en/latest/_images/7da037b28ad063bedc7bf371826886105658b72eeeb5115cc2f8c092b7cf93b6.png" alt="stride 2 转置卷积输出"></p>
+<p><img src="/images/jax-101-convolutions/transposed-convolution.png" alt="stride 2 转置卷积输出"></p>
 <blockquote>
 <p>图 5：转置卷积把空间尺寸扩大到输入的两倍。</p>
 </blockquote>
@@ -664,11 +664,11 @@ ConvDimensionNumbers(lhs_spec=(0, 2, 1),
  rhs_spec=(2, 1, 0), out_spec=(0, 2, 1))
 out shape: (1, 200, 2)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="https://docs.jax.dev/en/latest/_images/0dfde04cb067eb026962e3187461a010b782443a0dddabc03fe81b0310889dca.png" alt="一维卷积双通道输入"></p>
+<p><img src="/images/jax-101-convolutions/conv1d-input.png" alt="一维卷积双通道输入"></p>
 <blockquote>
 <p>图 6：一维卷积输入。</p>
 </blockquote>
-<p><img src="https://docs.jax.dev/en/latest/_images/eec428b58f34bb0befeaf1c54f225e0de2fdbef47282b4c75230d6edb73b91e2.png" alt="一维卷积双通道输出"></p>
+<p><img src="/images/jax-101-convolutions/conv1d-output.png" alt="一维卷积双通道输出"></p>
 <blockquote>
 <p>图 7：一维卷积输出。</p>
 </blockquote>
@@ -721,11 +721,11 @@ ConvDimensionNumbers(lhs_spec=(0, 4, 1, 2, 3),
  rhs_spec=(4, 3, 0, 1, 2), out_spec=(0, 4, 1, 2, 3))
 out shape: (1, 30, 30, 30, 1)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<p><img src="https://docs.jax.dev/en/latest/_images/464a471822b2b28292bedb3d9af09638cbbeaf64dc40ad616e74ed830122c3b4.png" alt="三维卷积输入"></p>
+<p><img src="/images/jax-101-convolutions/conv3d-input.png" alt="三维卷积输入"></p>
 <blockquote>
 <p>图 8：三维卷积输入体数据。</p>
 </blockquote>
-<p><img src="https://docs.jax.dev/en/latest/_images/681a35dc35f30ded3341de2da50dd5a9533e56e0c8d47e9924ad855f88414c15.png" alt="三维卷积输出"></p>
+<p><img src="/images/jax-101-convolutions/conv3d-output.png" alt="三维卷积输出"></p>
 <blockquote>
 <p>图 9：三维卷积输出体数据。</p>
 </blockquote>
@@ -929,16 +929,16 @@ out shape: (1, 30, 30, 30, 1)<span aria-hidden="true" class="line-numbers-rows">
                         <span class="chip bg-color">JAX</span>
                     </a>
                     
-                    <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
-                        <span class="chip bg-color">自动微分</span>
-                    </a>
-                    
                     <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
                         <span class="chip bg-color">大语言模型</span>
                     </a>
                     
                     <a href="/tags/Transformer/">
                         <span class="chip bg-color">Transformer</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
+                        <span class="chip bg-color">自动微分</span>
                     </a>
                     
                 </div>
@@ -1087,7 +1087,7 @@ out shape: (1, 30, 30, 30, 1)<span aria-hidden="true" class="line-numbers-rows">
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">331k</span>&nbsp;字
+                class="white-color">339.3k</span>&nbsp;字
             
             
             

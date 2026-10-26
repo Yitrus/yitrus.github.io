@@ -465,14 +465,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.3k
+                    5.3k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    5 分
+                    19 分
                 </div>
                 
 
@@ -504,7 +504,44 @@
     <span class="token keyword">return</span> x @ params<span class="token punctuation">[</span><span class="token string">"w"</span><span class="token punctuation">]</span> <span class="token operator">+</span> params<span class="token punctuation">[</span><span class="token string">"b"</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>参数被显式传入，不藏在可变的全局对象里。这样的函数很适合被 JAX 变换。</p>
-<h2 id="2-grad：从损失函数得到梯度函数"><a href="#2-grad：从损失函数得到梯度函数" class="headerlink" title="2. grad：从损失函数得到梯度函数"></a>2. <code>grad</code>：从损失函数得到梯度函数</h2><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">mse_loss</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> x<span class="token punctuation">,</span> y<span class="token punctuation">)</span><span class="token punctuation">:</span>
+<h2 id="2-grad：从损失函数得到梯度函数"><a href="#2-grad：从损失函数得到梯度函数" class="headerlink" title="2. grad：从损失函数得到梯度函数"></a>2. <code>grad</code>：从损失函数得到梯度函数</h2><h3 id="2-1-损失函数：把“预测得有多差”变成一个数"><a href="#2-1-损失函数：把“预测得有多差”变成一个数" class="headerlink" title="2.1 损失函数：把“预测得有多差”变成一个数"></a>2.1 损失函数：把“预测得有多差”变成一个数</h3><p>训练模型时，我们需要一种可以计算的标准，告诉模型这次回答离目标还有多远。<strong>损失函数（loss function）就是这个评分规则，损失值（loss）就是按规则算出的分数，通常越小越好。</strong></p>
+<p>例如，让模型根据输入预测一个数，正确答案是 3：预测成 2，误差是 -1；预测成 5，误差是 2。把误差平方，就分别得到 1 和 4，偏离目标更多的预测受到更大的惩罚。对一批样本的平方误差取平均，就是下面代码使用的均方误差（MSE）。</p>
+<p>语言模型预测的是“下一个 token 的概率”，通常使用<strong>交叉熵损失（cross-entropy loss）</strong>。可以把它理解为：检查模型给正确答案分配了多少概率，再把这个概率转换成一个惩罚分数。</p>
+<p>例如，输入“我正在学习”，训练数据中的下一个 token 是“JAX”。模型会给词表中的每个 token 分配概率。对于只有一个正确目标 token 的情况，这个位置的交叉熵就是 <code>-ln(p)</code>，其中 <code>p</code> 是模型给“JAX”分配的概率，<code>ln</code> 是自然对数：</p>
+<ul>
+<li>如果 <code>p = 0.8</code>，loss 约为 0.223，说明模型比较有把握地预测对了。</li>
+<li>如果 <code>p = 0.1</code>，loss 约为 2.303，说明模型给正确答案的概率偏低。</li>
+<li>如果 <code>p = 0.001</code>，loss 约为 6.908，说明模型几乎没考虑正确答案，惩罚就更大。</li>
+</ul>
+<p>为什么要取负对数？因为概率越接近 1，分数越接近 0；概率越接近 0，惩罚会迅速增大，能突出模型对正确答案严重缺乏信心的情况。在普通的 next-token 训练里，可以把一批序列中所有有效目标位置的这个分数取平均，得到用于训练的标量 loss。padding 等不参与训练的位置要通过 mask 排除。它衡量的是模型对训练文本中正确 token 的预测情况。</p>
+<h3 id="2-2-AI-Infra-中的精度对齐：为什么先关注-loss"><a href="#2-2-AI-Infra-中的精度对齐：为什么先关注-loss" class="headerlink" title="2.2 AI Infra 中的精度对齐：为什么先关注 loss"></a>2.2 AI Infra 中的精度对齐：为什么先关注 loss</h3><p>做 AI Infra，经常要替换算子、引入融合 kernel、调整混合精度，或者把模型迁移到另一套框架和并行方案上。性能优化之后，我们需要确认：<strong>新实现是否仍然在做预期的计算，训练是否还能沿着合理的轨迹收敛。</strong> 这就是这里讨论的精度对齐，loss 对齐是其中很常用的一项检查。</p>
+<p>最直接的做法是固定一份参考实现，让两边从相同权重出发，使用相同的输入、标签、数据顺序和训练配置，并控制 dropout 等随机因素，先比较同一个 batch 上的 loss。如果差异明显，就继续向前查 logits、各层输出，以及标签偏移、mask 和 loss 归约方式。例如，一边按有效 token 数取平均，另一边把 padding 也算进分母，loss 就没有可比性。</p>
+<p>前向 loss 对齐之后，还要比较梯度和一次参数更新，再观察多步训练的 loss 走势。<strong>前向算得接近，只能说明这一部分通过了检查；反向计算或优化器更新有问题，仍然可能把训练带偏。</strong> 浮点精度、算子实现和并行归约顺序会带来数值差异，因此工程上通常根据参考实现、精度配置和任务设置误差容限，并验证收敛表现。关于浮点计算为何可能出现这些差异，可以参考 <a target="_blank" rel="noopener" href="https://docs.pytorch.org/docs/main/notes/numerical_accuracy.html">PyTorch 的数值精度说明</a>。</p>
+<h3 id="2-3-训练时希望看到怎样的-loss-曲线"><a href="#2-3-训练时希望看到怎样的-loss-曲线" class="headerlink" title="2.3 训练时希望看到怎样的 loss 曲线"></a>2.3 训练时希望看到怎样的 loss 曲线</h3><p>可以把训练想成做题后不断改错。刚开始，模型有很多容易纠正的错误，更新参数后就能获得明显进步，因此 loss 可能下降较快。学会基本规律后，剩下的错误更难，继续改进往往更慢；加上训练后期通常会降低学习率，每次参数更新更小，曲线就可能逐渐趋于平稳。</p>
+<p>对于这里讨论的、数据分布相对稳定的常规预训练，<strong>我们通常希望看到：初期 loss 明显下降，随后下降速度逐步放缓，在更低的位置继续缓慢下降或趋于平稳。</strong> 这说明模型先学会了容易掌握的规律，之后逐步接近当前模型、数据和训练配置下能够达到的水平。从工程验收的角度，还应该与同一训练配方的参考曲线比较，检查下降速度和最终水平是否符合预期。</p>
+<p>看曲线时，需要把学习率 warmup 和 batch 间的小幅波动考虑进去，重点看持续一段时间的趋势。这里说的“趋于平稳”，是已经充分下降之后的收敛表现。如果一开始就停在很高的位置，或者长期偏离参考曲线，就应该检查学习率、数据处理、梯度和参数更新链路。</p>
+<p>还要区分训练 loss 和验证 loss：前者看模型对训练数据学得怎样，后者看模型在未参与参数更新的数据上表现如何。训练 loss 持续下降，而验证 loss 持续上升，往往意味着过拟合；模型越来越会做训练题，却没有更好地掌握通用规律。</p>
+<h3 id="2-4-loss-spike-有把模型“训废”的风险"><a href="#2-4-loss-spike-有把模型“训废”的风险" class="headerlink" title="2.4 loss spike 有把模型“训废”的风险"></a>2.4 loss spike 有把模型“训废”的风险</h3><p><strong>loss 异常升高，尤其是突然出现较大尖峰（spike），应该视为训练风险信号。</strong> 除了 batch 难度或数据分布变化，脏数据、错误标签、错误的 token mask、学习率过大、梯度爆炸和低精度计算中的数值溢出，都值得排查。</p>
+<p>风险在于：这批数据产生的异常梯度一旦进入参数更新，就可能让权重偏离原本的训练轨迹；对于 Adam 这类带有历史状态的优化器，还可能影响后续更新使用的动量和二阶矩估计。严重时，后续 loss 持续升高，甚至出现 <code>NaN</code>、<code>Inf</code>，训练就可能发散，也就是工程上常说的“训废了”。loss 的数值大小并不直接等于梯度大小，所以排查时应一起记录 loss、梯度范数、溢出信息和异常 batch。</p>
+<p>工程上处理这类异常，一个实用的原则是：<strong>尽量在更新参数之前拦住异常；如果异常更新已经发生，就评估是否回退到确认正常的 checkpoint。</strong> 可以按发现异常的时机处理：</p>
+<ol>
+<li><strong>更新之前发现异常</strong>：如果确认是脏数据或无效梯度，就跳过这次更新，清空本次梯度累积，并隔离、记录相关数据。分布式训练中，各 rank 必须一致地执行跳过逻辑，避免有些 rank 更新、有些没有更新。</li>
+<li><strong>更新之后发现训练被带偏</strong>：回退到异常发生前确认正常的 checkpoint，恢复模型权重、优化器、学习率调度器及相应的随机数和数据进度状态；排除异常数据，或修正数值问题后再继续训练。只恢复权重，可能把受影响的优化器状态留在训练里。</li>
+<li><strong>反复在相近位置出问题</strong>：保存 batch 的标识和复现条件，检查数据、算子及精度配置，必要时降低学习率或调整梯度裁剪策略。先定位原因，再决定恢复点，避免重复消耗算力。</li>
+</ol>
+<p>跳过和回退应建立在异常检测与排查结果上：例如相对近期 loss 的异常偏离、非有限梯度，以及验证表现是否退化；单独遇到一个有效但较难的 batch，也需要先检查原因，避免把难样本系统性地过滤掉。这些处理策略的目的，是尽早控制异常更新造成的损失。关于 loss spike 触发训练任务重启及 checkpoint 回退的工程实践，可参见 <a target="_blank" rel="noopener" href="https://yezhisheng.me/publication/pjtrace/NSDI_24_final.pdf">Characterization of Large Language Model Development in the Datacenter</a>。</p>
+<h3 id="2-5-前向算-loss，反向算“参数该怎么改”"><a href="#2-5-前向算-loss，反向算“参数该怎么改”" class="headerlink" title="2.5 前向算 loss，反向算“参数该怎么改”"></a>2.5 前向算 loss，反向算“参数该怎么改”</h3><p>loss 只能告诉我们“这次错了多少”，不能直接告诉我们“每个参数应该往哪边改”。这就需要<strong>梯度：loss 对各个参数的变化有多敏感</strong>。对于某个参数，梯度为正，表示在当前位置把它稍微增大，loss 会增大；梯度为负，则表示稍微增大它会让 loss 减小。这个判断是局部的，步子太大仍然可能走过头。</p>
+<p>用一个最简单的例子看：模型预测 <code>pred = w * x</code>，输入 <code>x = 1</code>，目标 <code>y = 3</code>，损失是 <code>L = (w - 3)²</code>。当 <code>w = 1</code> 时，loss 是 4，梯度 <code>dL/dw = 2(w - 3) = -4</code>。采用梯度下降，按 <code>w_new = w - 学习率 × 梯度</code> 更新；如果学习率为 0.1，就得到 <code>w_new = 1.4</code>，新 loss 为 2.56。参数向正确方向挪了一小步，误差就变小了。</p>
+<p>一次训练更新可以分成三步：</p>
+<ol>
+<li><strong>前向计算</strong>：输入经过模型各层得到预测，再把预测与目标交给损失函数，算出一个标量 loss。</li>
+<li><strong>反向传播</strong>：从这个 loss 出发，沿着前向计算的依赖关系倒着应用链式法则，算出 loss 对每个参数的梯度。</li>
+<li><strong>更新参数</strong>：优化器使用梯度和学习率等信息调整参数，然后进入下一轮前向计算。</li>
+</ol>
+<p>所以，“loss 是前向的、梯度是反向的”描述的是计算顺序。梯度和 loss 有关，是因为我们求的正是“<strong>这个 loss 对模型参数的导数</strong>”；换一个损失函数，即使模型预测相同，也可能得到不同的梯度。反向传播会利用前向计算中的中间结果，把最终误差的影响逐层传回各个参数。对于“参数很多、最终 loss 只有一个数”的神经网络，这样能高效地计算所有参数的梯度。</p>
+<p>这里更准确的说法是“<strong>反向计算梯度，再用梯度训练参数</strong>”。梯度是根据当前参数、当前数据和损失函数算出来的，并不是另外训练出来的对象；反向传播本身也不会更新参数，真正修改参数的是后面的优化器步骤。</p>
+<h3 id="2-6-用-JAX-同时得到-loss-和梯度"><a href="#2-6-用-JAX-同时得到-loss-和梯度" class="headerlink" title="2.6 用 JAX 同时得到 loss 和梯度"></a>2.6 用 JAX 同时得到 loss 和梯度</h3><p>下面把前面的线性模型和均方误差写成代码：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">mse_loss</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> x<span class="token punctuation">,</span> y<span class="token punctuation">)</span><span class="token punctuation">:</span>
     pred <span class="token operator">=</span> linear<span class="token punctuation">(</span>params<span class="token punctuation">,</span> x<span class="token punctuation">)</span>
     <span class="token keyword">return</span> jnp<span class="token punctuation">.</span>mean<span class="token punctuation">(</span><span class="token punctuation">(</span>pred <span class="token operator">-</span> y<span class="token punctuation">)</span> <span class="token operator">**</span> <span class="token number">2</span><span class="token punctuation">)</span>
 
@@ -520,9 +557,26 @@ loss_value<span class="token punctuation">,</span> grads <span class="token oper
 <span class="token keyword">print</span><span class="token punctuation">(</span>grads<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><code>jax.grad(f)</code> 给 JAX 一个“计算损失值的函数” f，JAX 自动帮你生成另一个“计算这个损失函数梯度的函数”。默认对第一个参数求导，并要求 <code>f</code> 返回标量。大语言模型的 loss 最后也必须归约成一个标量，常见做法是对 batch 和序列位置取平均。<code>value_and_grad</code> 同时返回 loss 和梯度，训练时比先算一次 loss 再单独求导更方便。</p>
-<h2 id="3-自动微分不是数值差分"><a href="#3-自动微分不是数值差分" class="headerlink" title="3. 自动微分不是数值差分"></a>3. 自动微分不是数值差分</h2><p>有限差分用</p>
+<p>在这个例子里，第一个参数是 <code>params</code>，所以 <code>grads</code> 包含 loss 对 <code>w</code> 和 <code>b</code> 的梯度，结构与 <code>params</code> 相同；<code>x</code> 和 <code>y</code> 用于计算这次误差，但不是这次要求导的对象。调用 <code>value_and_grad</code> 后，参数还没有改变，第 7 节才会使用这些梯度执行一次更新。</p>
+<h2 id="3-自动微分不是数值差分"><a href="#3-自动微分不是数值差分" class="headerlink" title="3. 自动微分不是数值差分"></a>3. 自动微分不是数值差分</h2><h3 id="3-1-自动微分：让框架按求导规则计算梯度"><a href="#3-1-自动微分：让框架按求导规则计算梯度" class="headerlink" title="3.1 自动微分：让框架按求导规则计算梯度"></a>3.1 自动微分：让框架按求导规则计算梯度</h3><p><strong>自动微分（automatic differentiation，简称 AD）是让框架根据程序中的基本运算及其求导规则，自动计算导数的方法。</strong> 我们写前向计算时，只需要表达矩阵乘法、加法、激活函数和 loss 等操作；框架利用这些操作的求导规则，再通过链式法则把它们组合起来，就能计算 loss 对参数的梯度。</p>
+<p>例如，上一节的 <code>L = (w - 3)²</code> 可以拆成 <code>u = w - 3</code>、<code>L = u²</code>。框架知道 <code>du/dw = 1</code>、<code>dL/du = 2u</code>，于是组合得到 <code>dL/dw = 2u × 1 = 2(w - 3)</code>。模型有很多层时，原理仍然一样，只是运算和依赖关系复杂得多。</p>
+<p>自动微分有前向模式和反向模式。上一节讲的反向传播，就是反向模式自动微分在神经网络训练中的应用；JAX 的 <code>jax.grad</code> 使用反向模式生成梯度函数。大模型训练有海量参数，而最终用于求导的 loss 是一个标量，反向模式可以从这个 loss 出发，把梯度传播到所有参与计算的参数，适合这种“输入多、输出少”的求导任务。</p>
+<h3 id="3-2-数值差分：稍微改动输入，观察输出怎么变"><a href="#3-2-数值差分：稍微改动输入，观察输出怎么变" class="headerlink" title="3.2 数值差分：稍微改动输入，观察输出怎么变"></a>3.2 数值差分：稍微改动输入，观察输出怎么变</h3><p><strong>数值差分是通过比较函数在相邻输入上的输出，近似估算导数的方法。</strong> 在这里使用的有限差分方法中，不需要知道函数内部怎么计算，只要能调用这个函数即可。</p>
+<p>直观地说，想知道参数 <code>w</code> 增大一点会让 loss 变化多少，可以分别把 <code>w</code> 向两边挪一小步，各算一次 loss，再用“loss 的变化量”除以“参数的变化量”。下面是常用的中心差分公式：</p>
 <p>[<br>f’(x) \approx \frac{f(x+\epsilon)-f(x-\epsilon)}{2\epsilon}<br>]</p>
-<p>近似导数，既有截断误差也有浮点误差。JAX 会把函数分解成基本运算，并应用链式法则得到导数程序。反向模式自动微分尤其适合“参数很多、损失是一个标量”的神经网络。可以用有限差分做小规模 sanity check，但它不是实际训练算法。</p>
+<p>这里的 <code>x</code> 是要求导的某个标量输入，放到训练中可以是一个权重参数；<code>f</code> 可以是固定数据下的 loss 函数；<code>ε</code> 是人为选取的小扰动。分子是两次前向计算得到的 loss 之差，分母是两次参数取值之间的距离 <code>2ε</code>。</p>
+<p>仍然用 <code>L(w) = (w - 3)²</code>，在 <code>w = 1</code> 处取 <code>ε = 0.01</code>：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">L(1.01) = 3.9601
+L(0.99) = 4.0401
+差分估计 = (3.9601 - 4.0401) / 0.02 = -4<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>这就得到了与前面求导结果相同的数值。这个二次函数在精确算术下恰好能得到相同结果；一般函数使用有限大小的步长会有近似误差，也就是截断误差。<code>ε</code> 太大，估计可能不够贴近当前位置的斜率；太小，两次函数值非常接近，相减时又容易受到浮点舍入误差影响。因此，差分检查需要选择合适的步长和误差容限。</p>
+<p>自动微分不需要用这个扰动公式来估算梯度，因此没有这类步长带来的截断误差，但计算过程仍然受到浮点精度和具体算子实现的影响。</p>
+<h3 id="3-3-在大模型开发中，差分公式主要用来检查反向实现"><a href="#3-3-在大模型开发中，差分公式主要用来检查反向实现" class="headerlink" title="3.3 在大模型开发中，差分公式主要用来检查反向实现"></a>3.3 在大模型开发中，差分公式主要用来检查反向实现</h3><p>从 AI Infra 的工作来看，这个公式很适合用于<strong>梯度检查（gradient check）</strong>。例如，开发一个融合算子、编写自定义反向规则，或者排查某层的梯度异常时，我们可以在小规模输入上，用差分估计出的导数，检查反向实现给出的梯度是否合理。</p>
+<p>前向输出和 loss 都对齐了，反向仍然可能存在转置、缩放或梯度累加错误。差分检查提供了另一条验证路径：固定输入、参数和随机因素，扰动某个输入或参数，用前向输出的变化，检查反向计算预测的变化是否一致。对于多输出算子，可以先把输出归约成一个标量，构造便于检查的测试函数。</p>
+<p>实际开发通常先在小张量和较高精度下验证，选择多个输入、扰动步长和测试方向，并避开不可导点。特别是 BF16、FP16 等低精度输入，小扰动可能在舍入后直接消失，导致两次前向结果看起来没有变化；这种情况下，要先检查差分测试本身是否有效。</p>
+<p><strong>大模型的常规梯度训练使用自动微分，差分检查主要放在开发和调试阶段。</strong> 如果模型有 <code>N</code> 个标量参数，逐个参数做中心差分需要约 <code>2N</code> 次前向计算，无法作为海量参数模型每一步求完整梯度的常规方案。相比之下，反向模式利用一次前向计算及相应的反向传播，就能计算所有参数的梯度。</p>
+<p>检查较大的参数张量时，还可以沿一个方向整体扰动参数，对比“差分估计的方向导数”和“自动微分梯度与该方向的内积”，避免逐个检查所有元素。JAX 提供的 <a target="_blank" rel="noopener" href="https://docs.jax.dev/en/latest/_autosummary/jax.test_util.check_grads.html"><code>jax.test_util.check_grads</code></a> 就使用随机方向的有限差分来检查自动微分结果。工程上可以结合多个方向和测试样例提高发现问题的机会，再配合算子对齐和训练收敛测试一起验收。</p>
 <h2 id="4-vmap：把单样本函数提升为批函数"><a href="#4-vmap：把单样本函数提升为批函数" class="headerlink" title="4. vmap：把单样本函数提升为批函数"></a>4. <code>vmap</code>：把单样本函数提升为批函数</h2><p>先写一个只处理单个 token 的函数：</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">token_linear</span><span class="token punctuation">(</span>w<span class="token punctuation">,</span> token_vector<span class="token punctuation">)</span><span class="token punctuation">:</span>
     <span class="token keyword">return</span> token_vector @ w
@@ -993,7 +1047,7 @@ new_loss <span class="token operator">=</span> loss_fn<span class="token punctua
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">331k</span>&nbsp;字
+                class="white-color">339.3k</span>&nbsp;字
             
             
             

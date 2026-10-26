@@ -465,14 +465,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.4k
+                    2k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    5 分
+                    8 分
                 </div>
                 
 
@@ -543,26 +543,55 @@ key<span class="token punctuation">,</span> <span class="token operator">*</span
     <span class="token keyword">return</span> jnp<span class="token punctuation">.</span>where<span class="token punctuation">(</span>mask<span class="token punctuation">,</span> x <span class="token operator">/</span> keep_prob<span class="token punctuation">,</span> <span class="token number">0.0</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>dropout 每次调用都需要随机性，如果每一步训练都用同一个 key，dropout 就会失效（变成”假随机”）。除以 <code>keep_prob</code> 是为了让输出的期望尺度保持不变。训练时每一步都应给 dropout 新 key；推理时关闭 dropout。</p>
 <p>在 jitted 函数里，Python 分支条件通常应当是静态值，或者改写成适合 JAX 的数组控制流。对初学课程来说，可以分别编译训练函数与推理函数。</p>
-<h2 id="6-自回归采样"><a href="#6-自回归采样" class="headerlink" title="6. 自回归采样"></a>6. 自回归采样</h2><p>模型输出 logits 后，可以按概率选择下一个 token。一般流程是先把 logits 转成概率分布（softmax），再按这个概率分布随机抽一个词，这样，分数高的词被选中的概率更大，但分数稍低的词也有机会被选中。自采样流程可以被理解为：</p>
-<pre class="line-numbers language-none"><code class="language-none">1. 当前序列 → Transformer前向传播 → logits（原始分数，未归一化）
-                                        │
-                                        ▼
-2. logits 除以温度T → scaled_logits（调节"分数差距"的大小）
-                                        │
-                                        ▼
-3. scaled_logits 做 softmax → probs（合法的概率分布，加起来=1）
-                                        │
-                                        ▼
-4. 按 probs 这个概率分布，随机采样出一个token（分数高的更容易被选中，但不是绝对）
-                                        │
-                                        ▼
-5. 把这个新token拼接回序列 → 回到步骤1，继续生成下一个token<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">sample_next_token</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> logits<span class="token punctuation">,</span> temperature<span class="token operator">=</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+<h2 id="6-自回归采样"><a href="#6-自回归采样" class="headerlink" title="6. 自回归采样"></a>6. 自回归采样</h2><h3 id="6-1-基础采样与温度调节的关系"><a href="#6-1-基础采样与温度调节的关系" class="headerlink" title="6.1 基础采样与温度调节的关系"></a>6.1 基础采样与温度调节的关系</h3><p>自回归生成的意思是：模型根据当前序列预测下一个 token，把选出的 token 拼回序列，再用更新后的序列继续预测。每一步选择的结果，都会成为后续预测的上下文。</p>
+<p>模型输出的 logits 是词表中各个 token 的原始分数。最基础的随机采样方式，是用 <code>softmax(logits)</code> 得到概率分布，再按这个分布抽取一个 token。分数高的 token 被选中的概率更大，分数稍低的 token 也有机会被选中。这里说的是 token，它可能是一个字、一个词，也可能只是词的一部分。</p>
+<p><strong>把 logits 除以温度 T，是生成时常用的概率调节方式，可以按需要启用。</strong> 对于 <code>T &gt; 0</code>，带温度的采样分布写成 <code>softmax(logits / T)</code>。当 <code>T = 1</code> 时，logits 保持原样，正好就是前面介绍的基础采样。因此，两种写法可以统一理解：基础采样对应温度为 1，其他正温度则用于调整分布的集中程度。这是解码阶段的设置，不需要修改模型权重或重新训练。</p>
+<p>用带温度的随机采样生成文本时，一轮的概念流程可以写成：</p>
+<ol>
+<li>将当前序列输入模型，取最后一个位置的 logits，用于预测下一个 token。</li>
+<li>根据生成配置，用正温度 T 调整 logits；T 为 1 时保持原分数。</li>
+<li>按调整后的 logits 所对应的 softmax 概率分布，随机采样一个 token。</li>
+<li>将新 token 拼回序列，继续生成，直到满足停止条件，例如遇到结束标记或达到长度上限。</li>
+</ol>
+<h3 id="6-2-温度如何影响选词"><a href="#6-2-温度如何影响选词" class="headerlink" title="6.2 温度如何影响选词"></a>6.2 温度如何影响选词</h3><p><strong>当 <code>0 &lt; T &lt; 1</code> 时，分布更集中。</strong> 例如，两个 token 的 logits 原本相差 2，除以 0.5 后就相差 4。softmax 会让高分 token 占据更大的概率，采样结果更容易集中在少数高分候选上。在文本生成中，这通常表现为输出更保守、更可预测，也可能更容易重复。</p>
+<p><strong>当 <code>T &gt; 1</code> 时，分布更平缓。</strong> 同样相差 2 的 logits，除以 2 后只相差 1，低分候选获得的概率会增加。生成结果通常更多样，但温度过高时，也更容易选到不合适的 token，影响连贯性和准确性。多样性增加，并不直接意味着内容更有创意或质量更高。</p>
+<p>例如，假设只有三个候选 token，logits 是 <code>[2, 1, 0]</code>，不同温度下的概率大约是：</p>
+<table>
+<thead>
+<tr>
+<th>温度 T</th>
+<th>第一个 token</th>
+<th>第二个 token</th>
+<th>第三个 token</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0.5</td>
+<td>86.7%</td>
+<td>11.7%</td>
+<td>1.6%</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>66.5%</td>
+<td>24.5%</td>
+<td>9.0%</td>
+</tr>
+<tr>
+<td>2.0</td>
+<td>50.6%</td>
+<td>30.7%</td>
+<td>18.6%</td>
+</tr>
+</tbody></table>
+<p>可以看到，正温度不会改变 logits 的高低排序，改变的是各个候选被抽中的概率。在工程实现中，温度还经常与 top-k、top-p 等候选过滤策略配合使用；这里先只讨论温度，便于理解随机采样本身。</p>
+<h3 id="6-3-在-JAX-中直接用-logits-采样"><a href="#6-3-在-JAX-中直接用-logits-采样" class="headerlink" title="6.3 在 JAX 中直接用 logits 采样"></a>6.3 在 JAX 中直接用 logits 采样</h3><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">sample_next_token</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> logits<span class="token punctuation">,</span> temperature<span class="token operator">=</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
     <span class="token keyword">if</span> temperature <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">:</span>
         <span class="token keyword">return</span> jnp<span class="token punctuation">.</span>argmax<span class="token punctuation">(</span>logits<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
     <span class="token keyword">return</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>categorical<span class="token punctuation">(</span>key<span class="token punctuation">,</span> logits <span class="token operator">/</span> temperature<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>在做 softmax 之前，先把 logits 除以一个温度参数 T，温度低 → logits 之间的差距被”放大”（除以小数相当于乘以大数）→ softmax后差距更悬殊 → 模型更”自信”、更倾向于反复选那个最高分的词 → 输出更保守、稳定、可预测，但也更容易重复、呆板；温度高 → logits 之间的差距被”缩小” → softmax后趋于平均 → 模型选词更”随意” → 输出更多样、有创意，但也更容易出现不连贯、跑题的内容。温度越低，分布越尖锐；温度越高，采样越随机。<code>categorical</code> 接受未归一化 logits，不需要提前手写 softmax。</p>
+
+<p>这里的 <code>jax.random.categorical</code> 接受未归一化 logits，采样分布对应于 <code>softmax(logits / temperature)</code>，所以调用前不用再手写 softmax。<strong>应当把调整后的 logits 传给它，不能把 softmax 得到的概率当成 logits 再传入，否则采样分布就变了。</strong> 这是接口层面省去了显式计算概率的步骤，概率采样的含义仍然相同，参见 <a target="_blank" rel="noopener" href="https://docs.jax.dev/en/latest/_autosummary/jax.random.categorical.html">JAX categorical 文档</a>。</p>
+<p>代码中的 <code>temperature &lt;= 0</code> 是这个示例约定的贪心分支：直接用 <code>argmax</code> 选择分数最高的 token，不进行随机采样，也不会真的执行除以 0。低正温度仍然属于随机采样；随着温度接近 0，概率会越来越集中到最高分候选上。生产接口可以将负温度判为非法参数，并用 <code>temperature = 0</code> 或独立开关显式选择贪心解码。</p>
 <p>生成循环中应当每一步拆分 key：</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">for</span> _ <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>max_new_tokens<span class="token punctuation">)</span><span class="token punctuation">:</span>
     key<span class="token punctuation">,</span> sample_key <span class="token operator">=</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>split<span class="token punctuation">(</span>key<span class="token punctuation">)</span>
@@ -968,7 +997,7 @@ key<span class="token punctuation">,</span> <span class="token operator">*</span
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">331k</span>&nbsp;字
+                class="white-color">339.3k</span>&nbsp;字
             
             
             
