@@ -1,0 +1,1332 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="JAX 101（一）：数组、jax.numpy 与语言模型的数据表示, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>JAX 101（一）：数组、jax.numpy 与语言模型的数据表示 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/46.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">JAX 101（一）：数组、jax.numpy 与语言模型的数据表示</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/JAX/">
+                                <span class="chip bg-color">JAX</span>
+                            </a>
+                        
+                            <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
+                                <span class="chip bg-color">大语言模型</span>
+                            </a>
+                        
+                            <a href="/tags/jax-numpy/">
+                                <span class="chip bg-color">jax.numpy</span>
+                            </a>
+                        
+                            <a href="/tags/XLA/">
+                                <span class="chip bg-color">XLA</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2026-05-16
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    2.9k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    12 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <blockquote>
+<p>参考官方原文：<a target="_blank" rel="noopener" href="https://docs.jax.dev/en/latest/101/arrays.html">Arrays and jax.numpy</a></p>
+</blockquote>
+<p>先只解决一件事：把文本变成 JAX 能处理的数组，并建立对形状的敏感度。大模型代码看起来复杂，很多错误其实只是“某一维代表什么”没有想清楚。</p>
+<h2 id="1-JAX-是什么"><a href="#1-JAX-是什么" class="headerlink" title="1. JAX 是什么"></a>1. JAX 是什么</h2><p>JAX 是面向高性能数值计算和机器学习的 Python 库。它提供与 NumPy 相似的数组接口，同时能对我们写的函数做自动微分、自动批处理和编译，并让同一套代码运行在 CPU、GPU 或 TPU 上。</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> jax
+<span class="token keyword">import</span> jax<span class="token punctuation">.</span>numpy <span class="token keyword">as</span> jnp
+
+x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>shape<span class="token punctuation">,</span> x<span class="token punctuation">.</span>dtype<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>jax<span class="token punctuation">.</span>devices<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token punctuation">[</span><span class="token number">1.</span> <span class="token number">2.</span> <span class="token number">3.</span><span class="token punctuation">]</span>
+<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token punctuation">)</span> float32
+<span class="token punctuation">[</span>CpuDevice<span class="token punctuation">(</span><span class="token builtin">id</span><span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>如果用过 NumPy，<code>jax.numpy</code> 会很熟悉，但不要把 JAX 简单理解为“能跑 GPU 的 NumPy”。JAX 最重要的能力是<strong>变换整个函数</strong>。为了让函数能够被分析和变换，JAX 对程序写法有一些约束，后面会逐步解释。</p>
+<p>传统写法是把 <code>jax.numpy</code> 导入为 <code>jnp</code>，把普通 NumPy 导入为 <code>np</code>：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> jax
+<span class="token keyword">import</span> jax<span class="token punctuation">.</span>numpy <span class="token keyword">as</span> jnp
+<span class="token keyword">import</span> numpy <span class="token keyword">as</span> np
+
+<span class="token comment"># jnp.arange(9.0) 创建一个从 0.0 到 8.0 的一维数组</span>
+<span class="token comment"># .reshape(3, 3) 将其变成一个 3 行 3 列的矩阵</span>
+x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">9.0</span><span class="token punctuation">)</span><span class="token punctuation">.</span>reshape<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token comment"># 创建一个长度为 3、所有元素都是 1 的一维数组</span>
+y <span class="token operator">=</span> jnp<span class="token punctuation">.</span>ones<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token comment"># @ 表示矩阵乘法。这里是一个 (3, 3) 矩阵乘以一个 (3,) 向量。</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x @ y<span class="token punctuation">)</span>          <span class="token comment"># [ 3. 12. 21.]</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span><span class="token builtin">sum</span><span class="token punctuation">(</span>axis<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># [ 9. 12. 15.]</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span>       <span class="token comment"># [3. 4.]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>JAX 数组是 <code>jax.Array</code> 的实例，类型标注也应使用 <code>jax.Array</code>。<code>jax.typeof()</code> 可以查看 JAX 类型；对普通数组来说，它主要表示 shape 和 dtype：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">print</span><span class="token punctuation">(</span><span class="token builtin">isinstance</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> jax<span class="token punctuation">.</span>Array<span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># True</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>jax<span class="token punctuation">.</span>typeof<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">)</span>             <span class="token comment"># float32[3,3]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>JAX 类型还能携带 sharding 信息，描述数组如何分布在设备上。NumPy 和 JAX 数组经常能通过鸭子类型互换使用：通常用 <code>np</code> 做数据加载与轻量 host 端处理，用 <code>jnp</code> 在加速器上做数值计算。</p>
+<h2 id="2-数组是不可变的"><a href="#2-数组是不可变的" class="headerlink" title="2. 数组是不可变的"></a>2. 数组是不可变的</h2><p>NumPy 可以原地修改数组，JAX 数组默认不可变：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">30</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token comment"># x[1] = 99  # TypeError</span>
+
+y <span class="token operator">=</span> x<span class="token punctuation">.</span>at<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token builtin">set</span><span class="token punctuation">(</span><span class="token number">99</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span>  <span class="token comment"># [10 20 30]</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>y<span class="token punctuation">)</span>  <span class="token comment"># [10 99 30]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>x.at[1].set(99)</code> 返回一个新值。在编译后，JAX/XLA 仍可能在底层安全地复用内存，所以“函数式写法”不等于“一定多复制一次”。</p>
+<p><code>.at</code> 除了 <code>set</code>，还支持 <code>add</code>、<code>multiply</code>、<code>min</code> 和 <code>max</code>：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>at<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">.</span>add<span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># [0,1,2,103,4,5,6,7,8,9]</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>at<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token builtin">max</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">)</span>   <span class="token comment"># [5,5,5,3,4,5,6,7,8,9]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>在 JIT 编译之外，函数式更新可能确实创建新数组；在 <code>jax.jit()</code> 内部，编译器通常能将更新优化为原地操作，某些中间结果甚至不会物化。确实需要可变数组时，JAX 还提供 Ref，后面的“有状态计算”会介绍。为什么这对模型重要？如果参数和中间结果不会被某段代码偷偷改掉，JAX 就更容易分析依赖关系、计算梯度并优化整个计算图。</p>
+<blockquote>
+<p>“物化”一般是把原本抽象、延迟或尚未真正计算的东西，转换成一个实际存在、可以直接使用的结果。在 JAX 或 NumPy 语境中，它常指“真正执行计算并取得具体数组值”。</p>
+</blockquote>
+<h2 id="3-从字符到-token"><a href="#3-从字符到-token" class="headerlink" title="3. 从字符到 token"></a>3. 从字符到 token</h2><p>真正的大模型使用 BPE、SentencePiece 等 tokenizer。为了把注意力集中在 JAX 上，我们先用字符级词表：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">text <span class="token operator">=</span> <span class="token string">"jax让模型计算更清晰"</span>
+<span class="token comment"># 提取并排序所有不同字符,得到字符表</span>
+chars <span class="token operator">=</span> <span class="token builtin">sorted</span><span class="token punctuation">(</span><span class="token builtin">set</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment"># 建立“字符 → 编号”字典</span>
+stoi <span class="token operator">=</span> <span class="token punctuation">{</span>ch<span class="token punctuation">:</span> i <span class="token keyword">for</span> i<span class="token punctuation">,</span> ch <span class="token keyword">in</span> <span class="token builtin">enumerate</span><span class="token punctuation">(</span>chars<span class="token punctuation">)</span><span class="token punctuation">}</span>
+<span class="token comment"># 建立“编号 → 字符”字典</span>
+itos <span class="token operator">=</span> <span class="token punctuation">{</span>i<span class="token punctuation">:</span> ch <span class="token keyword">for</span> ch<span class="token punctuation">,</span> i <span class="token keyword">in</span> stoi<span class="token punctuation">.</span>items<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span>
+
+<span class="token comment"># 定义编码函数</span>
+encode <span class="token operator">=</span> <span class="token keyword">lambda</span> s<span class="token punctuation">:</span> <span class="token punctuation">[</span>stoi<span class="token punctuation">[</span>ch<span class="token punctuation">]</span> <span class="token keyword">for</span> ch <span class="token keyword">in</span> s<span class="token punctuation">]</span>
+<span class="token comment"># 定义解码函数</span>
+decode <span class="token operator">=</span> <span class="token keyword">lambda</span> ids<span class="token punctuation">:</span> <span class="token string">""</span><span class="token punctuation">.</span>join<span class="token punctuation">(</span>itos<span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> ids<span class="token punctuation">)</span>
+
+<span class="token comment"># 把整个文本编码成 JAX 数组</span>
+tokens <span class="token operator">=</span> jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span>encode<span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token punctuation">,</span> dtype<span class="token operator">=</span>jnp<span class="token punctuation">.</span>int32<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>tokens<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>decode<span class="token punctuation">(</span>tokens<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token punctuation">[</span> <span class="token number">1</span>  <span class="token number">0</span>  <span class="token number">2</span> <span class="token number">10</span>  <span class="token number">6</span>  <span class="token number">3</span>  <span class="token number">9</span>  <span class="token number">8</span>  <span class="token number">5</span>  <span class="token number">7</span>  <span class="token number">4</span><span class="token punctuation">]</span>
+jax让模型计算更清晰<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>token id 必须是整数，因为之后它要充当 embedding 表的行索引。假设词表大小为 <code>V</code>，隐藏维度为 <code>D</code>，embedding 参数的形状就是 <code>[V, D]</code>：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">V<span class="token punctuation">,</span> D <span class="token operator">=</span> <span class="token builtin">len</span><span class="token punctuation">(</span>chars<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">8</span>
+embedding_table <span class="token operator">=</span> jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span>V <span class="token operator">*</span> D<span class="token punctuation">,</span> dtype<span class="token operator">=</span>jnp<span class="token punctuation">.</span>float32<span class="token punctuation">)</span><span class="token punctuation">.</span>reshape<span class="token punctuation">(</span>V<span class="token punctuation">,</span> D<span class="token punctuation">)</span>
+x <span class="token operator">=</span> embedding_table<span class="token punctuation">[</span>tokens<span class="token punctuation">]</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># [T, D]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>查表以后，每个离散 token id 变成一个可学习的连续向量。</p>
+<h2 id="4-构造“预测下一个-token”的样本"><a href="#4-构造“预测下一个-token”的样本" class="headerlink" title="4. 构造“预测下一个 token”的样本"></a>4. 构造“预测下一个 token”的样本</h2><p>语言模型训练目标可以概括为：看到前面的 token，预测下一个 token。设序列长度 <code>T=4</code>：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">data <span class="token operator">=</span> jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">12</span><span class="token punctuation">)</span>
+T <span class="token operator">=</span> <span class="token number">4</span>
+
+inputs <span class="token operator">=</span> jnp<span class="token punctuation">.</span>stack<span class="token punctuation">(</span><span class="token punctuation">[</span>data<span class="token punctuation">[</span>i<span class="token punctuation">:</span>i <span class="token operator">+</span> T<span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+targets <span class="token operator">=</span> jnp<span class="token punctuation">.</span>stack<span class="token punctuation">(</span><span class="token punctuation">[</span>data<span class="token punctuation">[</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">:</span>i <span class="token operator">+</span> T <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token keyword">print</span><span class="token punctuation">(</span>inputs<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>targets<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>inputs<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># [B, T]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>inputs[b, t]</code> 对应的监督信号是 <code>targets[b, t]</code>。目标序列只是输入序列向右错开一位。</p>
+<h2 id="5-形状、广播与矩阵乘法"><a href="#5-形状、广播与矩阵乘法" class="headerlink" title="5. 形状、广播与矩阵乘法"></a>5. 形状、广播与矩阵乘法</h2><p>模型隐藏状态通常是 <code>[B, T, D]</code>，线性层权重是 <code>[D, Dout]</code>：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">B<span class="token punctuation">,</span> T<span class="token punctuation">,</span> D<span class="token punctuation">,</span> Dout <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">16</span>
+x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>ones<span class="token punctuation">(</span><span class="token punctuation">(</span>B<span class="token punctuation">,</span> T<span class="token punctuation">,</span> D<span class="token punctuation">)</span><span class="token punctuation">)</span>
+w <span class="token operator">=</span> jnp<span class="token punctuation">.</span>ones<span class="token punctuation">(</span><span class="token punctuation">(</span>D<span class="token punctuation">,</span> Dout<span class="token punctuation">)</span><span class="token punctuation">)</span>
+b <span class="token operator">=</span> jnp<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span>Dout<span class="token punctuation">,</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+y <span class="token operator">=</span> x @ w <span class="token operator">+</span> b
+<span class="token keyword">print</span><span class="token punctuation">(</span>y<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># [B, T, Dout]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>矩阵乘法只作用在最后一维：<code>D</code> 被消去。偏置 <code>b</code> 通过广播同时加到所有 batch 和位置上。建议在写每一行模型代码前先写形状：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment"># x: [B, T, D]</span>
+<span class="token comment"># w: [D, 3 * D]</span>
+qkv <span class="token operator">=</span> x @ w  <span class="token comment"># [B, T, 3 * D]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+
+<h2 id="6-dtype-不是小事"><a href="#6-dtype-不是小事" class="headerlink" title="6. dtype 不是小事"></a>6. dtype 不是小事</h2><ul>
+<li>token id 常用 <code>int32</code>；</li>
+<li>参数和普通计算常从 <code>float32</code> 开始；</li>
+<li>大规模训练常用 <code>bfloat16</code> 降低显存和计算成本，但某些归一化、损失或累加仍保留更高精度；</li>
+<li>Python 的整数/浮点数与 JAX 数组混合时，最终 dtype 受 JAX 的类型提升规则影响。</li>
+</ul>
+<p>初学阶段不要急着上混合精度。先保证 float32 版本数值正确，再优化速度和显存。NumPy 浮点数组默认是 <code>float64</code>，JAX 默认是更适合加速器的 <code>float32</code>。JAX 默认还会禁用 64 位类型；确实需要时必须显式开启：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">jax<span class="token punctuation">.</span>config<span class="token punctuation">.</span>update<span class="token punctuation">(</span><span class="token string">"jax_enable_x64"</span><span class="token punctuation">,</span> <span class="token boolean">True</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>混合 dtype 运算使用与 NumPy 相似但不完全相同的类型提升规则，特别会避免意外全部提升到 64 位：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">print</span><span class="token punctuation">(</span><span class="token punctuation">(</span>jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1.5</span><span class="token punctuation">)</span><span class="token punctuation">.</span>dtype<span class="token punctuation">)</span>  <span class="token comment"># float32</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<h2 id="7-JAX-与-NumPy-的索引差异"><a href="#7-JAX-与-NumPy-的索引差异" class="headerlink" title="7. JAX 与 NumPy 的索引差异"></a>7. JAX 与 NumPy 的索引差异</h2><p>JAX 支持 NumPy 风格的切片和高级整数索引，但某些边缘行为不同，因为加速器内部的编译程序不能方便地抛出 Python 异常。</p>
+<p>越界读取默认会把索引截到边界：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">[</span><span class="token number">11</span><span class="token punctuation">]</span><span class="token punctuation">)</span>  <span class="token comment"># 9，相当于读取 x[9]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p><code>.at</code> 的越界写入默认被丢弃：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>at<span class="token punctuation">[</span><span class="token number">11</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token builtin">set</span><span class="token punctuation">(</span><span class="token number">99</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># x 保持不变</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>两种行为都可以通过索引操作的 <code>mode</code> 参数调整。编写训练代码时不能依赖 NumPy 的越界异常来发现数据错误，应主动检查 token id、position 和 mask 范围。</p>
+<p><code>jax.numpy</code> 也不会静默把 Python 列表转换成数组，静默转换列表容易隐藏性能问题，所以 JAX 要求显式创建数组。</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment"># jnp.sum([1, 2, 3])  # TypeError</span>
+jnp<span class="token punctuation">.</span><span class="token builtin">sum</span><span class="token punctuation">(</span>jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># 正确，结果为 6</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<h2 id="8-数组位于设备上"><a href="#8-数组位于设备上" class="headerlink" title="8. 数组位于设备上"></a>8. 数组位于设备上</h2><p>JAX 数组的数据位于一个或多个 CPU、GPU 或 TPU 上。JAX 会把数组放到默认设备，计算跟随数据执行。数组也可以分片到很多设备，因此同一套全局视图代码可以从一块芯片扩展到多块芯片。</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">print</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>sharding<span class="token punctuation">)</span>
+<span class="token comment"># 单设备示例：SingleDeviceSharding(device=CpuDevice(id=0), ...)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>每个数组的 <code>sharding</code> 属性准确描述数据放置方式。这是后续 Mesh、PartitionSpec 和 MaxText 并行配置的基础。</p>
+<h2 id="9-jax-numpy、jax-lax-与-XLA"><a href="#9-jax-numpy、jax-lax-与-XLA" class="headerlink" title="9. jax.numpy、jax.lax 与 XLA"></a>9. <code>jax.numpy</code>、<code>jax.lax</code> 与 XLA</h2><p><code>jax.numpy</code> 是面向使用者的便利层，大多数函数会处理 NumPy 风格的参数和 dtype 后，调用更严格、更底层的 <code>jax.lax</code> 操作。简化后的 <code>jnp.sin</code> 类似：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> jax <span class="token keyword">import</span> lax
+
+<span class="token keyword">def</span> <span class="token function">sin</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>asarray<span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+    <span class="token keyword">if</span> <span class="token keyword">not</span> jnp<span class="token punctuation">.</span>issubdtype<span class="token punctuation">(</span>x<span class="token punctuation">.</span>dtype<span class="token punctuation">,</span> jnp<span class="token punctuation">.</span>inexact<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        x <span class="token operator">=</span> x<span class="token punctuation">.</span>astype<span class="token punctuation">(</span><span class="token builtin">float</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> lax<span class="token punctuation">.</span>sin<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>jax.lax</code> 又与 XLA HLO 操作紧密对应。例如 <code>lax.sin</code> 基本映射到 XLA 的 <code>Sin</code>。因为更接近编译器，<code>lax</code> 不提供 <code>jnp</code> 的自动类型提升便利：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">print</span><span class="token punctuation">(</span>jnp<span class="token punctuation">.</span>add<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># 自动提升，得到 float32</span>
+<span class="token comment"># lax.add(1, 1.0)       # TypeError：两边 dtype 不同</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>严格性的回报是 <code>lax</code> 可以表达更一般的操作，包括任意 stride/dilation 的卷积和结构化控制流。多数基础代码不必直接使用它，但找不到合适的 <code>jax.numpy</code> API 时应检查 <code>jax.lax</code>。</p>
+<h2 id="10-初识-JIT-编译"><a href="#10-初识-JIT-编译" class="headerlink" title="10. 初识 JIT 编译"></a>10. 初识 JIT 编译</h2><p>前面的代码可以直接运行，但此时 JAX 通常是一条一条地派发数组操作。对于会反复执行的数值计算，我们可以使用 <code>jax.jit</code>（Just-In-Time，即时编译）把一个 Python 函数交给 JAX 和 XLA 编译：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> jax
+<span class="token keyword">import</span> jax<span class="token punctuation">.</span>numpy <span class="token keyword">as</span> jnp
+
+<span class="token keyword">def</span> <span class="token function">linear_gelu</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> w<span class="token punctuation">,</span> b<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> jax<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>gelu<span class="token punctuation">(</span>x @ w <span class="token operator">+</span> b<span class="token punctuation">)</span>
+
+jitted_linear_gelu <span class="token operator">=</span> jax<span class="token punctuation">.</span>jit<span class="token punctuation">(</span>linear_gelu<span class="token punctuation">)</span>
+
+x <span class="token operator">=</span> jnp<span class="token punctuation">.</span>ones<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+w <span class="token operator">=</span> jnp<span class="token punctuation">.</span>ones<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+b <span class="token operator">=</span> jnp<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+y <span class="token operator">=</span> jitted_linear_gelu<span class="token punctuation">(</span>x<span class="token punctuation">,</span> w<span class="token punctuation">,</span> b<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>y<span class="token punctuation">.</span>shape<span class="token punctuation">)</span>  <span class="token comment"># (2, 8)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>jax.jit</code> 接收一个函数，返回一个功能相同但经过 JIT 编译的新函数。它不是把某一个数组“编译掉”，而是根据函数接收到的数组类型——主要包括 shape 和 dtype——追踪其中的计算，再让 XLA 生成适合当前 CPU、GPU 或 TPU 的程序。</p>
+<h3 id="第一次调用为什么可能更慢"><a href="#第一次调用为什么可能更慢" class="headerlink" title="第一次调用为什么可能更慢"></a>第一次调用为什么可能更慢</h3><p>JIT 函数第一次遇到某组新的 shape 和 dtype 时，需要经历追踪与编译，所以第一次调用可能比普通执行更慢。之后使用相同类型的输入，JAX 通常会复用已经编译的程序：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment"># 第一次：可能包含 tracing 和编译开销</span>
+y1 <span class="token operator">=</span> jitted_linear_gelu<span class="token punctuation">(</span>x<span class="token punctuation">,</span> w<span class="token punctuation">,</span> b<span class="token punctuation">)</span>
+
+<span class="token comment"># 第二次：shape 和 dtype 相同，通常复用编译结果</span>
+y2 <span class="token operator">=</span> jitted_linear_gelu<span class="token punctuation">(</span>x <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">,</span> w<span class="token punctuation">,</span> b<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>如果把 <code>x</code> 从 <code>(2, 4)</code> 换成 <code>(16, 4)</code>，shape 发生变化，JAX 可能为新输入重新编译。这也是大模型训练通常保持 batch size 和 sequence length 固定，或只使用少量固定长度 bucket 的原因。</p>
+<h3 id="JAX-计算通常是异步派发的"><a href="#JAX-计算通常是异步派发的" class="headerlink" title="JAX 计算通常是异步派发的"></a>JAX 计算通常是异步派发的</h3><p>在加速器上，Python 函数返回时，设备计算不一定已经完成。准确计时时需要先预热，并调用 <code>.block_until_ready()</code> 等待结果完成：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> time
+
+<span class="token comment"># 预热并完成首次编译</span>
+jitted_linear_gelu<span class="token punctuation">(</span>x<span class="token punctuation">,</span> w<span class="token punctuation">,</span> b<span class="token punctuation">)</span><span class="token punctuation">.</span>block_until_ready<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+start <span class="token operator">=</span> time<span class="token punctuation">.</span>perf_counter<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">for</span> _ <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    y <span class="token operator">=</span> jitted_linear_gelu<span class="token punctuation">(</span>x<span class="token punctuation">,</span> w<span class="token punctuation">,</span> b<span class="token punctuation">)</span>
+y<span class="token punctuation">.</span>block_until_ready<span class="token punctuation">(</span><span class="token punctuation">)</span>
+elapsed <span class="token operator">=</span> time<span class="token punctuation">.</span>perf_counter<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> start
+
+<span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string-interpolation"><span class="token string">f"平均耗时：</span><span class="token interpolation"><span class="token punctuation">{</span>elapsed <span class="token operator">/</span> <span class="token number">100</span><span class="token punctuation">:</span><span class="token format-spec">.6f</span><span class="token punctuation">}</span></span><span class="token string"> 秒"</span></span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>如果不等待设备完成，只会测到 Python 把任务提交给设备所需的时间，而不是实际计算时间。</p>
+<h3 id="不是所有-Python-写法都能直接-JIT"><a href="#不是所有-Python-写法都能直接-JIT" class="headerlink" title="不是所有 Python 写法都能直接 JIT"></a>不是所有 Python 写法都能直接 JIT</h3><p>JAX 追踪函数时，通常只知道数组的 shape 和 dtype，不知道运行时的具体值。因此，依赖数组具体数值的 Python <code>if</code>、<code>while</code>、<code>int(x)</code> 或修改全局变量等写法可能失败或产生意外行为。</p>
+<p>后续结合 tracing、<code>grad</code>、<code>vmap</code> 和训练步骤进一步解释 JIT。这里先建立直觉：我们用熟悉的数组运算写函数，JAX 负责观察整个函数，并把它编译成适合目标设备的程序。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>模型不是从“Transformer”开始的，而是从数据表示开始的。先能在脑中稳定追踪 <code>[B, T, D]</code>，后面的注意力公式才不会变成符号堆砌。</p>
+<p>到这里，官方“Arrays and <code>jax.numpy</code>”正文中的 NumPy 迁移、<code>jax.Array</code>/<code>jax.typeof</code>、不可变更新、默认 dtype、索引差异、设备放置以及 <code>jnp</code>—<code>lax</code>—XLA 层次已经全部覆盖；字符 token、embedding 和语言模型 batch 是扩展。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2026/05/16/JAX-101-01-%E6%95%B0%E7%BB%84%E4%B8%8E%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%95%B0%E6%8D%AE%E8%A1%A8%E7%A4%BA/">http://ytirus.github.io/2026/05/16/JAX-101-01-%E6%95%B0%E7%BB%84%E4%B8%8E%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%95%B0%E6%8D%AE%E8%A1%A8%E7%A4%BA/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/JAX/">
+                                    <span class="chip bg-color">JAX</span>
+                                </a>
+                            
+                                <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
+                                    <span class="chip bg-color">大语言模型</span>
+                                </a>
+                            
+                                <a href="/tags/jax-numpy/">
+                                    <span class="chip bg-color">jax.numpy</span>
+                                </a>
+                            
+                                <a href="/tags/XLA/">
+                                    <span class="chip bg-color">XLA</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2026/05/23/JAX-101-02-%E5%87%BD%E6%95%B0%E5%8F%98%E6%8D%A2%E4%B8%8E%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="JAX 101（二）：函数变换、自动微分与批处理">
+                        
+                        <span class="card-title">JAX 101（二）：函数变换、自动微分与批处理</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            从纯函数开始介绍 JAX 的 grad、value_and_grad、vmap、jit 与 tracing，并通过一次梯度更新理解函数变换的组合方式。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2026-05-23
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/JAX/">
+                        <span class="chip bg-color">JAX</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
+                        <span class="chip bg-color">自动微分</span>
+                    </a>
+                    
+                    <a href="/tags/vmap/">
+                        <span class="chip bg-color">vmap</span>
+                    </a>
+                    
+                    <a href="/tags/JIT/">
+                        <span class="chip bg-color">JIT</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/05/09/RNA-Seq%E5%B7%AE%E5%BC%82%E8%A1%A8%E8%BE%BE%E5%88%86%E6%9E%90/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/15.jpg" class="responsive-img" alt="使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析">
+                        
+                        <span class="card-title">使用 DESeq2 和 edgeR 进行 RNA-Seq 差异表达分析</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            从表达矩阵、样本信息和基因注释出发，分别使用 DESeq2 与 edgeR 完成 RNA-Seq 差异表达分析，并记录容易出错的数据对应关系。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-05-09
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/R/">
+                        <span class="chip bg-color">R</span>
+                    </a>
+                    
+                    <a href="/tags/RNA-Seq/">
+                        <span class="chip bg-color">RNA-Seq</span>
+                    </a>
+                    
+                    <a href="/tags/DESeq2/">
+                        <span class="chip bg-color">DESeq2</span>
+                    </a>
+                    
+                    <a href="/tags/edgeR/">
+                        <span class="chip bg-color">edgeR</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">331k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

@@ -1,0 +1,1508 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="JAX 101（五）：有状态计算、Ref 与训练循环, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>JAX 101（五）：有状态计算、Ref 与训练循环 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/1.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">JAX 101（五）：有状态计算、Ref 与训练循环</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/JAX/">
+                                <span class="chip bg-color">JAX</span>
+                            </a>
+                        
+                            <a href="/tags/JIT/">
+                                <span class="chip bg-color">JIT</span>
+                            </a>
+                        
+                            <a href="/tags/Ref/">
+                                <span class="chip bg-color">Ref</span>
+                            </a>
+                        
+                            <a href="/tags/%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF/">
+                                <span class="chip bg-color">训练循环</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2026-06-13
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3.3k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    13 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <p>真实程序都有状态，例如训练步骤之间不断变化的模型参数、优化器动量、运行统计量和计数器。JAX 提供两种表达有状态计算的方法：</p>
+<ol>
+<li><strong>让状态穿过纯函数</strong>：状态作为参数进入函数，又作为返回值离开。这是经典方式，也是几乎整个 JAX 生态的标准做法。</li>
+<li><strong>Ref</strong>：显式的可变数组。当逐层传递状态太麻烦，或者确实需要原地写内存时使用。</li>
+</ol>
+<h2 id="1-先弄明白“状态”是什么"><a href="#1-先弄明白“状态”是什么" class="headerlink" title="1. 先弄明白“状态”是什么"></a>1. 先弄明白“状态”是什么</h2><p>可以先把状态理解为：</p>
+<blockquote>
+<p>一次函数调用结束后，需要保存下来，并且会影响下一次调用的信息。</p>
+</blockquote>
+<p>计数器当前数到几、模型目前的参数、优化器记录的动量、训练到了第几步，都是状态。</p>
+<h3 id="1-1-没有状态的函数"><a href="#1-1-没有状态的函数" class="headerlink" title="1.1 没有状态的函数"></a>1.1 没有状态的函数</h3><pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">add_one</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">return</span> x <span class="token operator">+</span> <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>只要输入相同，输出就相同：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">add_one<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>  <span class="token comment"># 1</span>
+add_one<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>  <span class="token comment"># 1</span>
+add_one<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>  <span class="token comment"># 1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>函数不会记住自己之前被调用过几次，每次计算只取决于当前输入。这是一个无状态的纯函数。</p>
+<h3 id="1-2-隐藏在对象里的状态"><a href="#1-2-隐藏在对象里的状态" class="headerlink" title="1.2 隐藏在对象里的状态"></a>1.2 隐藏在对象里的状态</h3><p>普通 Python 计数器会把当前数字保存在对象属性里：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">class</span> <span class="token class-name">Counter</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>n <span class="token operator">=</span> <span class="token number">0</span>
+
+    <span class="token keyword">def</span> <span class="token function">count</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>n <span class="token operator">+=</span> <span class="token number">1</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>n
+
+counter <span class="token operator">=</span> Counter<span class="token punctuation">(</span><span class="token punctuation">)</span>
+counter<span class="token punctuation">.</span>count<span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token comment"># 1</span>
+counter<span class="token punctuation">.</span>count<span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token comment"># 2</span>
+counter<span class="token punctuation">.</span>count<span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token comment"># 3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>虽然每次调用 <code>count()</code> 都没有传入参数，结果却不同，因为 <code>self.n</code> 保存了上一次调用留下的信息：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">调用前状态 0 → 输出 1 → 保存状态 1
+调用前状态 1 → 输出 2 → 保存状态 2
+调用前状态 2 → 输出 3 → 保存状态 3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>这个程序不是没有状态，而是把状态隐藏在 Python 对象内部。只看 <code>count() -&gt; int</code> 的函数接口，看不出它还读取和修改了 <code>self.n</code>。</p>
+<h3 id="1-3-把状态写成输入和输出"><a href="#1-3-把状态写成输入和输出" class="headerlink" title="1.3 把状态写成输入和输出"></a>1.3 把状态写成输入和输出</h3><p>JAX 更喜欢把同一件事写成：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">count</span><span class="token punctuation">(</span>state<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    new_state <span class="token operator">=</span> state <span class="token operator">+</span> <span class="token number">1</span>
+    output <span class="token operator">=</span> new_state
+    <span class="token keyword">return</span> output<span class="token punctuation">,</span> new_state<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>调用者负责保存函数返回的新状态：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">state <span class="token operator">=</span> <span class="token number">0</span>
+
+value<span class="token punctuation">,</span> state <span class="token operator">=</span> count<span class="token punctuation">(</span>state<span class="token punctuation">)</span>  <span class="token comment"># value=1, state=1</span>
+value<span class="token punctuation">,</span> state <span class="token operator">=</span> count<span class="token punctuation">(</span>state<span class="token punctuation">)</span>  <span class="token comment"># value=2, state=2</span>
+value<span class="token punctuation">,</span> state <span class="token operator">=</span> count<span class="token punctuation">(</span>state<span class="token punctuation">)</span>  <span class="token comment"># value=3, state=3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>现在完整的数据流出现在函数接口中：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">旧状态 0 → count → 输出 1，新状态 1
+旧状态 1 → count → 输出 2，新状态 2
+旧状态 2 → count → 输出 3，新状态 3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>函数没有偷偷修改外部对象，只根据输入计算并返回结果，因此 JAX 更容易对它进行 tracing、JIT 编译、求导和批处理。</p>
+<h3 id="1-4-“加状态”和“没加状态”的区别"><a href="#1-4-“加状态”和“没加状态”的区别" class="headerlink" title="1.4 “加状态”和“没加状态”的区别"></a>1.4 “加状态”和“没加状态”的区别</h3><p>严格来说，JAX 版本没有凭空增加状态。两个计数器本来都需要记住当前数字，区别只是状态放在哪里：</p>
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>状态在哪里</th>
+<th align="right">函数接口能否看到</th>
+<th align="right">JAX 是否容易追踪</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>self.n += 1</code></td>
+<td>Python 对象内部</td>
+<td align="right">否</td>
+<td align="right">否</td>
+</tr>
+<tr>
+<td><code>output, new_state = count(state)</code></td>
+<td>函数参数和返回值</td>
+<td align="right">是</td>
+<td align="right">是</td>
+</tr>
+<tr>
+<td><code>jax.new_ref(...)</code></td>
+<td>JAX 管理的可变内存</td>
+<td align="right">是</td>
+<td align="right">可以，但有限制</td>
+</tr>
+</tbody></table>
+<p>最核心的区别是：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">隐藏状态：函数偷偷读取或修改外面的数据
+显式状态：旧状态作为输入，新状态作为输出<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<h3 id="1-5-模型参数为什么也是状态"><a href="#1-5-模型参数为什么也是状态" class="headerlink" title="1.5 模型参数为什么也是状态"></a>1.5 模型参数为什么也是状态</h3><p>模型训练本质上也是一个状态不断更新的过程：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">train_step</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    grads <span class="token operator">=</span> compute_gradients<span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch<span class="token punctuation">)</span>
+    new_params <span class="token operator">=</span> update<span class="token punctuation">(</span>params<span class="token punctuation">,</span> grads<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> new_params<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>params</code> 是状态，因为它由之前的训练产生，会影响这一次模型的输出，并在本次训练后变成下一步参数：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">参数₀ → 训练第 1 步 → 参数₁
+参数₁ → 训练第 2 步 → 参数₂
+参数₂ → 训练第 3 步 → 参数₃<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>如果每一步都从最初的 <code>params_0</code> 开始，就会丢弃上一步学到的结果：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment"># 错误：三次训练都从同一份旧参数开始。</span>
+new_params <span class="token operator">=</span> train_step<span class="token punctuation">(</span>params_0<span class="token punctuation">,</span> batch_1<span class="token punctuation">)</span>
+new_params <span class="token operator">=</span> train_step<span class="token punctuation">(</span>params_0<span class="token punctuation">,</span> batch_2<span class="token punctuation">)</span>
+new_params <span class="token operator">=</span> train_step<span class="token punctuation">(</span>params_0<span class="token punctuation">,</span> batch_3<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>正确做法是把新参数继续传给下一步：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">params <span class="token operator">=</span> params_0
+params <span class="token operator">=</span> train_step<span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch_1<span class="token punctuation">)</span>
+params <span class="token operator">=</span> train_step<span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch_2<span class="token punctuation">)</span>
+params <span class="token operator">=</span> train_step<span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch_3<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>使用 momentum 或 AdamW 时，除了参数还要保存历史梯度信息。比较完整的训练状态可能是：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">state <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token string">"params"</span><span class="token punctuation">:</span> params<span class="token punctuation">,</span>        <span class="token comment"># 模型当前学到了什么</span>
+    <span class="token string">"opt_state"</span><span class="token punctuation">:</span> opt_state<span class="token punctuation">,</span>  <span class="token comment"># 优化器保存的历史信息</span>
+    <span class="token string">"step"</span><span class="token punctuation">:</span> step<span class="token punctuation">,</span>            <span class="token comment"># 当前训练步，影响学习率调度</span>
+    <span class="token string">"random_key"</span><span class="token punctuation">:</span> key<span class="token punctuation">,</span>       <span class="token comment"># 下一次 Dropout 或采样使用</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>因此，JAX 训练代码经常写成：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">new_state<span class="token punctuation">,</span> metrics <span class="token operator">=</span> train_step<span class="token punctuation">(</span>state<span class="token punctuation">,</span> batch<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>它表示：使用当前全部状态和一批数据完成一次训练，返回下一步需要的全部新状态，以及本次的 loss 等指标。</p>
+<blockquote>
+<p>状态不是 JAX 额外添加的东西，而是程序本来就需要记住的信息。JAX 只是要求尽量把这些信息从对象内部拿出来，明确写成函数的输入和输出。</p>
+</blockquote>
+<h2 id="2-不可追踪状态的问题"><a href="#2-不可追踪状态的问题" class="headerlink" title="2. 不可追踪状态的问题"></a>2. 不可追踪状态的问题</h2><p>从一个普通 Python 计数器开始：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> jax
+<span class="token keyword">import</span> jax<span class="token punctuation">.</span>numpy <span class="token keyword">as</span> jnp
+
+<span class="token keyword">class</span> <span class="token class-name">Counter</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""一个简单计数器。"""</span>
+
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>n <span class="token operator">=</span> <span class="token number">0</span>
+
+    <span class="token keyword">def</span> <span class="token function">count</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">&gt;</span> <span class="token builtin">int</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""计数加一，并返回新值。"""</span>
+        self<span class="token punctuation">.</span>n <span class="token operator">+=</span> <span class="token number">1</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>n
+
+counter <span class="token operator">=</span> Counter<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span> _ <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>counter<span class="token punctuation">.</span>count<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>输出是 <code>1、2、3</code>。属性 <code>n</code> 在调用之间保存状态，<code>self.n += 1</code> 通过副作用更新它。普通 Python 中没有问题，但放到 JAX 变换下就会失败。</p>
+<p>用 jaxpr 查看 tracing 记录到的程序：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">counter <span class="token operator">=</span> Counter<span class="token punctuation">(</span><span class="token punctuation">)</span>
+jax<span class="token punctuation">.</span>jit<span class="token punctuation">(</span>counter<span class="token punctuation">.</span>count<span class="token punctuation">)</span><span class="token punctuation">.</span>trace<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>jaxpr<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">{ lambda ; . let  in (1:i32[],) }<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>这段被记录的程序没有输入、不执行任何操作，而且永远返回 <code>1</code>。<code>self.n += 1</code> 只在 tracing 时执行了一次；产生的 <code>self.n</code> 被捕获为常量，而状态更新没有进入 jaxpr。 </p>
+<h2 id="3-让状态穿过纯函数"><a href="#3-让状态穿过纯函数" class="headerlink" title="3. 让状态穿过纯函数"></a>3. 让状态穿过纯函数</h2><p>解决办法是把状态变成函数接口的一部分：接收当前状态，同时返回输出和更新后的状态。</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">CounterState <span class="token operator">=</span> <span class="token builtin">int</span>
+
+<span class="token keyword">class</span> <span class="token class-name">CounterV2</span><span class="token punctuation">:</span>
+
+    <span class="token keyword">def</span> <span class="token function">count</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> n<span class="token punctuation">:</span> CounterState<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">&gt;</span> <span class="token builtin">tuple</span><span class="token punctuation">[</span><span class="token builtin">int</span><span class="token punctuation">,</span> CounterState<span class="token punctuation">]</span><span class="token punctuation">:</span>
+        <span class="token comment"># 分开写是为了区分“对外输出”和“下一步状态”。</span>
+        <span class="token keyword">return</span> n <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> n <span class="token operator">+</span> <span class="token number">1</span>
+
+    <span class="token keyword">def</span> <span class="token function">reset</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">&gt;</span> CounterState<span class="token punctuation">:</span>
+        <span class="token keyword">return</span> <span class="token number">0</span>
+
+counter <span class="token operator">=</span> CounterV2<span class="token punctuation">(</span><span class="token punctuation">)</span>
+state <span class="token operator">=</span> counter<span class="token punctuation">.</span>reset<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span> _ <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    value<span class="token punctuation">,</span> state <span class="token operator">=</span> counter<span class="token punctuation">.</span>count<span class="token punctuation">(</span>state<span class="token punctuation">)</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>调用者现在显式维护状态。作为交换，<code>count</code> 成为纯函数，容易被 tracing：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">jax<span class="token punctuation">.</span>jit<span class="token punctuation">(</span>counter<span class="token punctuation">.</span>count<span class="token punctuation">)</span><span class="token punctuation">.</span>trace<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">.</span>jaxpr<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">{ lambda ; a:i32[]. let
+    b:i32[] = add a 1:i32[]
+    c:i32[] = add a 1:i32[]
+  in (b, c) }<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>状态清楚地流过被记录的程序：作为参数进入，作为结果离开。没有隐藏或固化的值，因此 JAX 变换能正确处理它。</p>
+<p>一般而言，需要把有状态接口：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">class</span> <span class="token class-name">StatefulClass</span><span class="token punctuation">:</span>
+    state<span class="token punctuation">:</span> State
+
+    <span class="token keyword">def</span> <span class="token function">stateful_method</span><span class="token punctuation">(</span><span class="token operator">*</span>args<span class="token punctuation">,</span> <span class="token operator">**</span>kwargs<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">&gt;</span> Output<span class="token punctuation">:</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>改写为：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">stateless_method</span><span class="token punctuation">(</span>
+    state<span class="token punctuation">:</span> State<span class="token punctuation">,</span> <span class="token operator">*</span>args<span class="token punctuation">,</span> <span class="token operator">**</span>kwargs
+<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token operator">&gt;</span> <span class="token builtin">tuple</span><span class="token punctuation">[</span>Output<span class="token punctuation">,</span> State<span class="token punctuation">]</span><span class="token punctuation">:</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这是常见的函数式编程模式，也是绝大多数 JAX 程序表达状态的方式。</p>
+<h2 id="4-完整示例：带动量的训练状态"><a href="#4-完整示例：带动量的训练状态" class="headerlink" title="4. 完整示例：带动量的训练状态"></a>4. 完整示例：带动量的训练状态</h2><p>训练循环是最常见的例子：参数和优化器状态逐步穿过纯 <code>update</code> 函数。</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">update</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> opt_state<span class="token punctuation">,</span> batch<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""一个训练步骤：消费旧状态，产生新状态。"""</span>
+    grads <span class="token operator">=</span> jax<span class="token punctuation">.</span>grad<span class="token punctuation">(</span>loss_fn<span class="token punctuation">)</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch<span class="token punctuation">)</span>
+    new_params<span class="token punctuation">,</span> new_opt_state <span class="token operator">=</span> optimizer_step<span class="token punctuation">(</span>
+        params<span class="token punctuation">,</span> grads<span class="token punctuation">,</span> opt_state
+    <span class="token punctuation">)</span>
+    <span class="token keyword">return</span> new_params<span class="token punctuation">,</span> new_opt_state
+
+<span class="token keyword">def</span> <span class="token function">loss_fn</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    x<span class="token punctuation">,</span> y <span class="token operator">=</span> batch
+    <span class="token keyword">return</span> jnp<span class="token punctuation">.</span>mean<span class="token punctuation">(</span><span class="token punctuation">(</span>params<span class="token punctuation">[</span><span class="token string">"w"</span><span class="token punctuation">]</span> <span class="token operator">*</span> x <span class="token operator">+</span> params<span class="token punctuation">[</span><span class="token string">"b"</span><span class="token punctuation">]</span> <span class="token operator">-</span> y<span class="token punctuation">)</span> <span class="token operator">**</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+<span class="token keyword">def</span> <span class="token function">optimizer_step</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> grads<span class="token punctuation">,</span> opt_state<span class="token punctuation">,</span> lr<span class="token operator">=</span><span class="token number">0.1</span><span class="token punctuation">,</span> decay<span class="token operator">=</span><span class="token number">0.9</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token comment"># 带动量的梯度下降：momentum 就是优化器状态。</span>
+    new_opt_state <span class="token operator">=</span> jax<span class="token punctuation">.</span>tree<span class="token punctuation">.</span><span class="token builtin">map</span><span class="token punctuation">(</span>
+        <span class="token keyword">lambda</span> m<span class="token punctuation">,</span> g<span class="token punctuation">:</span> decay <span class="token operator">*</span> m <span class="token operator">+</span> g<span class="token punctuation">,</span> opt_state<span class="token punctuation">,</span> grads
+    <span class="token punctuation">)</span>
+    new_params <span class="token operator">=</span> jax<span class="token punctuation">.</span>tree<span class="token punctuation">.</span><span class="token builtin">map</span><span class="token punctuation">(</span>
+        <span class="token keyword">lambda</span> p<span class="token punctuation">,</span> m<span class="token punctuation">:</span> p <span class="token operator">-</span> lr <span class="token operator">*</span> m<span class="token punctuation">,</span> params<span class="token punctuation">,</span> new_opt_state
+    <span class="token punctuation">)</span>
+    <span class="token keyword">return</span> new_params<span class="token punctuation">,</span> new_opt_state
+
+params <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token string">"w"</span><span class="token punctuation">:</span> jnp<span class="token punctuation">.</span>float32<span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"b"</span><span class="token punctuation">:</span> jnp<span class="token punctuation">.</span>float32<span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span><span class="token punctuation">}</span>
+opt_state <span class="token operator">=</span> jax<span class="token punctuation">.</span>tree<span class="token punctuation">.</span><span class="token builtin">map</span><span class="token punctuation">(</span>jnp<span class="token punctuation">.</span>zeros_like<span class="token punctuation">,</span> params<span class="token punctuation">)</span>
+batch <span class="token operator">=</span> <span class="token punctuation">(</span>
+    jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">2.0</span><span class="token punctuation">,</span> <span class="token number">3.0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">3.0</span><span class="token punctuation">,</span> <span class="token number">5.0</span><span class="token punctuation">,</span> <span class="token number">7.0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">for</span> step <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    params<span class="token punctuation">,</span> opt_state <span class="token operator">=</span> update<span class="token punctuation">(</span>params<span class="token punctuation">,</span> opt_state<span class="token punctuation">,</span> batch<span class="token punctuation">)</span>
+
+<span class="token keyword">print</span><span class="token punctuation">(</span>jax<span class="token punctuation">.</span>tree<span class="token punctuation">.</span><span class="token builtin">map</span><span class="token punctuation">(</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> <span class="token builtin">round</span><span class="token punctuation">(</span><span class="token builtin">float</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span> params<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment"># {'b': 1.0, 'w': 2.0}，拟合出 y = 2x + 1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这里的状态是 PyTree，所以相同模式可以从一个标量计数器扩展到整个模型。Optax 等优化器库也围绕如下接口设计：</p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">update(grads, opt_state, ...) -&gt; (updates, new_opt_state)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>将状态作为值传递还有一个好处：每份状态都是不可变快照，JAX 变换可以作用于整个循环。我们可以对更新步骤求导，或用 <code>vmap</code> 同时运行许多独立训练，而不必担心多个引用别名指向同一份可变数据。</p>
+<h2 id="5-Ref：可变数组"><a href="#5-Ref：可变数组" class="headerlink" title="5. Ref：可变数组"></a>5. Ref：可变数组</h2><p>显式传递值是标准方法，但有时会很麻烦。例如调用栈深处的函数想更新归一化统计量或记录指标，沿途每个函数都要接收并返回这份状态。</p>
+<p>JAX 因此提供 Ref：可以原地读写的可变数组。使用 <code>jax.new_ref</code> 创建：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">x_ref <span class="token operator">=</span> jax<span class="token punctuation">.</span>new_ref<span class="token punctuation">(</span>jnp<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token decorator annotation punctuation">@jax<span class="token punctuation">.</span>jit</span>
+<span class="token keyword">def</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    x_ref<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">+=</span> <span class="token number">1.0</span>
+
+<span class="token keyword">print</span><span class="token punctuation">(</span>x_ref<span class="token punctuation">)</span>  <span class="token comment"># Ref([0., 0., 0.])</span>
+f<span class="token punctuation">(</span><span class="token punctuation">)</span>
+f<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>x_ref<span class="token punctuation">)</span>  <span class="token comment"># Ref([0., 2., 0.])</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><code>x_ref[...]</code> 把完整值读成普通 <code>Array</code>，<code>x_ref[...] = A</code> 写入完整数组：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">g</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    x_ref <span class="token operator">=</span> jax<span class="token punctuation">.</span>new_ref<span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span>
+    x_ref<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span> <span class="token operator">=</span> jnp<span class="token punctuation">.</span>sin<span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> x_ref<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span>
+
+<span class="token keyword">print</span><span class="token punctuation">(</span>jax<span class="token punctuation">.</span>grad<span class="token punctuation">(</span>g<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment"># 0.5403023</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>Ref 与 <code>Array</code> 是不同类型。索引读写几乎是 Ref 唯一允许的直接操作；不能在需要 <code>Array</code> 的地方直接传 Ref：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">x_ref <span class="token operator">=</span> jax<span class="token punctuation">.</span>new_ref<span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">)</span>
+<span class="token comment"># jnp.sin(x_ref)       # 错误：不能直接对 Ref 做数学运算</span>
+jnp<span class="token punctuation">.</span>sin<span class="token punctuation">(</span>x_ref<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span><span class="token punctuation">)</span>    <span class="token comment"># 正确：先读取 Array 值</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="6-Ref-的索引和-freeze"><a href="#6-Ref-的索引和-freeze" class="headerlink" title="6. Ref 的索引和 freeze"></a>6. Ref 的索引和 <code>freeze</code></h2><p>读写支持 NumPy 索引表达式：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">x_ref <span class="token operator">=</span> jax<span class="token punctuation">.</span>new_ref<span class="token punctuation">(</span>jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">12.0</span><span class="token punctuation">)</span><span class="token punctuation">.</span>reshape<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+row <span class="token operator">=</span> x_ref<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>                 <span class="token comment"># 整数索引</span>
+x_ref<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> row
+val <span class="token operator">=</span> x_ref<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span>              <span class="token comment"># 元组索引</span>
+x_ref<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span> <span class="token operator">=</span> val
+col <span class="token operator">=</span> x_ref<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span>              <span class="token comment"># 切片</span>
+x_ref<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">]</span> <span class="token operator">=</span> col
+
+vals <span class="token operator">=</span> x_ref<span class="token punctuation">[</span>
+    jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span>
+x_ref<span class="token punctuation">[</span>
+    jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span> <span class="token operator">=</span> vals<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>索引大体遵循 NumPy，但已提前知道的越界索引会报错。这与普通 <code>Array</code> 的越界读取截断、越界写入丢弃不同。</p>
+<p>完成修改后，<code>jax.freeze</code> 会使 Ref 失效——之后再次访问会报错——并把最终值返回为普通不可变 <code>Array</code>：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">final <span class="token operator">=</span> jax<span class="token punctuation">.</span>freeze<span class="token punctuation">(</span>x_ref<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>final<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">[[ 1.  1.  9.  3.]
+ [ 1.  3.  2.  3.]
+ [ 9.  9. 10.  2.]]<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="7-Ref-与纯函数"><a href="#7-Ref-与纯函数" class="headerlink" title="7. Ref 与纯函数"></a>7. Ref 与纯函数</h2><p>函数纯度有三个主要好处：使用者更容易推理程序和变换；编译器更容易优化、并行和扩展；JAX 更容易 tracing。</p>
+<p>JAX 会拦截 Ref 操作，因此 tracing 本身没有问题。Ref 会在一定程度上限制编译器变换代码，但限制程度与显式传递状态相当。需要学习的重点是 Ref 与各种变换如何交互。</p>
+<p>如果函数只在内部创建和使用 Ref，从调用者角度看它仍然是纯函数：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">normalize</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    acc <span class="token operator">=</span> jax<span class="token punctuation">.</span>new_ref<span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span>
+    acc<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span> <span class="token operator">=</span> jnp<span class="token punctuation">.</span><span class="token builtin">sum</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> x <span class="token operator">/</span> acc<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span>
+
+result <span class="token operator">=</span> jax<span class="token punctuation">.</span>grad<span class="token punctuation">(</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> normalize<span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token builtin">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">(</span>
+    jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">1.0</span><span class="token punctuation">,</span> <span class="token number">4.0</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span>  <span class="token comment"># [0., 0., 0.]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>函数只有在接收 Ref 作为输入时才是不纯的：Ref 可以是显式参数，也可以通过闭包捕获。纯度取决于调用者能否观察到状态变化。</p>
+<p>不纯函数仍支持许多变换。例如可以让 <code>vmap</code> 沿 Ref 的不同 batch 元素分别写入：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">scale_into</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> out_ref<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    out_ref<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">2.0</span> <span class="token operator">*</span> x
+
+xs <span class="token operator">=</span> jnp<span class="token punctuation">.</span>arange<span class="token punctuation">(</span><span class="token number">3.0</span><span class="token punctuation">)</span>
+out_ref <span class="token operator">=</span> jax<span class="token punctuation">.</span>new_ref<span class="token punctuation">(</span>jnp<span class="token punctuation">.</span>zeros<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+jax<span class="token punctuation">.</span>vmap<span class="token punctuation">(</span>scale_into<span class="token punctuation">)</span><span class="token punctuation">(</span>xs<span class="token punctuation">,</span> out_ref<span class="token punctuation">)</span>
+<span class="token keyword">print</span><span class="token punctuation">(</span>out_ref<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span><span class="token punctuation">)</span>  <span class="token comment"># [0., 2., 4.]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>但不能 <code>vmap</code> 一个通过闭包捕获 Ref 的函数，因为每个 batch 成员都会写同一个共享位置，最终值存在歧义：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">r <span class="token operator">=</span> jax<span class="token punctuation">.</span>new_ref<span class="token punctuation">(</span><span class="token number">0.0</span><span class="token punctuation">)</span>
+
+<span class="token keyword">def</span> <span class="token function">write_shared</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    r<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">]</span> <span class="token operator">=</span> x
+
+<span class="token comment"># 会报错：每个 batch 成员都试图写同一个 Ref。</span>
+<span class="token comment"># jax.vmap(write_shared)(jnp.arange(3.0))</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2 id="8-Ref-的限制"><a href="#8-Ref-的限制" class="headerlink" title="8. Ref 的限制"></a>8. Ref 的限制</h2><ul>
+<li>不能从 JIT 函数或 <code>jax.lax.scan</code> 等控制流 body 返回 Ref；</li>
+<li>不能把同一个 Ref 两次传给一个 JIT 函数，也不能既传入某个 Ref、又让函数从外层闭包捕获它；</li>
+<li>只能在创建 Ref 的作用域中 <code>freeze</code>；</li>
+<li>不支持 Ref 指向 Ref；</li>
+<li>不能对闭包捕获 Ref 的函数使用 <code>vmap</code> 或 <code>shard_map</code>。</li>
+</ul>
+<p>这些规则用于排除别名和其他语义不明确的情况。违反规则时，错误信息会说明原因；部分限制将来可能放宽。</p>
+<p>Ref 也是性能工具：写 Ref 会原地更新 buffer，而不是分配新数组。详细性能行为属于 JIT 章节。Ref 还可用于从反向传播传出值、跨 microbatch 原地累积梯度，以及对 Ref 参数求导，详见进阶的 Autodiff with refs。</p>
+<h2 id="9-语言模型训练状态"><a href="#9-语言模型训练状态" class="headerlink" title="9. 语言模型训练状态"></a>9. 语言模型训练状态</h2><p>官方示例中的 <code>params</code> 与 <code>opt_state</code> 可以直接扩展成语言模型状态：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">state <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token string">"params"</span><span class="token punctuation">:</span> params<span class="token punctuation">,</span>
+    <span class="token string">"opt_state"</span><span class="token punctuation">:</span> opt_state<span class="token punctuation">,</span>
+    <span class="token string">"step"</span><span class="token punctuation">:</span> jnp<span class="token punctuation">.</span>array<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> dtype<span class="token operator">=</span>jnp<span class="token punctuation">.</span>int32<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token string">"key"</span><span class="token punctuation">:</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>key<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>语言模型 logits 为 <code>[B,T,V]</code>，targets 为 <code>[B,T]</code>：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">cross_entropy</span><span class="token punctuation">(</span>logits<span class="token punctuation">,</span> targets<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    log_probs <span class="token operator">=</span> jax<span class="token punctuation">.</span>nn<span class="token punctuation">.</span>log_softmax<span class="token punctuation">(</span>logits<span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+    target_log_probs <span class="token operator">=</span> jnp<span class="token punctuation">.</span>take_along_axis<span class="token punctuation">(</span>
+        log_probs<span class="token punctuation">,</span> targets<span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">,</span> <span class="token boolean">None</span><span class="token punctuation">]</span><span class="token punctuation">,</span> axis<span class="token operator">=</span><span class="token operator">-</span><span class="token number">1</span>
+    <span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span>
+    <span class="token keyword">return</span> <span class="token operator">-</span>jnp<span class="token punctuation">.</span>mean<span class="token punctuation">(</span>target_log_probs<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>完整训练步骤仍遵循“旧状态进入、新状态离开”：</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">loss_fn</span><span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch<span class="token punctuation">,</span> key<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    logits <span class="token operator">=</span> model<span class="token punctuation">(</span>params<span class="token punctuation">,</span> batch<span class="token punctuation">[</span><span class="token string">"inputs"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> key<span class="token punctuation">,</span> training<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> cross_entropy<span class="token punctuation">(</span>logits<span class="token punctuation">,</span> batch<span class="token punctuation">[</span><span class="token string">"targets"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token keyword">def</span> <span class="token function">train_step</span><span class="token punctuation">(</span>state<span class="token punctuation">,</span> batch<span class="token punctuation">,</span> learning_rate<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    next_key<span class="token punctuation">,</span> dropout_key <span class="token operator">=</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>split<span class="token punctuation">(</span>state<span class="token punctuation">[</span><span class="token string">"key"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    loss<span class="token punctuation">,</span> grads <span class="token operator">=</span> jax<span class="token punctuation">.</span>value_and_grad<span class="token punctuation">(</span>loss_fn<span class="token punctuation">)</span><span class="token punctuation">(</span>
+        state<span class="token punctuation">[</span><span class="token string">"params"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> batch<span class="token punctuation">,</span> dropout_key
+    <span class="token punctuation">)</span>
+    new_params <span class="token operator">=</span> jax<span class="token punctuation">.</span>tree<span class="token punctuation">.</span><span class="token builtin">map</span><span class="token punctuation">(</span>
+        <span class="token keyword">lambda</span> p<span class="token punctuation">,</span> g<span class="token punctuation">:</span> p <span class="token operator">-</span> learning_rate <span class="token operator">*</span> g<span class="token punctuation">,</span>
+        state<span class="token punctuation">[</span><span class="token string">"params"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> grads<span class="token punctuation">,</span>
+    <span class="token punctuation">)</span>
+    new_state <span class="token operator">=</span> <span class="token punctuation">{</span>
+        <span class="token operator">**</span>state<span class="token punctuation">,</span>
+        <span class="token string">"params"</span><span class="token punctuation">:</span> new_params<span class="token punctuation">,</span>
+        <span class="token string">"step"</span><span class="token punctuation">:</span> state<span class="token punctuation">[</span><span class="token string">"step"</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span>
+        <span class="token string">"key"</span><span class="token punctuation">:</span> next_key<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> new_state<span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token string">"loss"</span><span class="token punctuation">:</span> loss<span class="token punctuation">}</span>
+
+train_step_jit <span class="token operator">=</span> jax<span class="token punctuation">.</span>jit<span class="token punctuation">(</span>train_step<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这里保留用 SGD，实际模型通常用 Optax 提供 AdamW、学习率调度和梯度裁剪；它仍遵循官方介绍的状态传递模式。checkpoint 应同时保存参数、优化器状态、step 和随机 key，才能真正恢复训练轨迹。</p>
+<h2 id="10-下一步"><a href="#10-下一步" class="headerlink" title="10. 下一步"></a>10. 下一步</h2><p>到这里，JAX 101 关于表达计算的主线已经完整串起：数组与 <code>jax.numpy</code>、<code>grad</code> 与 <code>vmap</code>、用于组织结构的 PyTree、用于随机性的 key，以及用于状态的显式传值或 Ref。</p>
+<p>让程序跑得更快需要继续学习 <code>jax.jit</code>、sharding 和 profiling。进入 MaxText 前，还要理解它如何把模型参数、优化器状态、指标、随机数和 checkpoint 组织成可变换的状态树。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">易百分</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2026/06/13/JAX-101-05-%E7%8A%B6%E6%80%81JIT%E4%B8%8E%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF/">http://ytirus.github.io/2026/06/13/JAX-101-05-%E7%8A%B6%E6%80%81JIT%E4%B8%8E%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">易百分</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/JAX/">
+                                    <span class="chip bg-color">JAX</span>
+                                </a>
+                            
+                                <a href="/tags/JIT/">
+                                    <span class="chip bg-color">JIT</span>
+                                </a>
+                            
+                                <a href="/tags/Ref/">
+                                    <span class="chip bg-color">Ref</span>
+                                </a>
+                            
+                                <a href="/tags/%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF/">
+                                    <span class="chip bg-color">训练循环</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2026/06/20/JAX-101-06-%E8%BF%B7%E4%BD%A0Transformer/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/39.jpg" class="responsive-img" alt="JAX 101（六）：从零拼出迷你 Transformer">
+                        
+                        <span class="card-title">JAX 101（六）：从零拼出迷你 Transformer</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            将数组、PyTree、随机 key、自动微分和 JIT 组合起来，从零实现一个 decoder-only 迷你 Transformer 的前向传播与训练步骤。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2026-06-20
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/JAX/">
+                        <span class="chip bg-color">JAX</span>
+                    </a>
+                    
+                    <a href="/tags/%E8%87%AA%E5%8A%A8%E5%BE%AE%E5%88%86/">
+                        <span class="chip bg-color">自动微分</span>
+                    </a>
+                    
+                    <a href="/tags/Transformer/">
+                        <span class="chip bg-color">Transformer</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
+                        <span class="chip bg-color">大语言模型</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/06/06/JAX-101-04-%E9%9A%8F%E6%9C%BA%E6%95%B0%E4%B8%8E%E5%8F%AF%E5%A4%8D%E7%8E%B0%E5%AE%9E%E9%AA%8C/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/44.jpg" class="responsive-img" alt="JAX 101（四）：显式随机数与可复现实验">
+                        
+                        <span class="card-title">JAX 101（四）：显式随机数与可复现实验</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            解释 JAX 为什么显式管理伪随机数 key，以及如何通过 key 拆分完成参数初始化、Dropout、自回归采样和可复现实验。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-06-06
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/JAX/">
+                        <span class="chip bg-color">JAX</span>
+                    </a>
+                    
+                    <a href="/tags/PRNG/">
+                        <span class="chip bg-color">PRNG</span>
+                    </a>
+                    
+                    <a href="/tags/Dropout/">
+                        <span class="chip bg-color">Dropout</span>
+                    </a>
+                    
+                    <a href="/tags/%E5%8F%AF%E5%A4%8D%E7%8E%B0%E6%80%A7/">
+                        <span class="chip bg-color">可复现性</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">331k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
