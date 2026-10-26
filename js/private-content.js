@@ -1,10 +1,10 @@
 (function () {
   'use strict';
-  const decode = value =&gt; Uint8Array.from(atob(value), c =&gt; c.charCodeAt(0));
-  document.querySelectorAll('.private-unlock').forEach(form =&gt; {
+  const decode = value => Uint8Array.from(atob(value), c => c.charCodeAt(0));
+  document.querySelectorAll('.private-unlock').forEach(form => {
     if (form.dataset.bound) return;
     form.dataset.bound = 'true';
-    form.addEventListener('submit', async event =&gt; {
+    form.addEventListener('submit', async event => {
       event.preventDefault();
       const status = form.querySelector('[role="status"]');
       const button = form.querySelector('button');
