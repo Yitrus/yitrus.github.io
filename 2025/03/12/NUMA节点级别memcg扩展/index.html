@@ -495,7 +495,7 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>关于cgroup，memcg，还有与task之间的联系我在另一篇博客<a target="_blank" rel="noopener" href="https://yitrus.github.io/2023/10/29/cgroup%E5%92%8Cnamespace/">cgroup和namespace</a>有写。</p>
+                <p>关于cgroup，memcg，还有与task之间的联系我在另一篇博客<a href="https://yitrus.github.io/2023/10/29/cgroup%E5%92%8Cnamespace/">cgroup和namespace</a>有写。</p>
 <p>本次讨论聚焦于 Linux 内核中的内存控制子系统（memcg），系统性地梳理了 cgroup、css_set、mem_cgroup 等核心数据结构之间的关系及其作用。我们深入分析了如何通过 task_struct 获取所属 memcg 信息、mem_cgroup_per_node 的设计初衷以及它在 NUMA 架构下的意义。进一步地，讨论还涵盖了如何通过扩展 alloc_pages_vma() 实现基于 NUMA 节点的 memcg 精细化页分配限制，以及如何注册 cgroup 接口文件（cftype[]），控制和监控每个节点的内存使用。整体内容构建了一条从内核机制理解到实际内存策略定制的清晰路径。</p>
 <h2 id="1-让-memcg-统计每个-NUMA-的信息"><a href="#1-让-memcg-统计每个-NUMA-的信息" class="headerlink" title="1. 让 memcg 统计每个 NUMA 的信息"></a>1. 让 memcg 统计每个 NUMA 的信息</h2><p>在多个NUMA的系统中，一个task的内存可能从多个NUMA中分配，所以一个memcg会用<code>mem_cgroup_per_node</code>区分每个NUMA的信息。它的核心作用是实现内存控制组的NUMA局部性统计、回收和限制，确保内存资源分配和回收能够感知NUMA架构的物理拓扑。如果要在NUMA节点间做内存调度需要关注这部分，在5.15.19这个内核是没有实现按照NUMA节点粒度来限制内存分配和回收的。</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// include/linux/memcontrol.h</span>
@@ -920,7 +920,7 @@ out<span class="token operator">:</span>
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://ytirus.github.io/2025/03/12/NUMA%E8%8A%82%E7%82%B9%E7%BA%A7%E5%88%ABmemcg%E6%89%A9%E5%B1%95/">http://ytirus.github.io/2025/03/12/NUMA%E8%8A%82%E7%82%B9%E7%BA%A7%E5%88%ABmemcg%E6%89%A9%E5%B1%95/</a>
+                    <a href="https://yitrus.github.io/2025/03/12/NUMA%E8%8A%82%E7%82%B9%E7%BA%A7%E5%88%ABmemcg%E6%89%A9%E5%B1%95/">https://yitrus.github.io/2025/03/12/NUMA%E8%8A%82%E7%82%B9%E7%BA%A7%E5%88%ABmemcg%E6%89%A9%E5%B1%95/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -1515,7 +1515,7 @@ $(function () {
 
     
     
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    <script async src="/libs/others/busuanzi.pure.mini.js?v=20261028"></script>
     
 
     

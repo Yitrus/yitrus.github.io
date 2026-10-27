@@ -146,9 +146,9 @@
             
             <tag> JAX </tag>
             
-            <tag> jax.lax </tag>
-            
             <tag> Transformer </tag>
+            
+            <tag> jax.lax </tag>
             
             <tag> Rematerialization </tag>
             
@@ -208,11 +208,11 @@
             
             <tag> JAX </tag>
             
+            <tag> Transformer </tag>
+            
             <tag> 大语言模型 </tag>
             
             <tag> 自动微分 </tag>
-            
-            <tag> Transformer </tag>
             
         </tags>
       
@@ -2019,11 +2019,11 @@
             
             <tag> NUMA </tag>
             
+            <tag> Kernel-Crashed </tag>
+            
             <tag> 虚拟文件系统 </tag>
             
             <tag> proc </tag>
-            
-            <tag> Kernel-Crashed </tag>
             
         </tags>
       
@@ -3250,9 +3250,9 @@
       
         <tags>
             
-            <tag> Review </tag>
-            
             <tag> Hybrid-Memory </tag>
+            
+            <tag> Review </tag>
             
         </tags>
       
