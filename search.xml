@@ -13,7 +13,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -44,7 +44,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -75,7 +75,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -106,7 +106,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -137,7 +137,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -146,9 +146,9 @@
             
             <tag> JAX </tag>
             
-            <tag> Transformer </tag>
-            
             <tag> jax.lax </tag>
+            
+            <tag> Transformer </tag>
             
             <tag> Rematerialization </tag>
             
@@ -168,7 +168,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -179,9 +179,9 @@
             
             <tag> XLA </tag>
             
-            <tag> jax.lax </tag>
-            
             <tag> 卷积 </tag>
+            
+            <tag> jax.lax </tag>
             
         </tags>
       
@@ -199,7 +199,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -210,9 +210,9 @@
             
             <tag> 大语言模型 </tag>
             
-            <tag> Transformer </tag>
-            
             <tag> 自动微分 </tag>
+            
+            <tag> Transformer </tag>
             
         </tags>
       
@@ -230,7 +230,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -261,7 +261,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -292,7 +292,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -323,7 +323,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -332,11 +332,11 @@
             
             <tag> JAX </tag>
             
-            <tag> JIT </tag>
-            
             <tag> 自动微分 </tag>
             
             <tag> vmap </tag>
+            
+            <tag> JIT </tag>
             
         </tags>
       
@@ -354,7 +354,7 @@
       
       <categories>
           
-          <category> Code &amp; Development </category>
+          <category> AI infra </category>
           
       </categories>
       
@@ -1845,9 +1845,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
             <tag> Cloud </tag>
             
@@ -1959,9 +1959,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
             <tag> Virtual-Machines </tag>
             
@@ -2019,11 +2019,11 @@
             
             <tag> NUMA </tag>
             
-            <tag> Kernel-Crashed </tag>
-            
             <tag> 虚拟文件系统 </tag>
             
             <tag> proc </tag>
+            
+            <tag> Kernel-Crashed </tag>
             
         </tags>
       
@@ -2079,11 +2079,11 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
+            <tag> Disaggregated </tag>
             
             <tag> CCFA </tag>
             
-            <tag> Disaggregated </tag>
+            <tag> Hybrid-Memory </tag>
             
             <tag> MemoryPool </tag>
             
@@ -2110,9 +2110,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
@@ -2164,9 +2164,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
@@ -2216,9 +2216,9 @@
       
         <tags>
             
-            <tag> CCFA </tag>
-            
             <tag> Disaggregated </tag>
+            
+            <tag> CCFA </tag>
             
             <tag> RDMA </tag>
             
@@ -2411,9 +2411,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
@@ -2465,9 +2465,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
             <tag> NUMA </tag>
             
@@ -2519,11 +2519,11 @@
       
         <tags>
             
+            <tag> CCFA </tag>
+            
             <tag> Optane </tag>
             
             <tag> NVDIMMs </tag>
-            
-            <tag> CCFA </tag>
             
         </tags>
       
@@ -2548,11 +2548,11 @@
       
         <tags>
             
+            <tag> CCFA </tag>
+            
             <tag> Optane </tag>
             
             <tag> NVDIMMs </tag>
-            
-            <tag> CCFA </tag>
             
         </tags>
       
@@ -2602,9 +2602,9 @@
       
         <tags>
             
-            <tag> CCFB </tag>
-            
             <tag> Hybrid-Memory </tag>
+            
+            <tag> CCFB </tag>
             
         </tags>
       
@@ -2629,9 +2629,9 @@
       
         <tags>
             
-            <tag> CCFB </tag>
-            
             <tag> Hybrid-Memory </tag>
+            
+            <tag> CCFB </tag>
             
         </tags>
       
@@ -2733,9 +2733,9 @@
       
         <tags>
             
-            <tag> CCFB </tag>
-            
             <tag> Hybrid-Memory </tag>
+            
+            <tag> CCFB </tag>
             
             <tag> 内存监控工具 </tag>
             
@@ -2839,9 +2839,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
             <tag> Warehouse-Scale </tag>
             
@@ -2870,9 +2870,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
@@ -2897,9 +2897,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
@@ -3115,9 +3115,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
@@ -3142,9 +3142,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
@@ -3169,9 +3169,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
             <tag> Object-Level-Memory </tag>
             
@@ -3277,9 +3277,9 @@
       
         <tags>
             
-            <tag> Hybrid-Memory </tag>
-            
             <tag> CCFA </tag>
+            
+            <tag> Hybrid-Memory </tag>
             
         </tags>
       
