@@ -1,0 +1,1250 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Scaling Book 中文（00）：导读——为什么要理解模型扩展, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>Scaling Book 中文（00）：导读——为什么要理解模型扩展 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/36.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">Scaling Book 中文（00）：导读——为什么要理解模型扩展</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/JAX/">
+                                <span class="chip bg-color">JAX</span>
+                            </a>
+                        
+                            <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
+                                <span class="chip bg-color">大语言模型</span>
+                            </a>
+                        
+                            <a href="/tags/Scaling-Book/">
+                                <span class="chip bg-color">Scaling Book</span>
+                            </a>
+                        
+                            <a href="/tags/TPU/">
+                                <span class="chip bg-color">TPU</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2026-07-11
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3.6k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    12 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <blockquote>
+<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/">本章原文</a>。原文固定版本：<code>173fb0851d7e</code>，获取日期：2026-10-26，MIT 许可。<br>本章为完整范围的机器辅助中文初译。</p>
+</blockquote>
+<blockquote>
+<p><strong>简介：</strong>训练大语言模型常让人觉得像炼金术，但理解和优化性能并不必如此。本书解释语言模型扩展背后的规律：TPU 与 GPU 怎样工作、如何互相通信，LLM 怎样在真实硬件上运行，以及如何在训练和推理时安排并行，让模型在大规模硬件上高效执行。如果你想知道一个模型应该花多少钱训练、自己部署需要多少内存，或者 AllGather 是什么，希望本书能帮到你。</p>
+</blockquote>
+<p><a href="/2026/07/11/Scaling-Book-00-%E5%AF%BC%E8%AF%BB/">Scaling Book 中文导读</a> · <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/">原著目录</a></p>
+<p><img src="/images/scaling-book/dragon.png" alt="原文插图"></p>
+<p>深度学习的大部分内容仍然可以归结为一种黑魔法，但优化模型的性能不必如此——即使是大规模的！相对简单的原则适用于任何地方——从处理单个加速器到数万个加速器——理解它们可以让你做很多有用的事情：</p>
+<ul>
+<li>大致了解模型的各个部分与其理论最佳值的接近程度。</li>
+<li>对不同规模的不同并行方案做出明智的选择（如何在多个设备之间分割计算）。</li>
+<li>估计训练和运行大型 Transformer 模型所需的成本和时间。</li>
+<li>设计利用<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2205.14135">特定</a><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1911.02150">硬件</a><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00072">功能可供性</a>的算法。</li>
+<li>通过明确了解限制当前算法性能的因素来设计硬件。</li>
+</ul>
+<p><strong>预期背景：</strong> 我们假设你对 LLM 和 Transformer 架构有基本了解，但不一定了解它们如何大规模运行。你应该了解 LLM 训练的基础知识，并且最好对 JAX 有一定的了解。一些有用的背景阅读可能包括关于 Transformer 架构的<a target="_blank" rel="noopener" href="https://jalammar.github.io/illustrated-transformer/">这篇博文</a> 和<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1706.03762">原始 Transformer 论文</a>。另请查看<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/conclusion/#further-reading">此列表</a>以获取更有用的并发和未来阅读。</p>
+<p>你可能还会喜欢阅读有关 NVIDIA GPU 的新 <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/gpus/">第 12 节</a>！</p>
+<!-- source-heading -->
+<p><a id="why-should-you-care"></a></p>
+<h3 id="你为什么要关心？"><a href="#你为什么要关心？" class="headerlink" title="你为什么要关心？"></a>你为什么要关心？</h3><p>三四年前，我认为大多数机器学习研究人员不需要理解本书中的任何内容。但如今，即使是“小型”模型的运行也如此接近硬件限制，以至于进行新颖的研究需要考虑规模效率。（原注：从历史上看，机器学习研究遵循系统创新和软件改进之间的循环。 Alex Krizhevsky 必须编写糟糕的 CUDA 代码才能使 CNN 更快，但几年之内，Theano 和 TensorFlow 等库意味着你不必这样做。也许这种情况也会发生在这里，几年后本书中的所有内容都会被抽象掉。但缩放法则将我们的模型永远推向了硬件的最前沿，而且在可预见的未来，进行前沿研究似乎将与如何有效地将模型缩放到大型硬件拓扑密不可分。） <strong>如果一种新架构在基准测试中的表现提升了 20%，却让硬件运行效率降低了 20%，那么这种提升就可能失去实际价值。</strong> 许多看起来很有潜力的模型架构，最终没能取得成功：有的是因为无法在大规模硬件上高效运行，有的则是因为没有投入足够的工程工作，让它们高效运行起来。</p>
+<blockquote>
+<p><strong>译者补充：</strong>这里的“硬件运行效率”对应原文的 roofline efficiency，指实际性能接近 Roofline 模型所预测上限的程度。作者想强调：评估新架构，既要看模型效果，也要看实际运行的资源成本。两个“20%”是强调这一取舍，并不表示模型效果与运行效率能直接相减、恰好抵消。</p>
+</blockquote>
+<p><strong>“模型扩展”的目标是能够增加用于训练或推理的芯片数量，同时实现吞吐量的成比例、线性增加。</strong>这称为“<em>强扩展</em>”。尽管添加额外的芯片（“并行性”）通常会减少计算时间，但这也会以增加芯片之间的通信为代价。当通信时间比计算时间长时，我们就会受到“通信束缚”，并且无法强扩展。（原注：随着计算耗时缩短，还需要留意单块芯片内部的瓶颈。一块全新的 TPU 或 GPU，标称算力可能达到每秒 500 万亿次运算；但如果大量时间花在内存中搬运参数，计算单元就只能等待数据，实际运算速度可能只有标称值的十分之一，也就是每秒约 50 万亿次运算。因此，要让模型高效扩展，就必须同时考虑单芯片算力、内存带宽和内存总容量，以及它们之间的配合。）如果我们足够了解我们的硬件，能够预测这些瓶颈将在哪里出现，我们就可以设计或重新配置我们的模型来避免它们。（原注：硬件设计人员面临着相反的问题：构建为我们的算法提供足够计算、带宽和内存的硬件，同时最大限度地降低成本。你可以想象这个“协同设计”问题的压力有多大：你必须押注当第一批芯片真正可用时（通常是 2 到 3 年后），算法会是什么样子。 TPU的故事在这款游戏中取得了巨大的成功。矩阵乘法是一种独特的算法，因为它每字节内存使用的 FLOP 次数比几乎任何其他算法都要多（每字节 N FLOP），并且早期的 TPU 及其脉动阵列架构比 GPU 在构建时实现了更好的性能/成本。 TPU 是为 ML 工作负载而设计的，带有 Tensor Core 的 GPU 也在迅速变化，以填补这一空白。但你可以想象，如果神经网络没有起飞，或者没有以 TPU（本质上不如 GPU 灵活）无法处理的某些基本方式发生变化，那么成本会有多高。）</p>
+<p><em>我们在本书中的目标是解释 TPU（和 GPU）硬件如何工作，以及 Transformer 架构如何发展以在当前硬件上表现良好。我们希望这对于设计新架构的研究人员和致力于使当前一代法学硕士快速运行的工程师都有用。</em></p>
+<h2 id="高层概要"><a href="#高层概要" class="headerlink" title="高层概要"></a>高层概要</h2><p>本书的总体结构如下：</p>
+<p><a href="/2026/07/18/Scaling-Book-01-Roofline%E5%88%86%E6%9E%90/">第 1 节</a> 解释了屋顶线分析以及哪些因素会限制我们的扩展能力（通信、计算和内存）。 <a href="/2026/07/25/Scaling-Book-02-%E7%90%86%E8%A7%A3TPU/">第 2 节</a> 和 <a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">第 3 节</a> 详细讨论了 TPU 如何工作，既作为单独的芯片，又作为具有有限带宽和延迟的芯片间链路的互连系统（至关重要）。我们将回答以下问题：</p>
+<ul>
+<li>一定大小的矩阵相乘需要多长时间？它在什么时候受到计算、内存或通信带宽的限制？</li>
+<li>TPU 如何连接在一起形成训练集群？系统各部分有多少带宽？</li>
+<li>在多个 TPU 上收集、分散或重新分布数组需要多长时间？</li>
+<li>我们如何有效地乘以跨设备不同分布的矩阵？</li>
+</ul>
+<p><img src="/images/scaling-book/pointwise-product.gif" alt="原文插图"></p>
+<p><b>图：</b> <a href="tpus">第2</a>部分的图表显示了TPU如何执行元素乘积。根据数组的大小和各种链路的带宽，我们可以发现自己受计算受限（使用全部硬件计算能力）或受内存限制（因内存加载而成为瓶颈）。</p>
+<p>五年前，ML 拥有丰富多彩的架构——ConvNet、LSTM、MLP、Transformers——但现在我们大多只有 Transformer<d-cite key="transformers"></d-cite>。我们坚信，理解 Transformer 架构的每一部分都是值得的：每个矩阵的确切大小、标准化发生的位置、有多少参数和 FLOP（原注：浮点数 OP，基本上是所需的加法和乘法总数。虽然许多来源将 FLOPs 表示“每秒操作数”，但我们使用 FLOPs/s 来明确表示。）在每个部分中。 <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/transformers/">第 4 节</a> 仔细介绍了“Transformer 数学”，展示了如何计算训练和推理的参数和 FLOP 次数。这告诉我们我们的模型将使用多少内存，我们将在计算或通信上花费多少时间，以及相对于前馈块，注意力何时变得重要。</p>
+<p><img src="/images/scaling-book/transformer-diagram.png" alt="原文插图"></p>
+<p><b>图3：</b> 一个标准 Transformer 层，其中每个矩阵乘法 (matmul) 显示为圆内的点。所有参数（不包括范数）均以紫色显示。 <a href="transformers"> 第 4 节</a> 更详细地介绍了此图。</p>
+<blockquote>
+<p><strong>译者补充：图中的 MLP 在做什么？</strong> MLP 是多层感知机（Multi-Layer Perceptron），在 Transformer 中通常也称为前馈网络（FFN）。它对每个 token 的特征向量分别进行加工，各个 token 使用同一组权重。注意力模块负责让不同位置的 token 交换信息；MLP 则进一步变换每个 token 自身的特征。</p>
+<p>图 3 画的是一种<strong>带门控的 MLP</strong>：归一化后的输入 <code>h</code> 分成两路，分别与 <code>W_in1</code>、<code>W_in2</code> 做矩阵乘法，都从 <code>D</code> 维投影到中间的 <code>F</code> 维；第一路经过 GELU 非线性激活，再与第二路逐元素相乘；最后乘以 <code>W_out</code>，从 <code>F</code> 维投影回 <code>D</code> 维。用一行表达就是：<code>MLP(h) = (GELU(h @ W_in1) ⊙ (h @ W_in2)) @ W_out</code>。这里 <code>@</code> 是矩阵乘法，<code>⊙</code> 是对应元素相乘；图中的圆点表示前者，圆圈里的星号表示后者。</p>
+<p>可以把它理解为“扩展特征 → 非线性加工与门控 → 压回原维度”。两条分支相乘，使一路能调节另一路中哪些特征通过。最下方的加号是残差连接：把 MLP 的输出加回该子层的输入；它在上述 MLP 公式之外。</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/training/">第 5 节：训练</a> 和 <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/inference/">第 7 节：推理</a> 是本书的核心，我们在其中讨论基本问题：给定一定大小和一定数量芯片的模型，如何并行化我的模型以保持“强缩放”状态？这是一个简单的问题，但答案却出奇地复杂。在较高层面上，有四种主要并行技术用于在多个芯片上分割模型（<strong>数据DP</strong>、<strong>张量TP</strong>、<strong>管道PP</strong>和<strong>专家EP</strong>），以及许多其他技术来减少内存需求（<strong>重新实现</strong>、<strong>优化器/模型分片（又名 ZeRO）</strong>、<strong>主机卸载</strong>、<strong>梯度累积</strong>）。我们将在这里讨论其中的许多内容。</p>
+<p>我们希望在读完这些部分后，你应该能够自己选择新的架构或设置。 <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/applied-training/">第 6 节</a> 和<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/applied-inference/">第 8 节</a> 是将这些概念应用到流行的开源模型 LLaMA 3 的实用教程。</p>
+<p>最后，<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/profiling/">第 9 节</a> 和<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/jax-stuff/">第 10 节</a> 了解如何在 JAX 中实现其中一些想法，以及如何在出现问题时分析和调试代码。 <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/gpus/">第 12 节</a> 是一个新的部分，也深入探讨 GPU。</p>
+<p>自始至终，我们都试图给你一些问题，让你自己去工作。请毫无压力地阅读所有部分或按顺序阅读。请留下反馈。目前，这是一个草案，并将继续修改。谢谢你！</p>
+<p><em>我们要感谢 James Bradbury 和 Blake Hechtman，他们提出了本书中的许多想法。</em></p>
+<p><a id="without-further-ado-here-is-section-101-roofline分析md-about-tpu-rooflines"></a></p>
+<h3 id="不再多说，现在进入讨论-TPU-Roofline-的第-1-章。"><a href="#不再多说，现在进入讨论-TPU-Roofline-的第-1-章。" class="headerlink" title="不再多说，现在进入讨论 TPU Roofline 的第 1 章。"></a>不再多说，现在进入讨论 TPU Roofline 的<a href="/2026/07/18/Scaling-Book-01-Roofline%E5%88%86%E6%9E%90/">第 1 章</a>。</h3><p><a id="links-to-sections"></a></p>
+<h2 id="章节链接"><a href="#章节链接" class="headerlink" title="章节链接"></a>章节链接</h2><p><em>本系列可能比需要的时间长，但我们希望这不会阻止你。前三章是预备部分，如果你已经熟悉这些材料，可以跳过，尽管它们介绍了稍后使用的符号。最后三个部分可能是最实用的，因为它们解释了如何使用真实模型。</em></p>
+<p><strong>第 1 部分：预备知识</strong></p>
+<ul>
+<li><p><a href="/2026/07/18/Scaling-Book-01-Roofline%E5%88%86%E6%9E%90/"><strong>第 1 章：屋顶线分析简介</strong></a>。算法受到三个因素的限制：计算、通信和内存。我们可以使用这些来估计我们的算法的运行速度。</p>
+</li>
+<li><p><a href="/2026/07/25/Scaling-Book-02-%E7%90%86%E8%A7%A3TPU/"><strong>第 2 章：如何思考 TPU</strong></a>。 TPU 是如何工作的？这对我们可以训练和服务的模型有何影响？</p>
+</li>
+<li><p><a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/"><strong>第 3 章：分片矩阵及其乘法</strong></a>。在这里，我们通过我们最喜欢的操作（分片）矩阵乘法来解释模型分片和多 TPU 并行性。</p>
+</li>
+</ul>
+<p><strong>第 2 部分：变形金刚</strong></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/transformers/"><strong>第 4 章：你需要了解的所有 Transformer 数学知识</strong></a>。 Transformer 在前向和反向传播中使用了多少次 FLOP？你能计算出参数的数量吗？它的KV缓存的大小？我们在这里进行数学计算。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/training/"><strong>第 5 章：如何并行化 Transformer 进行训练</strong></a>。 FSDP。威震天分片。管道并行性。给定一定数量的芯片，如何尽可能有效地训练给定批量大小的给定大小的模型？</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/applied-training/"><strong>第 6 章：在 TPU 上训练 LLaMA 3</strong></a>。我们如何在 TPU 上训练 LLaMA 3？需要多长时间？需要花多少钱？</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/inference/"><strong>第 7 章：关于 Transformer 推理的一切</strong></a>。一旦我们训练了模型，我们就必须为它提供服务。推理增加了一个新的考虑因素——延迟——并改变了内存格局。我们将讨论分解服务的工作原理以及如何考虑 KV 缓存。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/applied-inference/"><strong>第 8 章：在 TPU 上提供 LLaMA 3</strong></a>。在 TPU v5e 上提供 LLaMA 3 服务需要多少钱？延迟/吞吐量的权衡是什么？</p>
+</li>
+</ul>
+<p><strong>第 3 部分：实用教程</strong></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/profiling/"><strong>第 9 章：如何分析 TPU 代码</strong></a>。真正的法学硕士绝不会像上述理论那么简单。在这里，我们解释 JAX + XLA 堆栈以及如何使用 JAX/TensorBoard 分析器来调试和修复实际问题。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/jax-stuff/"><strong>第 10 章：在 JAX 中对 TPU 进行编程</strong></a>。 JAX 提供了一堆神奇的 API 用于并行计算，但你需要知道如何使用它们。有趣的例子和有效的问题。</p>
+</li>
+</ul>
+<p><strong>第 4 部分：结论和奖励内容</strong></p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/conclusion/"><strong>第 11 章：结论和进一步阅读</strong></a>。关于 TPU 和 LLM 的结束思考和进一步阅读。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/gpus/"><strong>第 12 章：如何思考 GPU</strong></a>。关于 GPU、它们如何工作、如何联网以及它们的屋顶线与 TPU 有何不同的额外部分。</p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>译文与许可：</strong>本章是基于固定版本 <code>173fb0851d7e654872f0327aff2e17607cf24106</code> 的机器辅助中文初译，并非逐句人工精校。原文与配图基于 MIT License 发布。Copyright (c) 2022 Maruan Al-Shedivat；Copyright (c) 2025 Google LLC。完整许可见 <a href="/images/scaling-book/LICENSE.txt">MIT License</a>。</p>
+</blockquote>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">Jacob Austin 等</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2026/07/11/Scaling-Book-00-%E5%AF%BC%E8%AF%BB/">http://ytirus.github.io/2026/07/11/Scaling-Book-00-%E5%AF%BC%E8%AF%BB/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">Jacob Austin 等</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/JAX/">
+                                    <span class="chip bg-color">JAX</span>
+                                </a>
+                            
+                                <a href="/tags/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">
+                                    <span class="chip bg-color">大语言模型</span>
+                                </a>
+                            
+                                <a href="/tags/Scaling-Book/">
+                                    <span class="chip bg-color">Scaling Book</span>
+                                </a>
+                            
+                                <a href="/tags/TPU/">
+                                    <span class="chip bg-color">TPU</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+        <div class="card utterances-card">
+    <div class="card-content">
+        <h2 style="font-size: 20px; font-weight: 700; margin-top: 0;">
+            <i class="fas fa-comments fa-fw" aria-hidden="true"></i> 评论
+        </h2>
+        <p>使用 GitHub 账号参与评论，评论将公开保存在 GitHub Issues 中。</p>
+        <script src="https://utteranc.es/client.js"
+                repo="Yitrus/yitrus.github.io"
+                issue-term="pathname"
+                theme="preferred-color-scheme"
+                crossorigin="anonymous"
+                async></script>
+        <p><a href="https://github.com/Yitrus/yitrus.github.io/issues" target="_blank" rel="noopener noreferrer">在 GitHub 查看评论</a></p>
+        <noscript>请启用 JavaScript 加载评论，或通过上方链接前往 GitHub。</noscript>
+    </div>
+</div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2026/07/18/Scaling-Book-01-Roofline%E5%88%86%E6%9E%90/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="Scaling Book 中文（01）：Roofline 分析——计算、带宽和内存的上限">
+                        
+                        <span class="card-title">Scaling Book 中文（01）：Roofline 分析——计算、带宽和内存的上限</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            使用 Roofline 模型分析计算吞吐、通信带宽和内存容量对模型性能的限制，并推导矩阵乘法的算术强度与性能上限。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2026-07-18
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
+                        <span class="chip bg-color">性能分析</span>
+                    </a>
+                    
+                    <a href="/tags/Scaling-Book/">
+                        <span class="chip bg-color">Scaling Book</span>
+                    </a>
+                    
+                    <a href="/tags/TPU/">
+                        <span class="chip bg-color">TPU</span>
+                    </a>
+                    
+                    <a href="/tags/Roofline/">
+                        <span class="chip bg-color">Roofline</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/07/04/JAX-101-08-lax-scan%E4%B8%8E%E5%B1%82%E5%A0%86%E5%8F%A0/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="JAX 101（八）：用 lax.scan 表达重复层与循环状态">
+                        
+                        <span class="card-title">JAX 101（八）：用 lax.scan 表达重复层与循环状态</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            从 Python 循环展开的问题出发，介绍 lax.scan 的 carry、参数层堆叠和自动微分，并说明如何结合 jax.checkpoint 控制 Transformer 的激活内存。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-07-04
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/JAX/">
+                        <span class="chip bg-color">JAX</span>
+                    </a>
+                    
+                    <a href="/tags/Transformer/">
+                        <span class="chip bg-color">Transformer</span>
+                    </a>
+                    
+                    <a href="/tags/jax-lax/">
+                        <span class="chip bg-color">jax.lax</span>
+                    </a>
+                    
+                    <a href="/tags/Rematerialization/">
+                        <span class="chip bg-color">Rematerialization</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">375.8k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

@@ -1,0 +1,1395 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Scaling Book 中文（02）：理解 TPU——芯片、内存和互连, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>Scaling Book 中文（02）：理解 TPU——芯片、内存和互连 | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">Scaling Book 中文（02）：理解 TPU——芯片、内存和互连</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Scaling-Book/">
+                                <span class="chip bg-color">Scaling Book</span>
+                            </a>
+                        
+                            <a href="/tags/TPU/">
+                                <span class="chip bg-color">TPU</span>
+                            </a>
+                        
+                            <a href="/tags/HBM/">
+                                <span class="chip bg-color">HBM</span>
+                            </a>
+                        
+                            <a href="/tags/ICI/">
+                                <span class="chip bg-color">ICI</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Code-Development/" class="post-category">
+                                Code & Development
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2026-07-25
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    8.7k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    32 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <blockquote>
+<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/tpus/">本章原文</a>。原文固定版本：<code>173fb0851d7e</code>，获取日期：2026-10-26，MIT 许可。<br>本章为完整范围的机器辅助中文初译</p>
+</blockquote>
+<blockquote>
+<p><strong>简介：</strong>本章介绍 TPU 如何工作、如何组成网络以支持多芯片训练和推理，以及这些特点如何影响常见算法的性能。GPU 使用者也能从中获得有用的认识。</p>
+</blockquote>
+<p><a href="/2026/07/11/Scaling-Book-00-%E5%AF%BC%E8%AF%BB/">Scaling Book 中文导读</a> · <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/">原著目录</a></p>
+<p>你可能还会喜欢阅读有关 NVIDIA GPU 的新 <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/gpus/">第 12 节</a>！</p>
+<p><a id="what-is-a-tpu"></a></p>
+<h2 id="什么是TPU？"><a href="#什么是TPU？" class="headerlink" title="什么是TPU？"></a>什么是TPU？</h2><p>**TPU 基本上是一个专门从事矩阵乘法的计算核心（称为 TensorCore），附加到快速内存堆栈（称为高带宽内存或 HBM）<d-cite key="tpu_paper"></d-cite></p>
+<p><img src="/images/scaling-book/tpu-chip.png" alt="原文插图"></p>
+<p><b> 图：</b> TPU芯片的基本组成。 TensorCore 是左侧的灰色框，包含矩阵乘法单元 (MXU)、向量单元 (VPU) 和向量内存 (VMEM)。</p>
+<p>你可以将 TensorCore 视为基本上只是一个非常好的矩阵乘法机，但它还有一些其他值得注意的功能。 TensorCore 具有三个关键单元：</p>
+<ul>
+<li><p><strong>MXU</strong>（矩阵乘法单元）是 TensorCore 的核心。在 TPU7x 上，它使用脉动阵列在每个 <code>4</code> 周期执行一次 <code>bf16[8,256] @ bf16[256,256] -&gt; f32[8,256]</code> 矩阵乘法（有关详细信息，请参阅 <a href="#appendix-b-how-does-a-systolic-array-work"> 附录 B</a>）。</p>
+<ul>
+<li>这大约是 TPU7x 上每个 MXU 在 2.2GHz 下的 <code>5.8e14</code> bf16 FLOPs/s。每个 TPU7x 芯片有 2 个 TensorCore，每个 TensorCore 有 2 个 MXU，因此 TPU7x 的总 bf16 FLOPs/s 约为 <code>2.3e15</code>。</li>
+<li>TPU 还支持具有较高吞吐量的较低精度 matmul（例如，每个 TPU7x 芯片可以执行 <code>4.6e15</code> fp8 OPs/s）。</li>
+</ul>
+</li>
+<li><p><strong>VPU</strong>（向量处理单元）执行一般数学运算，例如 ReLU 激活或向量之间的逐点加法或乘法。此处还执行归约（求和）。 <a href="#appendix-a-more-on-tpu-internals"> 附录 A</a> 提供了更多详细信息。</p>
+</li>
+<li><p><strong>VMEM</strong>（矢量内存）是位于 TensorCore 中靠近计算单元的片上暂存器。它比 HBM 小得多（例如，TPU7x 上每个芯片 128 MiB，而 HBM 为 192 GiB），但 MXU 的带宽要高得多。 VMEM 的运行方式有点像 CPU 上的 L1/L2 缓存，但要大得多并且由程序员控制。 HBM 中的数据需要先复制到 VMEM 中，然后 TensorCore 才能使用它进行任何计算。</p>
+</li>
+</ul>
+<p><strong>TPU 在矩阵乘法方面非常非常快</strong>。 <a target="_blank" rel="noopener" href="https://cloud.google.com/tpu/docs/tpu7x#system_architecture">TPU7x</a> 是迄今为止最强大的 TPU 之一，可以执行 <code>1.15e15</code> bf16 FLOPs/秒/核心或 <code>2.3e15</code> bf16 FLOPs/秒/芯片。单个 9216 芯片 Pod 可以执行 21 bf16 exaFLOPs/s。（译注：TPU，特别是它们的脉动阵列，是非常强大的硬件加速器，因为矩阵乘法是使用 $O(n^3)$ 计算 $O(n^2)$ 字节的少数算法之一。这使得普通 ALU 很容易成为计算瓶颈，而不是内存带宽。）</p>
+<p>上图还包括一些其他组件，例如 SMEM 和标量单元，它们用于控制流处理，并在 <a href="#appendix-a-more-on-tpu-internals"> 附录 A</a> 中进行了简要讨论，但对于理解它们并不重要。另一方面，HBM 很重要而且相当简单：</p>
+<ul>
+<li><p><strong>HBM</strong>（高带宽内存）是一大块快速内存，用于存储供 TensorCore 使用的张量。 HBM 容量通常为数十至数百 GB 量级（例如 TPU7x 的 HBM 容量为 <a target="_blank" rel="noopener" href="https://cloud.google.com/tpu/docs/tpu7x#system_architecture">192GiB</a>）。</p>
+<ul>
+<li><p>当需要计算时，张量通过 VMEM（见下文）从 HBM 流式传输到 MXU，并将结果从 VMEM 写回 HBM。</p>
+</li>
+<li><p>HBM 和 TensorCore 之间的带宽（通过 VMEM）被称为“HBM 带宽”（TPU7x 约为 7TB/秒），它限制了内存密集型工作负载中的计算速度。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>一般来说，所有 TPU 操作都是流水线和重叠的。</strong> 要执行 matmul $X \cdot A \to Y$，TPU 首先需要将矩阵块 $A$ 和 $X$ 从 HBM 复制到 VMEM 中，然后将它们加载到 MXU 中，MXU 将 8x256 块（对于 $X$）相乘， 256x256（对于 $A$），然后将结果逐块复制回 HBM。为了有效地做到这一点，matmul 是管道化的，因此进出 VMEM 的副本与 MXU 工作重叠。这允许 MXU 继续工作，而不是等待内存传输，从而保持 matmuls 受计算受限，而不是受内存限制。</p>
+<p>以下是如何从 HBM 执行元素乘积的示例：</p>
+<p><img src="/images/scaling-book/pointwise-product.gif" alt="原文插图"></p>
+<p><b>图：</b> 动画显示在 TPU 上执行的逐点乘积，其中字节从 HBM 加载。请注意字节如何以块的形式从内存中流出，以及部分结果如何通过管道传输回来，而无需等待完整的数组被具体化。</p>
+<p>matmul 看起来几乎相同，只是它会加载到 MXU 而不是 VPU/Vector 单元，并且加载和存储将以不同的顺序发生，因为相同的权重块用于多个激活块。你可以看到数据块流入 VMEM，然后流入 VREG（向量寄存器），然后流入向量单元，然后返回 VMEM 和 HBM。正如我们即将看到的，如果从 HBM 到 VMEM 的负载比向量单元（或 MXU）中的 FLOP 慢，我们就会受到“带宽受限”，因为我们导致 VPU 或 MXU 的工作量不足。</p>
+<p><strong>要点：</strong> TPU 非常简单。它们将权重从 HBM 加载到 VMEM，然后从 VMEM 加载到每秒可执行约 290 万亿次乘法加法的脉动阵列。 HBM $\leftrightarrow$ VMEM 和 VMEM $\leftrightarrow$ 脉动阵列带宽对 TPU 可以高效执行的计算设置了基本限制。</p>
+<p><strong>VMEM 和算术强度：</strong> VMEM 比 HBM 小得多，但它对 MXU 的带宽要高得多。正如我们在<a href="/2026/07/18/Scaling-Book-01-Roofline%E5%88%86%E6%9E%90/">第 1 节</a> 中看到的，这意味着如果算法可以在 VMEM 中容纳其所有输入/输出，那么遇到通信瓶颈的可能性就会小得多。当计算的算术强度较差时，这尤其有用：VMEM 带宽比 TPU7x 的 HBM 带宽高约 7 倍，这意味着从 VMEM 读取/写入的 MXU 操作所需的算术强度比使用 HBM 的操作低约 7 倍，以实现峰值 FLOP 利用率。这意味着如果我们可以将权重放入 VMEM 而不是 HBM，那么我们的矩阵乘法就可以在更小的批量大小下实现 FLOP。这意味着从根本上来说算术强度较低的算法仍然是高效的。 VMEM 太小了，这通常是一个挑战。（原注：我们有时会谈论 VMEM 预取，指的是在 VMEM 中提前加载权重，这样我们就可以掩盖 matmul 的加载成本。例如，在普通的 Transformer 中，我们有时可以在注意力期间将大前馈权重加载到 VMEM 中，如果我们受到内存带宽受限，这可以隐藏权重加载的成本。这要求我们的权重足够小或足够分片，以便将单个层放入 VMEM 中，并留出空间。）</p>
+<p><img src="/images/scaling-book/tpu-bandwidth.png" alt="原文插图"></p>
+<p><strong>TPU 芯片通常（但并非总是）由两个共享内存的 TPU 核心组成，可被视为一个大型加速器</strong>，具有两倍的 FLOP（称为“兆核”配置）。对于 v4、v5 和 v6 TPU 来说都是如此（TPU v7 删除了超级核心，而是在两个核心之间建立了高带宽链接）。较旧的 TPU 芯片具有独立的内存，并被视为两个独立的加速器（TPU v3 及更早版本）。 TPU v5e 等推理优化芯片每个芯片只有一个 TPU 核心。</p>
+<p><img src="/images/scaling-book/cores.png" alt="原文插图"></p>
+<p><strong>芯片</strong>以 **4 组的形式排列在通过 PCIe 网络连接到 <strong>CPU 主机的“托盘”上。</strong> 这是大多数读者熟悉的格式，4 个芯片（TPU7x 上有 8 个核心，因为每个芯片有两个 TensorCore，尽管一些老一代将这些组合成 4 个逻辑兆核）通过 Colab 或单个 TPU-VM 公开。对于像 TPU v6e 这样的推理芯片，我们每个主机有 2 个托盘，而不是 1 个，但每个芯片只有 1 个核心，因此 8 个芯片 = 8 个核心。（原注：在 Cloud TPU VM 上，每个托盘作为单独 VM 的一部分公开，因此再次有 4 个可见核心。）</p>
+<p><img src="/images/scaling-book/pcie.png" alt="原文插图"></p>
+<p><strong>PCIe 带宽有限：</strong> 与 HBM $\leftrightarrow$ VMEM 链接一样，CPU $\leftrightarrow$ HBM PCIe 连接具有特定带宽，限制从主机内存加载到 HBM 的速度，反之亦然。例如，TPU v4 的 PCIe 带宽为单路 16GB/秒，比 HBM 慢近 100 倍。我们<em>可以</em>将数据加载/卸载到主机 (CPU) RAM 中，但速度不是很快。<br><a id="tpu-networking"></a></p>
+<h2 id="TPU网络"><a href="#TPU网络" class="headerlink" title="TPU网络"></a>TPU网络</h2><blockquote>
+<p><strong>译者补充：host、TPU VM、ICI 与 slice（切片）分别是什么？</strong></p>
+<p>这里需要区分“CPU 主机怎样管理 TPU”和“TPU 芯片怎样互传数据”两种连接。</p>
+<p><strong>host 是 CPU 主机；TPU VM 是运行在 CPU 主机上的虚拟机环境，你在其中运行 Python、JAX 等程序。TPU 芯片则是连接到主机的加速器。</strong>所以，“4 块芯片对应一个 VM”是某些机型的资源配置，不是说 4 块 TPU 本身构成一台虚拟机。每台 VM／主机对应多少芯片，要看 TPU 代际和具体配置，不能一律按 4 块计算。</p>
+<p><strong>slice 是从同一个 TPU Pod 中分配出来、按指定拓扑通过 ICI 互连的一组 TPU 芯片。</strong>它可以由一个 host 管理，也可以跨多个 host。切片的边界不等于 VM 的边界；跨 host 不一定就跨切片。拓扑中的 <code>2x2x2</code> 表示三个方向的芯片数量，乘积是 8 块芯片，不是 8 台 VM。</p>
+<p>以每台 host／VM 对应 4 块芯片的 <strong>TPU v5p</strong> 配置为例，下表每一行都表示申请了<strong>一个</strong>相应拓扑的切片：</p>
+<table>
+<thead>
+<tr>
+<th>申请的切片拓扑</th>
+<th>TPU 芯片数</th>
+<th>host／VM 数量</th>
+<th>切片类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>2x2x1</code></td>
+<td>4</td>
+<td>1</td>
+<td>单 host 切片</td>
+</tr>
+<tr>
+<td><code>2x2x2</code></td>
+<td>8</td>
+<td>2</td>
+<td>跨两个 host 的单切片</td>
+</tr>
+<tr>
+<td><code>4x4x4</code></td>
+<td>64</td>
+<td>16</td>
+<td>跨十六个 host 的单切片</td>
+</tr>
+</tbody></table>
+<p>因此，申请一个 <code>2x2x2</code> 切片后，两台 VM 各管理 4 块 TPU，这 8 块芯片通过 ICI 组成一个整体。<strong>ICI 连接的是 TPU 芯片，不是两台 VM 的 CPU 网络接口。</strong>即使发送方和接收方 TPU 分属不同 host，切片内的 TPU 张量也可以沿 ICI 传输，不必先复制到 CPU 内存再经过主机网络。单 host 的 4 块芯片之间同样可以使用 ICI，ICI 并不是从第二台 host 才开始出现。</p>
+<p>反过来，分别申请两个独立的 <code>2x2x1</code> 切片，再让两台 VM 通过普通网络通信，并不会自动得到一个 <code>2x2x2</code> ICI 切片。判断时应查看申请或分配的<strong>切片资源及其拓扑</strong>，而不能仅凭芯片总数、VM 数量或它们是否在同一个 Pod 中推断。多个切片协同运行称为 Multislice：切片内部的 TPU 通信使用 ICI，切片之间的数据传输使用 DCN，经由 host 完成；两个切片也可能位于同一个 Pod 中。</p>
+<p>另外，<strong>是否具有首尾环绕连接，不是判断切片的标准</strong>。v5p 的 <code>2x2x2</code> 虽然没有完整环面拓扑的环绕链路，仍然是一个 ICI 切片。环绕连接影响通信路径和性能，不决定它是不是切片。</p>
+<p>本补充根据 Google Cloud 的 <a target="_blank" rel="noopener" href="https://docs.cloud.google.com/tpu/docs/v5p">TPU v5p 配置表</a>、<a target="_blank" rel="noopener" href="https://docs.cloud.google.com/tpu/docs/system-architecture-tpu-vm">TPU 系统架构</a>和 <a target="_blank" rel="noopener" href="https://docs.cloud.google.com/tpu/docs/multislice-introduction">Multislice 说明</a>核对，日期为 2026-10-27。</p>
+</blockquote>
+<p><strong>芯片通过 Pod 中的 ICI 网络相互连接</strong>。在 Trillium (TPU v6e) 中，ICI（“芯片间互连”）将每个芯片连接到其 4 个最近的邻居（通过边缘链接形成 2D 环面），这对于推理优化芯片来说是典型的。另一方面，TPU7x 中的每个芯片都连接到最近的 6 个邻居（形成 3D 环面），为训练工作负载提供更多 ICI 带宽。请注意，这些连接<strong>不</strong>通过其主机，它们是芯片之间的直接链接。</p>
+<p><img src="/images/scaling-book/ici-wraparound.png" alt="原文插图"></p>
+<p>环形结构将任意两个节点之间的最大距离从$N$减少到$N / 2$，使得通信速度更快。 TPU 还具有“扭曲环面”配置，将环面包裹在莫比乌斯带状拓扑中，以进一步减少节点之间的平均距离。</p>
+<p><strong>TPU pod（通过 ICI 连接）可以变得非常大：</strong> TPU7x 的最大 pod 尺寸（称为 <strong>superpod</strong>）由 9216 个芯片组成，这些芯片由 <code>4x4x4</code> 芯片的可重新配置立方体组成（原注：可重新配置，我们的意思是它们可以使用共享光路开关（OCS）动态地重新整形为 4nx4mx4k 的任何 3D 拓扑。 OCS 只是具有相同 ICI 带宽的可重新配置连接。它只是让我们连接立方体，同时保留环绕链接。）通过<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2208.10041">光学环绕链接</a>连接，我们可以重新配置以连接非常大的拓扑。</p>
+<p><img src="/images/scaling-book/tpu-rack.png" alt="原文插图"></p>
+<p>也可以请求更小的拓扑（例如 <code>2x2x1</code>、<code>2x2x2</code>），尽管没有环绕。这是一个重要的警告，因为它通常会使大多数通信的时间加倍。任何完整立方体的倍数（例如 <code>4x4x4</code> 或 <code>4x4x8</code>）都将具有由光学开关提供的环绕。（原注：请注意，<code>2x2x4</code> 不会有任何环绕，因为它们是由仅在完整立方体上可用的光学开关提供的。然而，TPU v6e 8x16 将在长轴上有一个环绕，因为它不使用可重新配置的光纤网络。）</p>
+<p><img src="/images/scaling-book/subslices.png" alt="原文插图"></p>
+<p>TPU v5e 和 Trillium (TPU v6e) Pod 由单个 <code>16x16</code> 2D 环面组成，沿任何尺寸为 16 的轴都有环绕（这意味着 <code>8x16</code> 在长轴上有环绕）。对于这些代，拓扑无法扩展到超过 16x16 环面，但 Pod 仍然可以通过标准数据中心网络 (DCN) 相互通信，该网络将 TPU 主机相互连接。同样，可以请求更小的拓扑，而无需包装暗调 $&lt;16$。</p>
+<p><img src="/images/scaling-book/more-subslices.png" alt="原文插图"></p>
+<p><strong>这种最近邻连接是 TPU 和 GPU 之间的关键区别</strong>。 GPU 通过层次结构的交换机连接，这些交换机近似于每个 GPU 之间的点对点连接，而不是像 TPU 那样使用本地连接。通常，节点内的 GPU（H100 为 8 个 GPU，B200 NVL72 为多达 72 个 GPU）直接连接，而较大的拓扑需要每个 GPU 之间的 O(log(N)) 跳。一方面，这意味着 GPU 可以在少量跳数内发送任意数据。另一方面，TPU 的价格要便宜得多（因为 NVLink 交换机价格昂贵），连接起来更简单，并且可以扩展到更大的拓扑，因为每个设备的链路数量和每个设备的带宽是恒定的。阅读更多信息<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/gpus/#networking">此处</a>。</p>
+<p><strong>ICI 相对于 DCN 来说非常快，但仍然比 HBM 带宽慢。</strong> 例如，<a target="_blank" rel="noopener" href="https://cloud.google.com/tpu/docs/tpu7x#system_architecture">TPU7x</a> 具有：</p>
+<ul>
+<li>每个芯片的 HBM 带宽为 <code>7.4e12</code> 字节/秒 (7380 GB/秒)。</li>
+<li>每个芯片的双向 ICI 带宽为 <code>1.2e12</code> 字节/秒（1200 GB/秒），或每轴 <code>4e11</code> 字节/秒（400 GB/秒）。（原注：根据所执行的操作，TPU ICI 链路的带宽略有不同。你通常可以放心使用本文档中的数字。）</li>
+<li>每个芯片的 DCN（出口）带宽为 <code>1.25e10</code> 字节/秒（12.5 GB/秒）。</li>
+</ul>
+<p>这意味着当我们将模型拆分到多个芯片上时，我们需要小心避免跨设备通信速度较慢而成为 MXU 的瓶颈。</p>
+<p><strong>多切片训练：</strong>一组ICI连接的TPU称为<strong>切片</strong>。不同的切片可以使用 DCN 相互连接，例如链接不同 Pod 上的切片。由于 DCN 的连接速度比 ICI 慢得多，因此我们应该尝试限制计算等待来自 DCN 的数据的时间。 DCN 是主机到主机的，因此要通过 DCN 将缓冲区从 TPU 传输到 TPU，我们首先需要通过 PCIe 传输到主机，然后通过网络传出，然后通过目标主机网络传入，然后通过 PCIe 传输到 HBM。</p>
+<blockquote>
+<p><strong>译者补充：为什么使用多个切片，而不申请一个更大的 ICI 切片？</strong></p>
+<p>如果单个切片的规模足够、资源也能及时获得，通常优先考虑单切片：TPU 张量通信可以留在高速 ICI 网络内。采用多个切片，往往是为了应对下面几种情况：</p>
+<ul>
+<li><strong>需要的规模超过单个切片支持的上限。</strong>单切片能容纳多少芯片，取决于 TPU 型号和支持的配置。超过这个范围，就需要通过 DCN 组合多个切片，继续扩大训练规模。</li>
+<li><strong>暂时申请不到足够大的拓扑资源。</strong>集群虽然还有空闲芯片，却未必能凑出满足所需拓扑的一整个大切片。多个小切片可能更容易获得，让任务更早开始。这里的“连续”指满足互连拓扑要求，不是简单地说芯片摆在相邻位置。</li>
+<li><strong>需要利用不同 Pod 中的资源。</strong>一个切片位于同一个 Pod 内；如果训练需要组合多个 Pod 中的 TPU，就要使用多个切片，通过 DCN 传输跨切片数据。</li>
+</ul>
+<p><strong>多切片也可以位于同一个 Pod 中，并不一定跨 Pod。</strong>关键是任务使用了几个独立分配的切片：每个切片内部走 ICI，切片之间走 DCN。多切片的取舍，是扩大可用规模或缩短资源等待时间，同时承担更慢的跨切片通信；它并不保证每一步训练都比同等芯片数量的单切片更快。</p>
+<p>以上场景与通信方式参见 <a target="_blank" rel="noopener" href="https://docs.cloud.google.com/tpu/docs/multislice-introduction">Google Cloud Multislice 官方说明</a>（2026-10-27 核对）。</p>
+</blockquote>
+<p><a id="key-takeaways"></a></p>
+<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ul>
+<li><p>TPU 很简单，在大多数情况下可以被视为连接到内存（超快）、ICI 上的其他芯片（相当快）以及 DCN 上的数据中心其余部分（稍快）的矩阵乘法单元。</p>
+</li>
+<li><p>通信受到我们各种网络带宽的限制（按速度顺序排列）：</p>
+<ul>
+<li>HBM 带宽：TensorCore 与其关联的 HBM 之间。</li>
+<li>ICI 带宽：TPU 芯片与其最近的 4 或 6 个邻居之间的带宽。</li>
+<li>PCIe 带宽：CPU 主机与其关联的芯片托盘之间。</li>
+<li>DCN 带宽：多个 CPU 主机之间，通常是不通过 ICI 连接的主机。</li>
+</ul>
+</li>
+<li><p><strong>在切片内，TPU 仅通过 ICI 连接到最近的邻居。</strong>这意味着切片中远程芯片之间通过 ICI 进行的通信需要首先跳过中间芯片。</p>
+</li>
+<li><p><strong>权重矩阵需要在两个维度上填充到可被 256 整除的大小</strong>（TPU v6e 之前的各代为 128），以填充 MXU（事实上，较小的轴会填充到 256）。</p>
+</li>
+<li><p><strong>较低精度的矩阵乘法往往会更快。</strong> TPU v6e 执行 int8/int4 矩阵乘法的速度比 bfloat16 快 2 倍/4 倍，而 TPU7x 执行 fp8 矩阵乘法的速度比 bfloat16 多 2 倍。 VPU 操作仍然在 fp32 或 bf16 中执行（尽管 TPU v6e 之前的各代仅支持 fp32 VPU 操作）。</p>
+</li>
+<li><p>为了避免 TPU 计算单元出现瓶颈，我们需要<strong>确保每个通道的通信量与其速度成正比</strong>。</p>
+</li>
+</ul>
+<p><a id="tpu-specs"></a></p>
+<h2 id="工作中遇到的问题"><a href="#工作中遇到的问题" class="headerlink" title="工作中遇到的问题"></a>工作中遇到的问题</h2><p><strong>问题 3 [PCIe 操作强度]：</strong> 假设我们被迫在主机 DRAM 中存储一个 $\text{bf16}[D, F]$ 类型的大权重矩阵 $A$ 和一批 $\text{bf16}[B, D]$ 类型的激活 $x$ ，并希望对它们进行矩阵乘法。它在单个主机上运行，​​我们使用连接到它的单个 TPU v6e 芯片。你可以假设 $B \ll D$ 和 $F = 4D$ （我们将在以后的章节中看到为什么这些是合理的假设）。我们需要保持 PCIe 上绑定的 FLOP 所需的最小批量大小 $B$ 是多少？假设 PCIe 带宽为 1.6e10 字节/秒。</p>
+<p><strong>答案：</strong></p>
+<p><strong>答案：</strong> 我们要执行$2BDF$浮点运算，每个芯片每秒可以执行<code>9.2e14</code>浮点运算。这需要 $2BDF / 9.2e14$ 秒才能执行。我们必须从 DRAM 加载 $2DF + 2BD$ 字节，并将 $2BF$ 字节写回其中。我们受到 PCIe 传输速度的瓶颈，因此我们需要 $2 \cdot (BD + DF + BF) / 1.6e10$ 秒来与 TPU 传输数据。由于我们希望计算比重量加载花费更长的时间，假设我们可以将所有重量加载与计算重叠，我们需要 $2BDF / 9.2e14 &gt; 2 \cdot (BD + DF + BF) / 1.6e10$。我们可以使用我们的假设 $B \ll D$ 和 $F = 4D$ 来简化它，得到</p>
+<p>$$\frac{8BD^2}{9.2 \times 10^{14}} &gt; \frac{8D^2}{1.6 \times 10^{10}}$$</p>
+<p>或者</p>
+<p>$$B &gt; \frac{9.2 \times 10^{14}}{1.6 \times 10^{10}} \simeq 57{,}500$$</p>
+<p><strong>问题 4 [一般 matmul 延迟]：</strong> 假设我们想要将权重矩阵 int8[16384, 4096] 乘以大小为 int8[B, 4096] 的激活矩阵，其中 B 是某个未知的批量大小。假设我们从 1 个 TPU v5e 开始。</p>
+<ol>
+<li>作为 B 的函数，这个乘法需要多长时间？ <em>提示：它可能有助于计算从 HBM 加载数组需要多长时间以及乘法实际需要多长时间。哪个是你的瓶颈？</em></li>
+<li>如果我们想在 VMEM 之外运行此操作怎么办？作为 B 的函数需要多长时间？</li>
+</ol>
+<p><strong>答案：</strong></p>
+<p><strong>答案：</strong> （1）我们需要执行的操作数是$2 \cdot 4096 \cdot 16384 \cdot B = 1.3 \times 10^{8} \cdot B$。所以 $T_{\text{math}} = (1.3 \times 10^{8} \cdot B) / 3.94 \times 10^{14}$ 秒。我们需要将 $16384 \cdot 4096 + 4096 \cdot B$ 字节从 HBM 加载到 VMEM，并将 $16384 \cdot B$ 字节从 VMEM 写回到 HBM。这意味着 $T_{\text{comms}} = (6.7 \times 10^{7} + 2 \times 10^{4} \cdot B) / 8.2 \times 10^{11}$ 秒。假设通信和计算尽可能多地重叠，整个乘法将大约花费</p>
+<p>$$\max{T_{\text{math}}, T_{\text{comms}}} = \max\left{\frac{1.3 \times 10^{8} \cdot B}{3.94 \times 10^{14}}, \frac{6.7 \times 10^{7} + 2 \times 10^{4} \cdot B}{8.2 \times 10^{11}}\right}$$</p>
+<p>当 $\frac{6.7 \times 10^{7} + 2 \times 10^{4} \cdot B}{8.2 \times 10^{11}} &lt; \frac{1.3 \times 10^{8} \cdot B}{3.94 \times 10^{14}}$ 或等效的 $B &gt; 267$ 时，我们将受到 FLOP 限制。这比我们在<a href="/2026/07/18/Scaling-Book-01-Roofline%E5%88%86%E6%9E%90/">第 1 节</a> 中得出的 240 数字稍大，因为我们考虑了 $D$ 和 $F$ 的全部影响。</p>
+<p>(2) 如果我们从 VMEM 加载，则将 MXU 的 VMEM 带宽视为 HBM $\leftrightarrow$ VMEM 带宽的 22 倍。这将我们的数据加载分母从 8.2e11 变为 1.80e13，我们得到 $B &gt; 11$。请注意，实际上，我们无法将所有 VMEM 带宽用于加载权重矩阵，因此实际上它会更接近 20。</p>
+<p><strong>问题 5 [ICI 带宽]：</strong> 假设我们有一个 TPU v5e <code>4x4</code> 切片。假设我们想要将 <code>bf16[8, 128, 8192]</code> 类型的数组从 <code>TPU{0,0}</code> 发送到 <code>TPU{3, 3}</code>。假设 TPU v5e 的每跳延迟为 $1\mu s$。</p>
+<ol>
+<li>第一个字节多久会到达目的地？</li>
+<li>总共转账需要多长时间？</li>
+</ol>
+<p><strong>答案：</strong></p>
+<p><strong>答案：</strong> 在 TPU v5e 中，我们有 2D 连接。因为我们只有 <code>4x4</code> 切片（没有大小为 16 的轴），所以我们没有环绕连接。因此，我们的目标芯片可以从两个端口接收数据，同样，我们的源芯片可以从两个端口发送数据。我们要传输的数据量是 <code>2 * 8 * 128 * 8192 = 1.7e7</code> 字节。我们可以同时从两个端口进行传输（即向右发送一半数组，向下发送一半数组），因此每秒传输的字节数为 <code>2 * 4.5e10 = 9e10</code>，这意味着传输整个数组大约需要 <code>1.7e7 / 9e10 = 188us</code>（假设我们受到带宽受限）。在 <code>4x4</code> 切片中，我们在芯片 $(0, 0)$ 和 $(3, 3)$ 之间有 6 个跃点，因为对于少于 16 个芯片的轴没有环绕链接。由于每一跳的延迟约为 $1\mu s$，第一个字节将在大约 <code>6us</code> 内到达，并且总传输将花费大约 <code>188 + 6 = 194us</code>，因为最后一个字节在离开源后必须同样遍历六个跳（一般来说，延迟和带宽项是相加的，尽管这里延迟是一个小的修正）。</p>
+<p><strong>问题 6 [将所有内容整合在一起，很难]：</strong> 假设你有一个大矩阵 <strong>A</strong>：<code>int8[128 * 1024, 128 * 1024]</code> 在 TPU v5e 4x4 切片上均匀分片，但卸载到每个芯片上的主机 DRAM。假设你要将整个数组复制到 TPU{0, 0} 并将其乘以向量 <code>bf16[8, 128 * 1024]</code>。这需要多长时间？ <em>提示：使用上面的数字。</em></p>
+<p><strong>答案：</strong></p>
+<p><strong>答案：</strong> 让我们首先概述我们必须执行的操作。我们的阵列大约有 16GB。从上表中可以看出，TPU v5e 主机具有 4x2 拓扑，因此 4x4 有 2 个主机。因此，由于我们的阵列是均匀分片的，因此每个主机实际上包含阵列的 1/2 块，即 8GB。我们需要将这些块全部复制到 TPU{0,0}，这给了我们两个选择：</p>
+<ol>
+<li>我们可以通过 DCN 进行复制，然后通过 PCIe 将整个非分片阵列加载到 HBM 中。</li>
+<li>我们可以将分片数组加载到相应的 TPU 上，然后通过 ICI 执行收集，然后在 TPU{0,0} 上执行 matmul。</li>
+</ol>
+<p>应该清楚的是，选项（2）更好。与 ICI 相比，DCN 速度较慢，我们更愿意通过许多 PCIe 链路加载大型阵列，而不是仅加载几个（主机 0 上的 8 个）。这是系统部分的图。如上所述，请注意，TPU 通过 ICI 连接到其邻居（甚至跨主机），所有 TPU 都连接到其主机 CPU（通过 PCIe），主机通过 DCN 连接。</p>
+<p><img src="/images/scaling-book/challenge-problem.png" alt="原文插图"></p>
+<p>每个芯片实际上都有自己的 PCIe 链路连接到其主机，但为了清楚起见，此处仅显示了一个。</p>
+<p>现在让我们计算一下每部分需要多长时间：</p>
+<ol>
+<li><p><strong>PCIe 负载</strong>：我们通过 16 个 PCIe 链路加载 16GB 的块，每个链路的带宽为 <code>1.6e10</code> 字节/秒。因此这将花费大约 63 毫秒。</p>
+</li>
+<li><p><strong>ICI 副本：</strong> 每个 TPU 现在有 16GB / 16 = 1GB 的阵列。我们的 ICI 带宽为每条链路 9e10 字节/秒<em>双向</em>，你会从上图中注意到，TPU v5e 上的 4 个 ICI 链路中只有 2 个在 TPU{0,0} 的拓扑中使用。由于 TPU{0,0} 需要以 <code>4.5e10</code> 字节/秒/链接沿 2 个轴接收总共 15GB 的数据，因此我们可以将时间下限 <code>15e9 / (4.5e10 * 2) = 167ms</code>。实际上，这可能无法实现，因为负载非常不均匀，但可能在 2 倍以内。正如你将在第 3 节中看到的，执行完整的 AllGather 也大约需要 <code>16e9 / (4.5e10 * 2)</code>，因此这接近最佳值。</p>
+</li>
+<li><p><strong>HBM $\rightarrow$ MXU 加载：</strong> 为了执行最终的 matmul，我们需要通过 HBM 带宽将这 16e9 字节加上 bf16[8, 128 * 1024] 数组（另外 2MB，因此可以忽略不计）加载到 MXU 中，这将占用 <code>16e9 / 8.2e11 = 20ms</code>。</p>
+</li>
+<li><p><strong>FLOPs：</strong> 我们总共执行了 $$2 \cdot 8 \cdot 128 \cdot 1024 \cdot 128 \cdot 1024 = 2.7 \times 10^{11}$$ FLOPs，并且由于我们可以执行 <code>1.97e14</code> bf16 FLOPs/s，因此我们得到 1.4ms。</p>
+</li>
+</ol>
+<p>总时间的上限是所有这些时间的总和，但由于 TPU 通常可以重叠这些操作，因此我们可以将其视为因最慢部分而成为瓶颈的流水线问题。假设这是真的，那么答案至少是 167 毫秒，在不完美重叠的情况下可能接近 200 毫秒。</p>
+<!-- source-heading -->
+<p><a id="thats-it-for-part-2-for-part-3-covering-partitioning-and-cross-tpu-communication-click-here03-分片矩阵与矩阵乘法md"></a></p>
+<h3 id="第-2-章到此结束！第-3-章将讨论数组分片与跨-TPU-通信。"><a href="#第-2-章到此结束！第-3-章将讨论数组分片与跨-TPU-通信。" class="headerlink" title="第 2 章到此结束！第 3 章将讨论数组分片与跨 TPU 通信。"></a>第 2 章到此结束！<a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">第 3 章</a>将讨论数组分片与跨 TPU 通信。</h3><!-- source-heading -->
+<p><a id="appendix"></a></p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><!-- source-heading -->
+<p><a id="appendix-a-more-on-tpu-internals"></a></p>
+<h3 id="附录-A：有关-TPU-内部结构的更多信息"><a href="#附录-A：有关-TPU-内部结构的更多信息" class="headerlink" title="附录 A：有关 TPU 内部结构的更多信息"></a>附录 A：有关 TPU 内部结构的更多信息</h3><p>在这里，我们将更深入地了解 TPU 的内部操作。除非另有说明，我们将提供 TPU7x 的规格。</p>
+<!-- source-heading -->
+<p><a id="vpu"></a></p>
+<h3 id="视觉处理单元"><a href="#视觉处理单元" class="headerlink" title="视觉处理单元"></a>视觉处理单元</h3><p>VPU是TPU的矢量运算核心。 VPU 由执行 vadd（向量加法）或 vmax（元素最大值）等元素算术运算的二维 SIMD 向量机（<strong>VPU</strong>）和一组称为 <strong>VREG</strong> 的向量寄存器组成，这些寄存器保存 VPU 和 MXU 的数据。</p>
+<p><strong>VREG：</strong> 每个 TPU7x 核心都有 64 个 32 位 VREG（TPU v4 中有 32 个），每个核心总共提供约 <code>64 * 8 * 128 * 4 = 256kB</code> 的 VREG 内存（或者整个芯片的 2 倍，因为我们有两个核心）。 TPU7x 每个周期可以从 VMEM 加载 3 个寄存器，每个周期向 VMEM 写入 2 个寄存器，但总读取/写入次数限制为 4 次，因此可以是 3 次读取 + 1 次写入或 2 次读取 + 2 次写入。</p>
+<p>对于在 float32 输入上运行的程序，VREG 的每个 32 位字包含一个 float32 元素。使用较低精度的数据类型时，可以将多个元素<strong>打包</strong>到单个 32 位字中，以更有效地使用 VMEM 和 VREG，并且某些操作希望其操作数以这种方式打包。</p>
+<p><strong>VPU：</strong> VPU 是形状为 <code>(8, 128)</code> 的 2D 向量运算单元，其中 128 维称为车道轴，8 维称为子车道轴。 TPU7x 上的每个（通道、子通道）对包含 4 个彼此独立的标准浮点 ALU。 VPU 在每个 ALU 的一个周期内执行大多数算术指令（例如 vadd 或向量加法），延迟为 2 个周期，因此在 TPU7x 中，你可以在每个周期中将 VREG 中的 4 对 f32 值相加。典型的 VPU 指令可能类似于 <code>{v2 = vadd.8x128.f32 v0, v1}</code>，其中 v0 和 v1 是输入 VREG，v2 是输出 VREG。所有 TPU 代的 ALU 还支持一组元素整数、按位和逻辑运算，并且 TPU v6e 和 TPU7x 还可以在打包 bfloat16 VREG 上执行元素算术运算。</p>
+<p>所有通道和子通道在每个周期以纯SIMD方式执行相同的程序，但每个ALU可以执行不同的操作。所以我们可以例如在单个周期中处理 1 个 vadd 和 1 个 vsub，每个过程都在两个完整的 VREG 上运行，并将输出写入第三个 VREG。</p>
+<p><strong>小测验[计算 VPU 吞吐量]：</strong> 使用上述信息，计算 TPU7x 可以执行多少矢量 FLOP/s。 TPU7x 的时钟速度约为 2.2GHz。</p>
+<details>
+<summary>点击此处查看答案。</summary>
+
+
+<p><em>答案</em>：每个周期，每个内核可以在 <code>8 * 128</code> ALU 上执行 4 条向量指令。这为我们提供了每个核心的 <code>8 * 128 * 4</code> FLOPs/cycle，或 <code>8 * 128 * 4 * 2.2e9 = 9e12 FLOPs/s</code>（1.8e13 bfloat16 FLOPs/s，因为打包的 bfloat16 VREG 包含的元素数量是 float32 VREG 的两倍）。请注意，这比每核大约 <code>1.2e15</code> 的 MXU FLOPs/s（大约是 bfloat16 的 64 倍）小得多。</p>
+</details>
+
+
+<p><strong>减少：</strong>通常，跨子车道维度的通信或减少比跨车道维度更容易。例如，VPU支持通道内洗牌操作，该操作可以在大约一个周期内沿尺寸为8的轴滚动。这可用于沿子通道维度执行有效的缩减（只需按 4、2 和 1 进行混洗，并执行 3 对元素求和）。</p>
+<p>跨车道减少要困难得多，并且涉及称为 XLU 或“跨车道单元”的单独硬件单元，该单元速度缓慢且相当昂贵。</p>
+<p><strong>与 GPU 的比较：</strong> 对于熟悉 NVIDIA GPU 的人来说，VPU 中的每个 ALU 类似于 CUDA 核心，单个 VPU 通道类似于“Warp Scheduler”，即执行 SIMD 算术的通常 32 个 CUDA 核心的集合。车道内减速非常容易，但如果我们需要穿越车道，我们至少需要换乘VMEM/XLU/SMEM，这要慢得多。有关更多详细信息，请参阅<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/gpus/">GPU 部分</a>。</p>
+<!-- source-heading -->
+<p><a id="scalar-core"></a></p>
+<h3 id="标量核心"><a href="#标量核心" class="headerlink" title="标量核心"></a>标量核心</h3><p>标量核心是TPU的控制单元。它获取并分派所有指令并执行从 HBM 到 VMEM 的传输，并且可以编程来执行标量元数据工作。由于标量核心是单线程的，因此其副作用是 TPU 的每个核心每个周期只能创建一个 DMA 请求。</p>
+<p>具体来说，单个标量核心控制一个 VPU（由 4096 个 ALU 组成）、2 个 MXU、2 个 XLU 和多个 DMA 引擎。每单位计算控制的高度倾斜性质是硬件效率的一个来源，但也限制了以任何有趣的方式进行数据相关矢量化的能力。</p>
+<!-- source-heading -->
+<p><a id="appendix-b-how-does-a-systolic-array-work"></a></p>
+<h3 id="附录-B：脉动阵列如何工作？"><a href="#附录-B：脉动阵列如何工作？" class="headerlink" title="附录 B：脉动阵列如何工作？"></a>附录 B：脉动阵列如何工作？</h3><p>TPU MXU 的核心是 <code>256x256</code> 脉动阵列（TPU v6e 之前的 <code>128x128</code>）。当完全饱和时，脉动阵列可以执行一个<code>bf16[8,256] @ bf16[256,256] -&gt; f32[8,256]</code>（原注：如果你不熟悉这种表示法，它的意思是：将具有bfloat16元素的<code>8x256</code>矩阵乘以具有bfloat16元素的<code>256x256</code>矩阵，并将结果存储在具有float32元素的<code>8x256</code>矩阵中。）每4个时钟周期（原注：MXU可以每4个周期加载8行<code>f32</code>输入并将其转换为<code>bf16</code>，或者每8个周期加载16行<code>bf16</code>输入。无论哪种情况，每 4 个周期相当于 8 行 <code>bf16</code> 输入。（TPUv6e 之前为 8 行）。</p>
+<ul>
+<li>脉动阵列的核心是 ALU 的 2D <code>256x256</code> (<code>=65,536</code>) 网格，每个 ALU 都能够执行乘法和加法运算。</li>
+<li>权重（<strong>W</strong>，<code>256x256</code> 输入）从上方（称为 RHS）向下传递，而输入（<strong>X</strong>，<code>8x256</code> 输入）从左侧（称为 LHS）传递。</li>
+</ul>
+<p>这是一组权重（蓝色）与一组激活（绿色）相乘的简化动画。你会注意到，权重 (RHS) 首先沿对角线方向部分加载，然后激活也沿对角线方向输入。在下面的每一帧中，我们将所有重叠的绿色和蓝色单位相乘，将结果与从上面传入的任何残差相加，然后将结果依次向下传递一个单位。</p>
+<p><img src="/images/scaling-book/systolic-array.gif" alt="原文插图"></p>
+<p>这是该动画的更通用版本，显示了从计算中流出的输出：</p>
+<p><img src="/images/scaling-book/systolic-array2.gif" alt="原文插图"></p>
+<p>下面的图表显示了如何跨多个 RHS 和 LHS 阵列进行管道传输：</p>
+<p><img src="/images/scaling-book/systolic-array-pipelining.png" alt="原文插图"></p>
+<p>加载权重 (RHS) 和激活 (LHS) 时会出现初始管道气泡。在初始气泡之后，可以加载新的输入和权重，而无需额外的气泡。</p>
+<p>这是 bf16[2, 3] x bf16[3, 3] 矩阵乘法的糟糕动画，你可以将其想象为 2x3 权重矩阵的 matmul，输入激活为批次 1，大小为 3。与之前的幻灯片相比，这是旋转的，输入向右而不是向下流动，但你可以大致看到结构。</p>
+<p><img src="/images/scaling-book/systolic-array-bad.gif" alt="原文插图"></p>
+<p>我们可以有效地将其管道化以乘以大型矩阵，而不会出现太大的管道气泡。话虽如此，重要的是我们的矩阵形状必须大于 MXU 的边尺寸（128x128 或 256x256）。某些 TPU（自 TPU v3 起）具有多个 MXU，TPU v3、TPU v6e 和 TPU7x 为 2 个，TPU v4/5 为 4 个，因此我们需要确保平铺尺寸大于 256（对于旧代为 128）* MXU 数量。 <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=sJltBQ4MOHA">这里</a> 一个很好的动画。</p>
+<p><a target="_blank" rel="noopener" href="https://fleetwood.dev/posts/domain-specific-architectures#google-tpu">这篇博文</a> 还有另一个关于固定权重矩阵的脉动数组乘法的优秀动画。</p>
+<hr>
+<blockquote>
+<p><strong>译文与许可：</strong>本章是基于固定版本 <code>173fb0851d7e654872f0327aff2e17607cf24106</code> 的机器辅助中文初译，并非逐句人工精校。原文与配图基于 MIT License 发布。Copyright (c) 2022 Maruan Al-Shedivat；Copyright (c) 2025 Google LLC。完整许可见 <a href="/images/scaling-book/LICENSE.txt">MIT License</a>。</p>
+</blockquote>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">Jacob Austin 等</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://ytirus.github.io/2026/07/25/Scaling-Book-02-%E7%90%86%E8%A7%A3TPU/">http://ytirus.github.io/2026/07/25/Scaling-Book-02-%E7%90%86%E8%A7%A3TPU/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">Jacob Austin 等</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Scaling-Book/">
+                                    <span class="chip bg-color">Scaling Book</span>
+                                </a>
+                            
+                                <a href="/tags/TPU/">
+                                    <span class="chip bg-color">TPU</span>
+                                </a>
+                            
+                                <a href="/tags/HBM/">
+                                    <span class="chip bg-color">HBM</span>
+                                </a>
+                            
+                                <a href="/tags/ICI/">
+                                    <span class="chip bg-color">ICI</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+        <div class="card utterances-card">
+    <div class="card-content">
+        <h2 style="font-size: 20px; font-weight: 700; margin-top: 0;">
+            <i class="fas fa-comments fa-fw" aria-hidden="true"></i> 评论
+        </h2>
+        <p>使用 GitHub 账号参与评论，评论将公开保存在 GitHub Issues 中。</p>
+        <script src="https://utteranc.es/client.js"
+                repo="Yitrus/yitrus.github.io"
+                issue-term="pathname"
+                theme="preferred-color-scheme"
+                crossorigin="anonymous"
+                async></script>
+        <p><a href="https://github.com/Yitrus/yitrus.github.io/issues" target="_blank" rel="noopener noreferrer">在 GitHub 查看评论</a></p>
+        <noscript>请启用 JavaScript 加载评论，或通过上方链接前往 GitHub。</noscript>
+    </div>
+</div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/43.jpg" class="responsive-img" alt="Scaling Book 中文（03）：分片矩阵，以及如何进行矩阵乘法">
+                        
+                        <span class="card-title">Scaling Book 中文（03）：分片矩阵，以及如何进行矩阵乘法</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            介绍设备网格、张量分片和局部形状，并分析 AllGather、ReduceScatter、AllToAll 等集合通信在分片矩阵乘法中的开销。
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2026-08-01
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Scaling-Book/">
+                        <span class="chip bg-color">Scaling Book</span>
+                    </a>
+                    
+                    <a href="/tags/Sharding/">
+                        <span class="chip bg-color">Sharding</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">
+                        <span class="chip bg-color">矩阵乘法</span>
+                    </a>
+                    
+                    <a href="/tags/%E9%9B%86%E5%90%88%E9%80%9A%E4%BF%A1/">
+                        <span class="chip bg-color">集合通信</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/07/18/Scaling-Book-01-Roofline%E5%88%86%E6%9E%90/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="Scaling Book 中文（01）：Roofline 分析——计算、带宽和内存的上限">
+                        
+                        <span class="card-title">Scaling Book 中文（01）：Roofline 分析——计算、带宽和内存的上限</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            使用 Roofline 模型分析计算吞吐、通信带宽和内存容量对模型性能的限制，并推导矩阵乘法的算术强度与性能上限。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-07-18
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Code-Development/" class="post-category">
+                                    Code & Development
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/">
+                        <span class="chip bg-color">性能分析</span>
+                    </a>
+                    
+                    <a href="/tags/Scaling-Book/">
+                        <span class="chip bg-color">Scaling Book</span>
+                    </a>
+                    
+                    <a href="/tags/TPU/">
+                        <span class="chip bg-color">TPU</span>
+                    </a>
+                    
+                    <a href="/tags/Roofline/">
+                        <span class="chip bg-color">Roofline</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">375.8k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
