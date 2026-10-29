@@ -1,0 +1,1414 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Scaling Book 中文（04）：Transformer 数学——参数量、FLOPs 与 KV Cache, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>Scaling Book 中文（04）：Transformer 数学——参数量、FLOPs 与 KV Cache | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/26.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">Scaling Book 中文（04）：Transformer 数学——参数量、FLOPs 与 KV Cache</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Transformer/">
+                                <span class="chip bg-color">Transformer</span>
+                            </a>
+                        
+                            <a href="/tags/Scaling-Book/">
+                                <span class="chip bg-color">Scaling Book</span>
+                            </a>
+                        
+                            <a href="/tags/FLOPs/">
+                                <span class="chip bg-color">FLOPs</span>
+                            </a>
+                        
+                            <a href="/tags/Attention/">
+                                <span class="chip bg-color">Attention</span>
+                            </a>
+                        
+                            <a href="/tags/KV-Cache/">
+                                <span class="chip bg-color">KV Cache</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/AI-infra/" class="post-category">
+                                AI infra
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2026-08-08
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    6.8k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    28 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <blockquote>
+<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/transformers/">本章原文</a>。原文版本：<code>173fb0851d7e</code>，MIT 许可。<br>本章为完整范围的机器辅助中文初译</p>
+</blockquote>
+<blockquote>
+<p><strong>原文章节简介（中译）：</strong>本章简要回顾 Transformer 架构，重点说明如何计算 FLOPs、字节数以及其他关心的数量。</p>
+</blockquote>
+<p><a href="/2026/07/11/Scaling-Book-00-%E5%AF%BC%E8%AF%BB/">Scaling Book 中文导读</a> · <a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">上一章：分片矩阵与矩阵乘法</a> · <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/">原著目录</a></p>
+<p><a id="counting-dots"></a></p>
+<h2 id="计数点"><a href="#计数点" class="headerlink" title="计数点"></a>计数点</h2><p>让我们从以下形状的向量 $x$、$y$ 和矩阵 $A$、$B$ 开始：</p>
+
+$$
+\def \red#1{\textcolor{red}{#1}}
+\def \green#1{\textcolor{green}{#1}}
+\def \blue#1{\textcolor{blue}{#1}}
+\def \purple#1{\textcolor{purple}{#1}}
+\def \orange#1{\textcolor{orange}{#1}}
+\def \gray#1{\textcolor{gray}{#1}}
+
+\begin{array}{cc}
+\textrm{array}  &amp; \textrm{shape} \\ \hline
+x               &amp; \textrm{[P]}   \\
+y               &amp; \textrm{[P]}   \\
+A               &amp; \textrm{[N P]} \\
+B               &amp; \textrm{[P M]} \\
+\hline
+\end{array}
+$$
+
+
+<ul>
+<li>$x \cdot y$ 的点积需要 $P$ <em>adds</em> 和 _multiplies_，或 $2P$ 浮点运算总计。</li>
+<li>对于 $2NP$ FLOP，矩阵向量积 $Ax$ 沿着 $A$ 的行进行 $N$ 点积。</li>
+<li>矩阵-矩阵乘积 $AB$ 对 $B$ 的每个 $M$ 列进行矩阵-向量乘积，总计 $2NPM$ FLOP。</li>
+<li>一般来说，如果我们有两个高维数组 $C$ 和 $D$，其中一些维度是 <span style="color:red">CONTRACTING</span>，一些维度是 <span style="color:blue">BATCHING</span>（例如$C[\blue{GH}IJ\red{KL}], D[\blue{GH}MN\red{KL}]$），则此收缩的 FLOP 成本是所有 $C$ 和 $D$ 维度的乘积的两倍，其中批量和收缩维度仅计算一次（例如 $2\blue{GH}IJMN\red{KL}$）。请注意，只有当某个维度同时出现在两个被乘数中时，该维度才是批处理。 （另请注意，如果没有收缩维度，则因子 2 将不适用，并且这只是一个元素乘积。）（原注：<b>Contracting</b> 维度是在操作过程中求和的轴（它们出现在两个输入中，但不在输出中），就像矩阵乘法中的内部维度一样。 <b>Batching</b> 尺寸是出现在两个输入中的共享轴，并且不改变地传送到输出；它们索引独立的子问题，并且不会在 FLOP 计数中相乘。用 Einsum 术语来说：输入和输出上出现的标签都是批处理的；两个输入上都存在但输出中不存在的标签正在收缩。）</li>
+</ul>
+<p>$$<br>\begin{array}{ccc}<br>\textrm{Operation} &amp; \textrm{FLOPs} &amp; \textrm{Data} \<br>\hline<br>x \cdot y  &amp; 2P   &amp; 2P      \<br>A x        &amp; 2NP  &amp; NP + P  \<br>AB         &amp; 2NPM &amp; NP + PM \<br>[c_0,…,c_N] \cdot [d_0,…,d_N] &amp;<br>2 \prod c_i \times \prod_{\substack{d_j \notin \blue{BATCH} \ d_j \notin \red{CONTRACT}}} d_j<br>&amp;<br>  \prod c_i + \prod d_j \<br>\hline<br>\end{array}<br>$$</p>
+<p>请注意，对于矩阵-矩阵乘法，<em>计算</em>按三次方缩放 $O(N^3)$，而数据传输仅按二次方缩放 $O(N^2)$ — 这意味着当我们扩大 matmul 大小时，它会<em>更容易</em>达到计算饱和极限。这是极其不寻常的，并且在很大程度上解释了为什么我们使用以矩阵乘法为主的架构——它们适合扩展！</p>
+<p><img src="/images/scaling-book/matmul-flops.gif" alt="原文插图"></p>
+<!-- source-heading -->
+<p><a id="forward-and-reverse-flops"></a></p>
+<h3 id="前向与反向传播的浮点运算量（FLOPs）"><a href="#前向与反向传播的浮点运算量（FLOPs）" class="headerlink" title="前向与反向传播的浮点运算量（FLOPs）"></a>前向与反向传播的浮点运算量（FLOPs）</h3><p>在训练过程中，我们并不特别关心给定矩阵乘法的结果；我们真的很关心它的衍生品。事实证明，计算该导数的成本比仅进行 matmul 本身的成本高出约 3 倍。</p>
+<p>如果我们想象 <strong>B</strong> 只是较大网络中的一个矩阵，而 <strong>A</strong> 是我们的输入激活，其中 <strong>C = A B</strong>，则损失 <strong>L</strong> 相对于 <strong>B</strong> 的导数由链式法则给出：</p>
+<p>$$\frac{\partial L}{\partial B} = \frac{\partial L}{\partial C}\frac{\partial C}{\partial B} = A^T \left(\frac{\partial L}{\partial C}\right)$$</p>
+<p>这需要 $2NPM$ FLOP 次来计算（因为它在 $N$ 维度上收缩）。同样，关于<strong>A</strong>的损失的导数是</p>
+<p>$$\frac{\partial L}{\partial A} = \frac{\partial L}{\partial C}\frac{\partial C}{\partial A} = \left(\frac{\partial L}{\partial C}\right) B^T$$</p>
+<p>这又是 $2NPM$ FLOP，因为 <strong>dL/dC</strong> 是大小为 $[N, M]$ 的矩阵。虽然这个数量不是导数。一个参数，它用于计算网络前几层的导数（例如，就像上面的 dL/dC 用于计算 dL/dB 一样）。</p>
+<p>将这些加起来，我们看到<strong>在训练期间，我们总共有 6NPM FLOP</strong>，而推理期间为 2NPM：前向传播中为 2NPM，反向传播中为 4NPM。由于 PM 是矩阵中参数的数量，因此这是训练期间 Transformer FLOP 著名的 $6 * \text{num parameters} * \text{num tokens}$ 近似的最简单形式：每个token需要 $6 * \text{num parameters}$ FLOP。下面我们将展示一个更正确的推导。</p>
+<!-- source-heading -->
+<p><a id="transformer-accounting"></a></p>
+<h2 id="Transformer-的参数量与计算量核算"><a href="#Transformer-的参数量与计算量核算" class="headerlink" title="Transformer 的参数量与计算量核算"></a>Transformer 的参数量与计算量核算</h2><p>Transformer 是未来——至少，它已经是当下的主流架构。几年前，它还只是众多模型架构之一；但今天，深入了解它的各个细节很有价值。这里不再重新介绍 Transformer 架构；需要回顾的话，可以参考<a target="_blank" rel="noopener" href="https://jalammar.github.io/illustrated-transformer/">这篇博客</a>和<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1706.03762">原始 Transformer 论文</a>。</p>
+<p>这是 Transformer 解码器架构的基本图：</p>
+<p><img src="/images/scaling-book/transformer-diagram.png" alt="原文插图"></p>
+<p><b>图：</b> 该图显示了标准 Transformer 的一层并从上到下流动。我们使用单字母约定来描述 Transformer 中数组的形状和布局，再次以红色显示收缩维度，以蓝色显示批量维度。在给定的操作中，输入形状在左上角给出，参数形状在右上角给出，结果形状在下面，例如BTD 是门控 einsum 的输入形状，DF 是权重形状。</p>
+<p>**注意 [gating einsum]**：上图使用了“<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2002.05202">gating einsum</a>”，其中我们将上投影矩阵分成两个矩阵（上面的 $W_\text{In1}$ 和 $W_\text{In2}$），其输出按元素相乘，作为一种“门控功能”。并非所有 LLM 都使用此矩阵，因此你有时会看到单个 $W_\text{In}$ 矩阵和 $2DF$ 而不是 $3DF$ 的 MLP 参数总数。通常在这种情况下，$D$ 和 $F$ 将按比例放大，以保持参数计数与 3 矩阵情况相同。尽管如此，LLaMA、DeepSeek 和许多其他模型都使用某种形式的门控 einsum。</p>
+<p>**注 2 [MHA 注意力]**：对于自注意力，$T$ 和 $S$ 是相同的，但对于交叉注意力，它们可能不同。对于普通多头注意力（MHA），$N$ 和 $K$ 相同；对于<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1911.02150">多查询注意力</a>（MQA），$K=1$；对于<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2305.13245">分组多查询注意力</a>（GQA），$K$ 只需能够整除 $N$。</p>
+<p><strong>注3 [前范数与后范数]：</strong> 上图显示了所谓的“前范数”架构，其中范数出现在残差连接之前，通常为 <code>x + attn(norm(x))</code>。像 LLaMA-3 这样的模型现在就使用这个。最初的 Transformer 论文使用了“后范数”架构，其中层范数发生在残差连接之后，即 <code>norm(x + attn(x))</code>。</p>
+<!-- source-heading -->
+<p><a id="global-flops-and-params-calculation"></a></p>
+<h2 id="全局-FLOP-和参数计算"><a href="#全局-FLOP-和参数计算" class="headerlink" title="全局 FLOP 和参数计算"></a>全局 FLOP 和参数计算</h2><p>让我们计算 Transformer 的每层 FLOP（这样我们就可以避免在任何地方都坚持 <strong>L</strong> 因子）。请注意，下面的训练 FLOP 几乎总是推理 FLOP 的 3 倍，因此你可以将任何总数除以 3 以获得前向传播的成本。</p>
+<!-- source-heading -->
+<p><a id="mlps"></a></p>
+<h3 id="MLP"><a href="#MLP" class="headerlink" title="MLP"></a>MLP</h3><p>Transformer 的 MLP 通常由 2 个按元素组合的输入 matmul 和一个输出 matmul 组成：</p>
+<p>$$<br>\begin{array}{ccc}<br>\textrm{operation} &amp; \textrm{train FLOPs} &amp; \textrm{params} \<br>\hline \<br>A[B,T,\red{D}] \cdot W_{in1}[\red{D}, F] &amp; 6BTDF &amp; DF \[10pt]<br>A[B,T,\red{D}] \cdot W_{in2}[\red{D}, F] &amp; 6BTDF &amp; DF \[10pt]<br>\sigma\left(A_{in1}\right)[B,T, F] * A_{in2}[B,T, F] &amp; \gray{O(BTF)} \[10pt]<br>A[B,T,\red{F}] \cdot W_{out}[\red{F}, D] &amp; 6BTDF &amp; DF \[10pt]<br>\hline \<br>&amp; \approx 18BTDF &amp; 3DF<br>\end{array}<br>$$</p>
+<!-- source-heading -->
+<p><a id="attention"></a></p>
+<h3 id="注意力"><a href="#注意力" class="headerlink" title="注意力"></a>注意力</h3><p>对于具有不同 <strong>Q</strong> 和 <strong>KV</strong> 头数的通用分组查询注意情况，让我们假设 <strong>Q</strong>、<strong>K</strong>、<strong>V</strong> 投影的头尺寸 H 相等，并估计 <strong>QKVO</strong> 矩阵相乘的成本：</p>
+<p>$$<br>\begin{array}{ccc}<br>\textrm{operation} &amp; \textrm{train FLOPs} &amp; \textrm{params} \<br>\hline \<br>A[B,T,\red{D}] \cdot W_{Q}[\red{D}, N, H] &amp; 6BTDNH &amp; DNH \[10pt]<br>A[B,T,\red{D}] \cdot W_{K}[\red{D}, K, H] &amp; 6BTDKH &amp; DKH \[10pt]<br>A[B,T,\red{D}] \cdot W_{V}[\red{D}, K, H] &amp; 6BTDKH &amp; DKH \[10pt]<br>A[B,T,\red{N}, \red{H}] \cdot W_{O}[\red{N}, \red{H}, D] &amp; 6BTDNH &amp; DNH \[10pt]<br>\hline \ &amp; 12BTD(N+K)H &amp; 2D(N+K)H<br>\end{array}<br>$$</p>
+<p>点积注意力操作更加微妙，实际上是在 $B$、$K$ 维度上批处理的 $TH \cdot HS$ matmul、softmax 和在 $B$、$K$ 维度上再次批处理的 $TS \cdot SH$ matmul。我们用蓝色突出显示批处理的暗淡：</p>
+<p>$$<br>\begin{array}{cc}<br>\textrm{operation} &amp; \textrm{train FLOPs} \<br>\hline \[3pt]<br>Q[\blue{B}, T, \blue{K}, G, \red{H}] \cdot K[\blue{B}, S, \blue{K}, \red{H}]<br>&amp; 6BTSKGH = 6BTSNH  \[3pt]<br>\textrm{softmax}_S ;; L[B, T, S, K, G] &amp; \gray{O(BTSKG) = O(BTSN)} \[3pt]<br>S[\blue{B}, T, \red{S}, \blue{K}, G] \cdot V[\blue{B}, \red{S}, \blue{K}, H]<br>&amp; 6BTSKGH = 6BTSNH \[3pt]<br>\hline \<br>&amp; \approx 12BTSNH = 12BT^2NH \<br>\end{array}<br>$$</p>
+<p>**注意[因果屏蔽]**：最近的 Transformer 使用因果屏蔽，而不是完全双向关注。在这种情况下，点积运算的有用 FLOP 会减少一半。为了在实践中实现这种减少，我们需要使用注意力内核，而不是朴素的 einsum。</p>
+<!-- source-heading -->
+<p><a id="other-operations"></a></p>
+<h3 id="其他操作"><a href="#其他操作" class="headerlink" title="其他操作"></a>其他操作</h3><p>Transformer 中还发生其他一些操作。层范数相对便宜，对于一阶成本估计可以忽略。请注意，每一层通常有两个（一个在注意力之前，一个在 MLP 之前）。还有最后一个巨大的（尽管不是每层）非嵌入矩阵乘法。</p>
+<p>$$<br>\begin{array}{ccc}<br>\textsf{operation} &amp; \textsf{train FLOPs} &amp; \textsf{params} \<br>\hline \<br>2 \times \textrm{layernorm}<em>D ;; A[B,T,\red{D}] &amp; \gray{O\left(BTD\right)} &amp; \gray{2D} \[10pt]<br>A[B,T,\red{D}] \cdot W</em>{unembed}[\red{D}, V] &amp; 6BTDV &amp; DV \<br>\end{array}<br>$$</p>
+<!-- source-heading -->
+<p><a id="general-rule-of-thumb-for-transformer-flops"></a></p>
+<h3 id="Transformer-FLOP-的一般经验法则"><a href="#Transformer-FLOP-的一般经验法则" class="headerlink" title="Transformer FLOP 的一般经验法则"></a>Transformer FLOP 的一般经验法则</h3><p>如果我们忽略点积注意力的成本（这对于较短上下文的训练是合理的），那么所有层的总 FLOP 是</p>
+<p>$$<br>\begin{align*}<br>(18BTDF + 12BTD(N+K)H)L = 6 <em>BT * (3DF + 2D(N+K)H)L \ = 6 * \textrm{num tokens} * \textrm{parameter count}<br>\end{align</em>}<br>$$</p>
+<p>这导致了一个著名的经验法则，用于估计密集 Transformer FLOP 计数，忽略注意力 FLOP。 （取消嵌入是另一个简单的 matmul，具有 $6BTDV$ FLOP 和 $DV$ 参数，并遵循相同的经验法则。）</p>
+<!-- source-heading -->
+<p><a id="fractional-cost-of-attention-with-context-length"></a></p>
+<h3 id="注意力成本与上下文长度的关系"><a href="#注意力成本与上下文长度的关系" class="headerlink" title="注意力成本与上下文长度的关系"></a>注意力成本与上下文长度的关系</h3><p>如果我们确实考虑了上面的点积注意力并假设 $F=4D$、$D=NH$（典型情况）和 $N=K$，则点积注意力 FLOP 与所有 matmul FLOP（包括注意力投影）的比率为：</p>
+<p>$$\small{\frac{\textrm{attention FLOPs}}{\textrm{matmul FLOPs}} = \frac{12BT^2NH}{18BTDF + 24BTDNH} = \frac{12BT^2D}{4*18 BTD^2 + 24 BTD^2} = \frac{12BT^2D}{96 BTD^2} = \frac{T}{8D}}$$</p>
+<p>结果是，<strong>点积注意力仅在训练期间 $T&gt;8D$ 时才占主导地位</strong>。对于 $D \sim 8\text{k}$，临界点约为 64K token。这是有道理的，因为这意味着随着 MLP 大小的增加，注意力 FLOP 变得不那么重要。对于大型模型来说，注意力的二次成本实际上并不是长上下文训练的巨大障碍。然而，对于较小的模型，例如 $D=4608$ 的 Gemma 27B，注意力在 37K 左右的序列长度开始占主导地位。（原注：一些现代 OSS 模型引入了局部注意力或其他优化，降低了注意力成本并改变了 Roofline。）Flash Attention 也有助于减轻长上下文的成本，我们在<a href="#appendix-a-how-does-flash-attention-work">附录 A</a>中简要讨论。</p>
+<!-- source-heading -->
+<p><a id="miscellaneous-math"></a></p>
+<h2 id="补充计算：MoE、重计算与-KV-缓存"><a href="#补充计算：MoE、重计算与-KV-缓存" class="headerlink" title="补充计算：MoE、重计算与 KV 缓存"></a>补充计算：MoE、重计算与 KV 缓存</h2><!-- source-heading -->
+<p><a id="sparsity-and-mixture-of-experts"></a></p>
+<h3 id="稀疏性和混合专家"><a href="#稀疏性和混合专家" class="headerlink" title="稀疏性和混合专家"></a>稀疏性和混合专家</h3><p>如果我们不简要讨论混合专家（MoE）模型，那就太失职了。它用一组可以动态路由的独立 MLP 取代标准 Transformer 中的单个密集 MLP 块。作为一阶近似，<strong>MoE 可以看作一个每层有 $E$ 个 MLP 块的普通密集模型</strong>，而不是只有一个。每个 token 会激活其中的 $k$ 个专家，通常有 $k \ll E$。比率 $E/k$ 称为稀疏度，通常在 8 到 64 之间（例如 <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2412.19437">DeepSeek-V3</a> 有 $k=8$、$E=256$）。与密集版本相比，这将参数量增加到 $O(E)$，而每个 token 激活的参数量只乘以 $k$。</p>
+<p><img src="/images/scaling-book/moe.png" alt="原文插图"></p>
+<p><b>图：</b>一个含 $n$ 个专家的 MoE 层。门控模块将每个 token 路由给其中 $k$ 个专家，再把这 $k$ 个 MLP 的输出相加。总参数量是单个专家参数量的 $n$ 倍，但每个 token 只使用其中 $k$ 个专家。<a target="_blank" rel="noopener" href="https://deepgram.com/learn/mixture-of-experts-ml-model-guide">来源</a>。</p>
+<p>与稠密模型相比，MoE 会引入新的通信，主要是在 MoE 模块前后各执行一次 AllToAll，将 token 送给正确的专家，再送回原来的设备。（原注：严格来说，只有数据或序列沿专家所在的同一设备轴分片时，才会发生这种通信。）不过，上一章已经说明，在双向环网络上，每次 AllToAll 的开销只有同一轴上可比 AllGather 的四分之一。</p>
+<!-- source-heading -->
+<p><a id="gradient-checkpointing"></a></p>
+<h3 id="梯度检查点"><a href="#梯度检查点" class="headerlink" title="梯度检查点"></a>梯度检查点</h3><p>反向传播这种算法用内存换取了计算量的减少：反向传播不必花费 $O(n_\text{layers}^2)$ FLOPs，却需要 $O(n_\text{layers})$ 的内存，来保存前向传播产生的全部中间激活。虽然这比二次增长的计算量更好，内存开销仍然很大。例如，若模型的 $B \times T=4\text{M}$（每批总计 400 万个 token）、$L=64$、$D=8192$，并且完全避免反向传播中的额外重计算，就要保存约 $2 \times 20 \times B \times T \times D \times L = 84\text{TB}$ 的 bf16 激活。这里的 20 来自对上面 Transformer 示意图中各个中间节点的粗略计数。例如：</p>
+<p>$$f(x) = \exp(g(x))$$</p>
+<p>$$\frac{df}{dx} = \exp(g(x)) \cdot \frac{dg}{dx}$$</p>
+<p>所以，要避免重计算，就必须保存前向传播中的 $g(x)$ 和 $\exp(g(x))$。为了减少内存占用，我们可以只保存一部分中间激活。下面介绍几种常用做法。</p>
+<ul>
+<li><strong>整层重计算（block remat）：</strong>只保存每层的输入。这是这里采用的最激进方案，每层只保存一个检查点，所以上例只需保存 4.2TB。但反向传播时，几乎要重新执行全部前向计算，运算量便从 $6 \cdot \text{num params} \cdot \text{num tokens}$ 增加到约 $8 \cdot \text{num params} \cdot \text{num tokens}$。</li>
+<li><strong>只保存大型矩阵乘法的输出：</strong>另一种简单策略是保留大型矩阵乘法的结果。这样，反向传播不必重做这些矩阵乘法，但仍要重新计算其他激活函数和一部分注意力操作。每层需要保存的中间结果数量，会从上面的约 20 个降到约 7 个。</li>
+</ul>
+<p>这些策略并未覆盖所有情况。在 JAX 中，通常使用 <code>jax.remat</code>／<code>jax.checkpoint</code> 控制这些行为，更多说明见<a target="_blank" rel="noopener" href="https://jax.readthedocs.io/en/latest/_autosummary/jax.checkpoint.html">这里</a>。</p>
+<!-- source-heading -->
+<p><a id="key-value-kv-caching"></a></p>
+<h3 id="键值缓存（KV-cache）"><a href="#键值缓存（KV-cache）" class="headerlink" title="键值缓存（KV cache）"></a>键值缓存（KV cache）</h3><p><a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/inference/">原著第 7 章</a>将详细说明，LLM 推理包含两个主要阶段：预填充与生成。</p>
+<ul>
+<li><strong>预填充（prefill）</strong>处理较长的提示词，并把注意力模块的激活保存到键值缓存（KV cache），供生成阶段使用。具体保存的是注意力模块中键和值的投影。</li>
+<li><strong>生成（generation）</strong>把多份 KV cache 组成一个批次，分别从每个序列的分布中采样 token。</li>
+</ul>
+<p>每份 KV cache 实际上可以看作形状为 $[2, S, L, K, H]$ 的数组，其中 2 表示键和值。这已经相当大了！采用 int8 时，KV cache 的总大小为 $2SLKH$。对于上下文长度 8k、64 层、$KH = NH = D = 8192$ 的中等规模模型，这相当于 $2 \cdot 8192 \cdot 64 \cdot 8192 = 8\text{GiB}$。这也解释了为什么我们希望采用 $K \ll N$ 的 GMQA。</p>
+<!-- source-heading -->
+<p><a id="what-should-you-take-away-from-this-section"></a></p>
+<h2 id="本章需要记住什么？"><a href="#本章需要记住什么？" class="headerlink" title="本章需要记住什么？"></a>本章需要记住什么？</h2><ul>
+<li>Transformer 的总参数量与 FLOPs 比较容易计算。下表给出了采用 MHA 时的汇总：批量为 $B$，词表大小为 $V$，序列长度为 $T$，$D=d_\text{model}$，$F=d_\text{ff}$。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">组件</th>
+<th align="left">每层参数</th>
+<th align="left">每层训练 FLOPs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>MLP</strong></td>
+<td align="left">$3DF$</td>
+<td align="left">$18BTDF$</td>
+</tr>
+<tr>
+<td align="left"><strong>注意力</strong></td>
+<td align="left">$4DNH$</td>
+<td align="left">$24BTDNH + 12BT^2NH$</td>
+</tr>
+<tr>
+<td align="left"><strong>其他</strong></td>
+<td align="left">$2D$</td>
+<td align="left">$BTD$</td>
+</tr>
+<tr>
+<td align="left"><strong>词表</strong></td>
+<td align="left">$DV$（总计，不是每层）</td>
+<td align="left">$12BTDV$</td>
+</tr>
+</tbody></table>
+<ul>
+<li>MLP 块的参数计数主导总参数计数，并且只要序列长度为 $T &lt; 8D$，MLP 块也主导 FLOP 预算。</li>
+<li>对于合理的上下文长度，训练期间的总 FLOP 预算非常接近 $6 \cdot \text{num_params} \cdot \text{num_tokens}$。</li>
+<li>在推理过程中，我们的 KV 缓存大约为每个缓存 $2 \cdot S \cdot L \cdot K \cdot H$（其中 $K$ 是 KV 头的数量），尽管架构修改通常可以减少这一点。</li>
+</ul>
+<!-- source-heading -->
+<p><a id="a-few-problems-to-work"></a></p>
+<h2 id="工作中的一些问题"><a href="#工作中的一些问题" class="headerlink" title="工作中的一些问题"></a>工作中的一些问题</h2><p><strong>问题1：</strong> $D=4096$、$F=4 \cdot D$、$V=32,000$、$L=64$ 的模型有多少个参数？其中哪些部分是注意力参数？每个token的 KV 缓存有多大？ <em>你可以假设 $N\cdot H=D$ 和具有 int8 KV 的多头注意力。</em></p>
+<p><strong>答案：</strong></p>
+<ol>
+<li><p>总参数大约为 $L \cdot (3DF + 4DNH + 2D) + 2DV$（计算每层的两个层范数）。对于给定的数字，这是 $64 \cdot (3 \cdot 4e3 \cdot 16e3 + 4 \cdot 4e3 \cdot 4e3 + 2 \cdot 4e3) + 2 \cdot 4e3 \cdot 32e3 = 16e9$，或 16B 参数。</p>
+</li>
+<li><p>一般情况下，注意力参数占总参数的比例为 $4DNH / (4DNH + 3DF) = 4D^2 / (4D^2 + 12D^2) = 1/4$。这意味着大约 1/4 的参数用于注意力。</p>
+</li>
+<li><p>对于每个 token，我们的 KV 缓存是 int8 形式的 $2 \cdot L \cdot N \cdot H = 2 \cdot 64 \cdot 4096$，即 <code>512 KiB / token</code>。</p>
+</li>
+</ol>
+<p><strong>问题 2：</strong> 在 <code>{'X': 4, 'Y': 8, 'Z': 4}</code> 的设备网格上执行 $A[B_X,D_Y] \cdot_D W[D_Y,F]$，总共需要多少 FLOP？每个 TPU 执行多少 FLOP？</p>
+<p><strong>答案：</strong></p>
+<p>该操作的总“理论”算力为 $2 \cdot B \cdot D \cdot F$。然而，由于计算并未在 Z 维度上进行分片，因此我们实际上执行了 Z 次额外的 FLOP，这意味着总 FLOP 为 $2 \cdot B \cdot D \cdot F \cdot Z$。由于计算是跨其他维度进行分片的，因此每台设备的总计算量大约为 $2 \cdot B \cdot D \cdot F / (X \cdot  Y)$。</p>
+<p><strong>问题 3：</strong> 执行 $A[I,J,K,L] \cdot B[I,J,M,N,O] \rightarrow C[K,L,M,N,O]$ 涉及多少 FLOP？</p>
+<p><strong>答案：</strong></p>
+<p>遵循上述规则，我们将 I 和 J 作为收缩维度，将 K、L、M、N 和 O 作为非收缩维度。我们没有“批处理维度”，所以这只是 $2 \cdot I \cdot J \cdot K \cdot L \cdot M \cdot N \cdot O$，所有轴的乘积。如果我们有一个共享轴，它只会被计算一次。</p>
+<p><strong>问题 4：</strong> 分组多查询注意力的算术强度是多少（忽略 Q/K/V/O 投影）？ <em>给出作为 Q 和 KV 序列长度 T 和 S 以及多查询因子 G 的函数的答案。</em> 在什么上下文长度下注意力 FLOP 受限？给定 TPU 的 HBM 带宽，绘制随着上下文长度增长，关注 FFW 块的有效相对成本。 <em>提示：假设我们使用有效的注意力实现，不会执行任何不必要的读/写。考虑 T = S 和 T &lt;&lt; S 的极限。</em></p>
+<p><strong>答案：</strong></p>
+<p>自注意力需要加载 $Q$、$K$ 和 $V$ 激活，然后计算 $\text{softmax}(Q \cdot K) \cdot V$，然后将结果写回 HBM。这将通过 Flash Attention 来完成，因此对这个数学有一些注意事项，但基本上在 bf16 自注意力中执行</p>
+<p>$$\text{Q[B,T,N,H]} \rightarrow_\text{reshape} \text{Q[B, T, K, G, H]} \cdot \text{K[B, S, K, H]} \rightarrow \text{O[B, T, S, K, G]}$$</p>
+<p>$$U=\text{softmax}_S(\text{O[B, T, S, K, G]})$$</p>
+<p>$$\text{U[B, T, S, K, G]} \cdot \text{V[B, S, K, H]} \rightarrow \text{X[B, T, K, G, H]}$$</p>
+<p>所以我们的总字节数是 $2 * \text{sizeof}(Q) + 2 * \text{sizeof(K or V)} = 4BTNH + 4BSKH = 4BHK * (TG + S)$，总 FLOP 是 $4BTSNH + O(BTSN)$，算术强度是 $4BTSKGH / (4BHK * (TG + S))$。</p>
+<p>所以基本上，在预填充期间我们有 $S=T$，所以我们有 $4BT^2KGH / 4BHKT \cdot (G+1) = TG/(G + 1) = O(T)$ 的算术强度。在生成过程中，$T=1$，因此我们有 $4BSKGH / (4BHK \cdot (G + S)) = SG / (G + S) \rightarrow G$，假设 $S$ 非常大。根据你解释问题的方式，在预填充或训练期间，假设没有序列分片，自注意力在 S=240 处受计算受限。在生成过程中，我们永远不会受计算受限，因为 $G$ 很小。尽管如此，你可以看到增加 $G$ 使我们更接近计算极限。</p>
+<p><strong>问题 5：</strong> 在什么序列长度下，自注意力 FLOP 等于 QKVO 投影 FLOP？</p>
+<p><strong>答案：</strong></p>
+<p>这纯粹是 $24BTDNH = 12BT^2NH$ 何时成立的问题。简化后得到 $2D = T$，所以对于 $D=4096$，临界序列长度是 $8192$。这告诉我们，对于大多数常见上下文长度，matmul FLOP 更大。</p>
+<p><strong>问题 6：</strong> 假设我们在前向传播期间仅保存 Transformer 层中 7 个主要矩阵乘法的输出（Q、K、V、O 加上三个 FFW 矩阵）。在反向传播过程中，需要额外执行多少 FLOP 来完成重计算？</p>
+<p><strong>答案：</strong></p>
+<p>仅保存七个 matmul 输出（Q、K、V、O、W₁、W₂、W₃）意味着反向传播必须重新计算两个注意力 matmul</p>
+<p>$$QK^{\top} \quad\text{and}\quad \operatorname{softmax}(QK^{\top})V$$</p>
+<p>以获得$\frac{\partial L}{\partial W_\text{O}}$。</p>
+<p>每个都是 $T \times T$ matmul，通过 $B$ 序列和 $N$ 头进行批处理，因此额外的 FLOP 为</p>
+<p>$$4 ; B , T^{2} , N , H.$$</p>
+<p>其他重新计算的操作有：</p>
+<ol>
+<li><p>$O(BTD)$ 为 $\frac{\partial L}{\partial W_\text{In1}}$ 和 $\frac{\partial L}{\partial W_\text{In2}}$。</p>
+</li>
+<li><p>$O(BTF)$ 为 $\frac{\partial L}{\partial W_\text{Out}}$。</p>
+</li>
+</ol>
+<p><strong>问题 7：</strong> DeepSeek v3 表示它在 14.8T token上训练了 279 万小时的 H800 小时（<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2412.19437v1">来源</a>）。鉴于它有 37B 个激活参数，它们大致实现了多少硬件利用率？ <em>提示：请注意，他们使用了没有结构化稀疏性的 FP8 FLOP。</em></p>
+<p><strong>答案：</strong></p>
+<p>从<a target="_blank" rel="noopener" href="https://lenovopress.lenovo.com/lp1814.pdf">此处</a>的规格表中，我们发现稀疏情况下 FP8 性能为 3,026 TFLOPs/s，或者在没有稀疏情况下通常为该性能的一半 (<code>1.513e15</code> FLOPs/s)。 279 万小时 H800 意味着 <code>2.79e6 * 1.513e15 * 60 * 60 = 1.52e25</code> 总算力。鉴于激活的参数计数为 37B，此训练运行应该使用大约 <code>6 * 37e9 * 14.8e12 = 3.3e24</code> FLOP。这意味着 FLOP 利用率约为 <code>3.3e24 / 1.52e25 = 21.7%</code>。</p>
+<p><strong>问题 8：</strong>混合专家（MoE）模型有 $E$ 份标准稠密 MLP，每个 token 激活其中 $k$ 个专家。在 TPU v5e 上，如果权重采用 int8，需要多大的 token 批量才能达到计算受限？DeepSeek 有 256 个路由专家，且 $k=8$，此时这个数是多少？</p>
+<p><strong>答案：</strong></p>
+<p>因为我们有每个专家的 $E$ 副本，在 int8 中，对于每个权重矩阵，我们需要加载 $E \cdot D \cdot F$ 字节。因为每个token都会激活 $k$ 专家，所以对于每个权重矩阵，我们都有 $2\cdot k \cdot B \cdot D \cdot F$ FLOP。为了受到 int8 权重和 bfloat16 FLOP 的计算受限，我们需要算术强度（加载的每字节 FLOP）超过 TPU 的约 240 FLOP/字节，这在 $(2\cdot k \cdot BDF) / EDF &gt; 240$ 或 $k \cdot B / E &gt; 120$ 时发生。</p>
+<p>因此，我们需要 $B &gt; 120 \cdot E / k$ 进行计算受限。对于 DeepSeek，这给我们 $B &gt; 120 \cdot 256 / 8 = 3840$。这在生成时是一个非常大的批量大小。</p>
+<!-- source-heading -->
+<p><a id="thats-it-for-part-4-for-part-5-about-scaling-transformer-training-click-here05-transformer并行训练md"></a></p>
+<h3 id="第-4-章到此结束！原著第-5-章将讨论如何扩展-Transformer-训练。"><a href="#第-4-章到此结束！原著第-5-章将讨论如何扩展-Transformer-训练。" class="headerlink" title="第 4 章到此结束！原著第 5 章将讨论如何扩展 Transformer 训练。"></a>第 4 章到此结束！<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/training/">原著第 5 章</a>将讨论如何扩展 Transformer 训练。</h3><!-- source-heading -->
+<p><a id="appendix"></a></p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><!-- source-heading -->
+<p><a id="appendix-a-how-does-flash-attention-work"></a></p>
+<h3 id="附录-A：Flash-Attention-是如何工作的？"><a href="#附录-A：Flash-Attention-是如何工作的？" class="headerlink" title="附录 A：Flash Attention 是如何工作的？"></a>附录 A：Flash Attention 是如何工作的？</h3><p>将 Transformer 扩展到很长上下文的传统反对意见是，注意力 FLOP 和内存使用量与上下文长度呈二次方缩放。虽然注意力 QK 产品的形状确实是 $[B, T, S, N]$，其中 B 是批量大小，T 和 S 是 Q 和 K 序列暗淡，N 是头数，但这种说法有一些严重的警告：</p>
+<ol>
+<li>正如我们之前提到的，即使这是二次的，注意力 FLOP 仅在 $T &gt; 8 \cdot D$ 时占主导地位，并且在训练期间，与内存中的所有权重和激活检查点相比，单个注意力矩阵的内存很小，尤其是在分片时。</li>
+<li>我们不需要具体化完整的注意力矩阵来计算注意力！我们可以计算局部总和和最大值，并避免实现超过数组的一小部分。虽然总 FLOP 仍然是二次方，但我们极大地减少了内存压力。</li>
+</ol>
+<p>第二个观察首先由<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2112.05682">Rabe et al.。 2021</a> 以及随后的 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2205.14135">Flash Attention 论文</a>（Dao 等人，2022）。基本思想是计算 K/V 块中的注意力，其中我们计算局部 softmax 和一些辅助统计数据，然后将它们传递到下一个块，将它们与其局部块组合。具体来说，我们计算</p>
+<ol>
+<li><strong>M:</strong> $q \cdot k$ 在序列维度上的运行最大值</li>
+<li><strong>O:</strong> 在序列维度上运行全注意力 softmax</li>
+<li><strong>L:</strong> 运行分母 $\sum_i \exp(q \cdot k_i - \text{running max})$</li>
+</ol>
+<p>有了这些，我们就可以仅使用恒定量的内存来计算新的最大值、新的运行总和以及新的输出。粗略地描述一下它是如何工作的，注意力大致是这样的操作：</p>
+<p>$$\text{Attn}(Q, K, V) = \sum_i \frac{\exp(Q \cdot K_i - \max_j Q \cdot K_j) V_i}{\sum_l \exp(Q \cdot K_l - \max_j Q \cdot K_j)}$$</p>
+<p>减去最大值是为了提高数值稳定性。由于 $\sum_i \exp(a_i + b) = \exp(b) \sum \exp(a)$，对所有分数减去同一个最大值，会使 softmax 的分子和分母乘上相同的因子，因此不改变最终结果。现在只看上式的分母：假设把键向量（key vectors）分成两个连续的块 $K^1$ 和 $K^2$，分别计算它们用于 softmax 归一化的局部指数和 $L^1$ 和 $L^2$：</p>
+<p>$$L^1 = \sum_i \exp(Q \cdot K_i^1 - \max_j Q \cdot K_j^1)$$</p>
+<p>$$L^2 = \sum_i \exp(Q \cdot K_i^2 - \max_j Q \cdot K_j^2)$$</p>
+<p>然后我们可以使用以下方法将它们组合成这两个块的完整 softmax 总和：</p>
+<p>$$L^\text{combined} = \exp(M^1 - \max(M^1, M^2)) \cdot L^1 + \exp(M^2 - \max(M^1, M^2)) \cdot L^2$$</p>
+<p>在哪里</p>
+<p>$$M^1 = \max_j Q \cdot K_j^1 \text{ and } M^2 = \max_j Q \cdot K_j^2$$</p>
+<p>这也可以对完整的 softmax 完成，为我们提供了一种累积任意大的 softmax 总和的方法。这是 Flash Attention 论文中的完整算法。</p>
+<p><img src="/images/scaling-book/flash-algo.png" alt="原文插图"></p>
+<p>从硬件的角度来看，这让我们可以将 Q 块放入 VMEM（上面的算法称为片上 SRAM）中，因此我们只需在每次迭代时加载 KV 块，从而增加算术强度。我们还可以将运行统计数据保存在VMEM中。</p>
+<p>最后一个值得强调的微妙点是注意力 softmax 属性，它用于使 Flash VJP（反向模式导数）计算对于训练实用。我们定义一个中间的softmax数组：</p>
+<p>$$S_{ij} = \frac{e^{\tau q_i \cdot k_j}}{\sum_l e^{\tau q_i \cdot k_l}}$$</p>
+<p>注意，我们从反向模式 <em>dO</em> 和 <em>V</em> 数组中获得 <em>dS</em>：</p>
+<p>$$dS_{ij} = dO_{id} \cdot_d V_{jd} = \sum_d dO_{id} V_{jd}$$</p>
+<p>在该梯度反向传播到 Q 和 K 期间</p>
+<p>$$d(q_i \cdot k_j) = (dS_{ij} - S_{ij} \cdot_j dS_{ij}) S_{ij}$$</p>
+<p>我们利用一个恒等式，允许我们将沿大密钥<strong>长度</strong>维度的收缩与沿特征<strong>深度</strong>维度的局部收缩进行交换。</p>
+<p>$$\begin{align*}<br>S_{ij} \cdot_j dS_{ij} &amp;= \sum_j \frac{e^{\tau q_i \cdot k_j}}{\sum_k e^{\tau q_i \cdot k_k}} \sum_d dO_{id} V_{jd} \<br>&amp;= \sum_d dO_{id} \sum_j \frac{e^{\tau q_i \cdot k_j}}{\sum_k e^{\tau q_i \cdot k_k}} V_{jd} \<br>&amp;= \sum_d dO_{id} O_{id} \<br>&amp;= dO_{id} \cdot_d O_{id}<br>\end{align*}$$</p>
+<p>这种替换对于能够为 VJP 实现序列块<em>局部</em>计算至关重要，并且能够实现更智能的分片方案，例如环关注。</p>
+<hr>
+<blockquote>
+<p><strong>译文与许可：</strong>本章是基于固定版本 <code>173fb0851d7e654872f0327aff2e17607cf24106</code> 的机器辅助中文初译，并非逐句人工精校。原文与配图基于 MIT License 发布。Copyright (c) 2022 Maruan Al-Shedivat；Copyright (c) 2025 Google LLC。完整许可见 <a href="/images/scaling-book/LICENSE.txt">MIT License</a>。</p>
+</blockquote>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">Jacob Austin 等</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://yitrus.github.io/2026/08/08/Scaling-Book-04-Transformer%E6%95%B0%E5%AD%A6/">https://yitrus.github.io/2026/08/08/Scaling-Book-04-Transformer%E6%95%B0%E5%AD%A6/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">Jacob Austin 等</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Transformer/">
+                                    <span class="chip bg-color">Transformer</span>
+                                </a>
+                            
+                                <a href="/tags/Scaling-Book/">
+                                    <span class="chip bg-color">Scaling Book</span>
+                                </a>
+                            
+                                <a href="/tags/FLOPs/">
+                                    <span class="chip bg-color">FLOPs</span>
+                                </a>
+                            
+                                <a href="/tags/Attention/">
+                                    <span class="chip bg-color">Attention</span>
+                                </a>
+                            
+                                <a href="/tags/KV-Cache/">
+                                    <span class="chip bg-color">KV Cache</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+        <div class="card utterances-card">
+    <div class="card-content">
+        <h2 style="font-size: 20px; font-weight: 700; margin-top: 0;">
+            <i class="fas fa-comments fa-fw" aria-hidden="true"></i> 评论
+        </h2>
+        <p>使用 GitHub 账号参与评论，评论将公开保存在 GitHub Issues 中。</p>
+        <script src="https://utteranc.es/client.js"
+                repo="Yitrus/yitrus.github.io"
+                issue-term="pathname"
+                theme="preferred-color-scheme"
+                crossorigin="anonymous"
+                async></script>
+        <p><a href="https://github.com/Yitrus/yitrus.github.io/issues" target="_blank" rel="noopener noreferrer">在 GitHub 查看评论</a></p>
+        <noscript>请启用 JavaScript 加载评论，或通过上方链接前往 GitHub。</noscript>
+    </div>
+</div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2026/08/08/Scaling-Book-04-Transformer%E6%95%B0%E5%AD%A6/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/26.jpg" class="responsive-img" alt="Scaling Book 中文（04）：Transformer 数学——参数量、FLOPs 与 KV Cache">
+                        
+                        <span class="card-title">Scaling Book 中文（04）：Transformer 数学——参数量、FLOPs 与 KV Cache</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            从点积与反向传播的计算量出发，核算 Transformer 的参数量、训练 FLOPs、注意力成本、MoE、重计算、KV Cache 与 Flash Attention。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-08-08
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/AI-infra/" class="post-category">
+                                    AI infra
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Transformer/">
+                        <span class="chip bg-color">Transformer</span>
+                    </a>
+                    
+                    <a href="/tags/Scaling-Book/">
+                        <span class="chip bg-color">Scaling Book</span>
+                    </a>
+                    
+                    <a href="/tags/FLOPs/">
+                        <span class="chip bg-color">FLOPs</span>
+                    </a>
+                    
+                    <a href="/tags/Attention/">
+                        <span class="chip bg-color">Attention</span>
+                    </a>
+                    
+                    <a href="/tags/KV-Cache/">
+                        <span class="chip bg-color">KV Cache</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/43.jpg" class="responsive-img" alt="Scaling Book 中文（03）：分片矩阵，以及如何进行矩阵乘法">
+                        
+                        <span class="card-title">Scaling Book 中文（03）：分片矩阵，以及如何进行矩阵乘法</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            介绍设备网格、张量分片和局部形状，并分析 AllGather、ReduceScatter、AllToAll 等集合通信在分片矩阵乘法中的开销。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-08-01
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/AI-infra/" class="post-category">
+                                    AI infra
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Scaling-Book/">
+                        <span class="chip bg-color">Scaling Book</span>
+                    </a>
+                    
+                    <a href="/tags/Sharding/">
+                        <span class="chip bg-color">Sharding</span>
+                    </a>
+                    
+                    <a href="/tags/%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">
+                        <span class="chip bg-color">矩阵乘法</span>
+                    </a>
+                    
+                    <a href="/tags/%E9%9B%86%E5%90%88%E9%80%9A%E4%BF%A1/">
+                        <span class="chip bg-color">集合通信</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">382.5k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js?v=20261028"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
