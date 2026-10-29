@@ -1,0 +1,1712 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Scaling Book 中文（05）：如何并行训练 Transformer, Yi&#39;s Blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', '');
+</script>
+
+
+    <title>Scaling Book 中文（05）：如何并行训练 Transformer | Yi&#39;s Blog</title>
+    <link rel="icon" type="image/png" href="/medias/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <link type='text/css' rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" media='all'/>
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<!-- hexo injector head_end start --><script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.esm.min.mjs">
+    mermaid.initialize(
+      startOnLoad: true,
+    );
+    </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Yi&#39;s Blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-link" style="zoom: 0.6;"></i>
+      
+      <span>Links</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Yi&#39;s Blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-link"></i>
+			
+			Links
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/Yitrus" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/Yitrus" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+<script src="/libs/cryptojs/crypto-js.min.js"></script>
+<script>
+    (function() {
+        let pwd = '';
+        if (pwd && pwd.length > 0) {
+            if (pwd !== CryptoJS.SHA256(prompt('Oops! the password')).toString(CryptoJS.enc.Hex)) {
+                alert('密码错误，将返回主页！');
+                location.href = '/';
+            }
+        }
+    })();
+</script>
+
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/6.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <!-- <h1 class="description center-align post-title">Scaling Book 中文（05）：如何并行训练 Transformer</h1> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Transformer/">
+                                <span class="chip bg-color">Transformer</span>
+                            </a>
+                        
+                            <a href="/tags/Scaling-Book/">
+                                <span class="chip bg-color">Scaling Book</span>
+                            </a>
+                        
+                            <a href="/tags/Distributed-Training/">
+                                <span class="chip bg-color">Distributed Training</span>
+                            </a>
+                        
+                            <a href="/tags/FSDP/">
+                                <span class="chip bg-color">FSDP</span>
+                            </a>
+                        
+                            <a href="/tags/Tensor-Parallelism/">
+                                <span class="chip bg-color">Tensor Parallelism</span>
+                            </a>
+                        
+                            <a href="/tags/Pipeline-Parallelism/">
+                                <span class="chip bg-color">Pipeline Parallelism</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/AI-infra/" class="post-category">
+                                AI infra
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2026-08-15
+                </div>
+                
+
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    12.8k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    51 分
+                </div>
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+        <!-- 代码块折行 -->
+        <style type="text/css">
+            code[class*="language-"], pre[class*="language-"] { white-space: pre-wrap !important; }
+        </style>
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <blockquote>
+<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/training/">本章原文</a>。原文版本：<code>173fb0851d7e</code>，MIT 许可。<br>本章为完整范围的机器辅助中文初译</p>
+</blockquote>
+<blockquote>
+<p><strong>简介：</strong>本章讨论 LLM 训练中的四种主要并行方案：数据并行、全分片数据并行（FSDP）、张量并行和流水线并行，并分别计算它们在什么条件下会受通信限制。</p>
+</blockquote>
+<p><a href="/2026/07/11/Scaling-Book-00-%E5%AF%BC%E8%AF%BB/">Scaling Book 中文导读</a> · <a href="/2026/08/08/Scaling-Book-04-Transformer%E6%95%B0%E5%AD%A6/">上一章：Transformer 数学</a> · <a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/">原著目录</a></p>
+<!-- source-heading -->
+<p><a id="what-do-we-mean-by-scaling"></a></p>
+<h2 id="扩展是什么意思？"><a href="#扩展是什么意思？" class="headerlink" title="扩展是什么意思？"></a>扩展是什么意思？</h2><p>“模型扩展”的目标是能够增加用于训练或推理的芯片数量，同时实现吞吐量的成比例、线性增加（我们称之为<em>强扩展</em>）。虽然单个芯片上的性能取决于内存带宽和 FLOP 之间的权衡，但集群级别的性能取决于通过将芯片间通信与有用的 FLOP 重叠来隐藏芯片间通信。这并非易事，因为增加芯片数量会增加通信负载，同时减少我们可以用来隐藏它的每台设备的计算量。正如我们在<a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">第 3 章：分片矩阵与矩阵乘法</a>中看到的，分片矩阵乘法通常需要昂贵的 AllGather 或 ReduceScatter，这可能会阻止 TPU 执行有用的工作。本节的目标是找出这些通信何时变得“太贵”。</p>
+<p>在本节中，我们将讨论四种常见的并行方案：（纯）<strong>数据并行、完全分片数据并行</strong>（FSDP / ZeRO 分片）、<strong>张量并行</strong>（也称为模型并行）和（简而言之）<strong>管道并行</strong>。对于每一个，我们将展示我们产生的通信成本以及在什么时候该成本开始成为我们计算成本的瓶颈。（原注：我们将重点关注通信边界 - 因为虽然内存容量限制很重要，但在预训练期间使用重新实现（激活检查点）和大量芯片时，它们通常不会限制我们。我们在这里也不讨论 MoE 的专家并行性——这大大扩展了设计空间，仅讨论密集 Transformer 的基本情况。）在本节中，你可以只关注芯片间通信成本，因为只要我们有足够大的单芯片批量大小，从 HBM 到 MXU 的数据传输就已经与计算重叠。</p>
+<p>我们将使用以下符号来简化本节中的计算。</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>含义（模型参数）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$D$</td>
+<td>模型隐藏维度，即残差流的特征维度 $d_{\text{model}}$</td>
+</tr>
+<tr>
+<td>$F$</td>
+<td>前馈网络的中间维度 $d_{\text{ff}}$</td>
+</tr>
+<tr>
+<td>$B$</td>
+<td>全局批量中的 token 总数，不是每台设备上的 token 数</td>
+</tr>
+<tr>
+<td>$T$</td>
+<td>序列长度，即每条序列包含的 token 数</td>
+</tr>
+<tr>
+<td>$L$</td>
+<td>模型的层数</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>含义（硬件特性）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$C$</td>
+<td>每块芯片的计算吞吐量，单位为 FLOPs/s</td>
+</tr>
+<tr>
+<td>$W$</td>
+<td>网络带宽，采用双向带宽口径；常用下标区分 $W_{\text{ici}}$ 与 $W_{\text{dcn}}$</td>
+</tr>
+<tr>
+<td>$X$</td>
+<td>设备网格沿 X 轴的芯片数量</td>
+</tr>
+<tr>
+<td>$Y$</td>
+<td>设备网格沿 Y 轴的芯片数量</td>
+</tr>
+<tr>
+<td>$Z$</td>
+<td>设备网格沿 Z 轴的芯片数量</td>
+</tr>
+</tbody></table>
+<p>为了简单起见，<strong>我们将 Transformer 近似为 MLP 块的堆栈</strong>——正如我们在<a href="/2026/08/08/Scaling-Book-04-Transformer%E6%95%B0%E5%AD%A6/">第 4 章：Transformer 数学</a>中看到的那样，对于较大模型，注意力只占 FLOP 的一小部分。我们还将忽略门控 matmul，为每层留下以下简单结构：</p>
+<p><img src="/images/scaling-book/transformer-layer.png" alt="原文插图"></p>
+<p><b> 图：</b> 简化的 Transformer 层。我们将每个 FFW 块视为两个矩阵 <b>W<sub>in</sub></b> 的堆栈：<code>bf16[D, F]</code>（上投影）和<b>W<sub>out</sub></b>: <code>bf16[F, D]</code>（下投影），带输入<b>In</b>：<code>bf16[B, D]</code>。</p>
+<p><strong>这是我们的小型 Transformer 的完整算法，没有并行性。</strong></p>
+<p><strong>前向传播：</strong>需要计算Loss[B]</p>
+<ol>
+<li> Tmp[B, F] = In[B, D] *<sub>D</sub> W<sub>in</sub>[D, F]</li>
+<li> Out[B, D] = Tmp[B, F] *<sub>F</sub> W<sub>out</sub>[F, D]</li>
+<li> Loss[B] = …</li>
+</ol>
+<p><strong>反向传播：</strong>需要计算dW<sub>out</sub>[F, D], dW<sub>in</sub>[D, F]</p>
+<ol>
+<li> dOut[B, D] = …</li>
+<li> dW<sub>out</sub>[F, D] = Tmp[B, F] *<sub>B</sub> dOut[B, D]</li>
+<li> dTmp[B, F] = dOut[B, D] *<sub>D</sub> W<sub>out</sub>[F, D]</li>
+<li> dW<sub>in</sub>[D, F] = In[B, D] *<sub>B</sub> dTmp[B, F]</li>
+<li> dIn[B, D] = dTmp[B, F] *<sub>F</sub> W<sub>in</sub>[D, F]；<em>前一层需要</em></li>
+</ol>
+<p>我们提供这个是为了与添加了通信的算法进行比较。</p>
+<p>以下是我们将讨论的 4 种并行方案。每个方案都可以被认为是由上图中 <strong>In</strong>、<strong>W<sub>in</sub>、W<sub>out</sub> 和 Out</strong> 的分片唯一定义的。</p>
+<p><strong>1.数据并行性：</strong> <em>沿批次分片的激活、参数和优化器状态在每个设备上复制。通信仅发生在反向传播期间。</em></p>
+<p>$$\text{In}[B_X, D] \cdot_D W_\text{in}[D, F] \cdot_F W_\text{out}[F, D] \rightarrow \text{Out}[B_X, D]$$</p>
+<p><strong>2.完全分片的数据并行性（FSDP 或 ZeRO-3）：</strong> <em>激活按批次分片（如纯数据并行），参数沿同一网格轴分片，并在前向传播中使用之前及时收集。优化器状态也按批次进行分片。减少重复的内存。</em></p>
+<p>$$\text{In}[B_X, D] \cdot_D W_\text{in}[D_X, F] \cdot_F W_\text{out}[F, D_X] \rightarrow \text{Out}[B_X, D]$$</p>
+<p><strong>3.张量并行性（也称为威震天分片或模型并行性）：</strong> <em>激活沿 D ($d_\text{model}$) 分片，参数沿 F ($d_{ff}$) 分片。每个块之前和之后的 AllGather 和 ReduceScatter 激活。与 FSDP 兼容。</em></p>
+<p>$$\text{In}[B, D_Y] \cdot_D W_\text{in}[D, F_Y] \cdot_F W_\text{out}[F_Y, D] \rightarrow \text{Out}[B, D_Y]$$</p>
+<p><strong>4.管道并行性：</strong> <em>权重沿层维度分片，激活沿层维度微批处理和滚动。管道阶段之间的通信很少（仅在单跳上移动激活）。滥用符号：</em></p>
+<p>$$\text{In}[L_Z, B, D][i] \cdot_D W_\text{in}[L_Z, D, F][i] \cdot_F W_\text{out}[L_Z, F, D][i] \rightarrow \text{Out}[L_Z, B, D][i]$$</p>
+<!-- source-heading -->
+<p><a id="data-parallelism"></a></p>
+<h3 id="数据并行性"><a href="#数据并行性" class="headerlink" title="数据并行性"></a>数据并行性</h3><p><strong>语法：</strong></p>
+<p>$$\text{In}[B_X, D] \cdot_D W_\text{in}[D, F] \cdot_F W_\text{out}[F, D] \rightarrow \text{Out}[B_X, D]$$</p>
+<p>当你的模型适合单个芯片时，即使批量大小很小（&gt; 240 个token，以便受计算受限），<strong>你应该始终使用简单的数据并行性。</strong>只要 TPU 的数量小于我们的批量大小，纯数据并行就会将我们的激活分割到任意数量的 TPU 上。前向传播不涉及通信，但在每个步骤结束时，<strong>每个 TPU 都会对其本地梯度执行 AllReduce，以在更新参数之前同步它们。</strong></p>
+<p><img src="/images/scaling-book/data-parallelism.png" alt="原文插图"></p>
+<p><b> 图：</b> 纯数据并行图（前向传播）。我们的激活（左）沿着批次维度完全分片，并且我们的权重完全复制，因此每个 TPU 都有相同的权重副本。这意味着我们权重的总内存增加了 N 倍，但前向传播不需要通信。</p>
+<p><strong>这里是前向和反向传播的完整算法。我们滥用符号将 dL/dOut 写为 dOut，纯粹是为了紧凑性。</strong></p>
+<p><strong>纯数据并行算法：</strong></p>
+<p><strong>前向传播：</strong>需要计算Loss[B<sub>X</sub>]</p>
+<ol>
+<li> Tmp[B<sub>X</sub>, F] = In[B<sub>X</sub>, D] *<sub>D</sub> W<sub>in</sub>[D, F]</li>
+<li> Out[B<sub>X</sub>, D] = Tmp[B<sub>X</sub>, F] *<sub>F</sub> W<sub>out</sub>[F, D]</li>
+<li> Loss[B<sub>X</sub>] = …</li>
+</ol>
+<p><strong>反向传播：</strong>需要计算dW<sub>out</sub>[F, D], dW<sub>in</sub>[D, F]</p>
+<ol>
+<li> dOut[B<sub>X</sub>, D] = …</li>
+<li> dW<sub>out</sub>[F, D] {U<sub>X</sub>} = Tmp[B<sub>X</sub>, F] *<sub>B</sub> dOut[B<sub>X</sub>, D]</li>
+<li> dW<sub>out</sub>[F, D] = <strong>AllReduce</strong>(dW<sub>out</sub>[F, D] {U<sub>X</sub>})；<em>不在关键路径上，可以异步执行</em></li>
+<li> dTmp[B<sub>X</sub>, F] = dOut[B<sub>X</sub>, D] *<sub>D</sub> W<sub>out</sub>[F, D]</li>
+<li> dW<sub>in</sub>[D, F] {U<sub>X</sub>} = In[B<sub>X</sub>, D] *<sub>B</sub> dTmp[B<sub>X</sub>, F]</li>
+<li> dW<sub>in</sub>[D, F] = <strong>AllReduce</strong>(dW<sub>in</sub>[D, F] {U<sub>X</sub>})；<em>不在关键路径上，可以异步执行</em></li>
+<li> dIn[B<sub>X</sub>, D] = dTmp[B<sub>X</sub>, F] *<sub>F</sub> W<sub>in</sub>[D, F]；<em>前一层需要</em></li>
+</ol>
+<p>我们忽略损失函数的细节，缩写为$\text{Tmp} = W_\text{in} \cdot \text{In}$。请注意，虽然我们的最终损失是平均值 <strong>AllReduce</strong>(Loss[B<sub>X</sub>])，但我们只需要在平均权重梯度时计算反向传播上的 AllReduce。</p>
+<p>请注意，前向传播没有通信 - <strong>一切都在反向传播中</strong>！反向传播还有一个很好的特性，即 AllReduce 不在“关键路径”中，这意味着每个 AllReduce 都可以在方便的时候执行，并且不会阻止你执行后续操作。如果总体通信成本超过我们的总计算成本，那么它仍然会成为我们的瓶颈，但从实现的角度来看，它要宽容得多。我们将看到模型/张量并行性不具有此属性。</p>
+<p><strong>为什么采用这种方案？</strong>纯数据并行沿批量维度切分激活，降低每块设备的激活内存压力。只要有更多芯片分担批量，整体批量就可以持续增大。训练时激活往往占据主要内存，因此这很有用。</p>
+<p><strong>为什么不这样做？</strong> 纯数据并行对于减少模型参数或优化器状态的内存压力没有任何作用，这意味着纯数据并行对于大规模的有趣模型很少有用，因为我们的参数和优化器状态不适合单个 TPU。为了给人一种规模感，如果我们使用 bf16 中的参数和 fp32 中的优化器状态与 Adam 进行训练（原注：Adam 存储参数、一阶和二阶累加器。由于参数位于 bfloat16 中，优化器状态位于 float32 中，这为我们提供了每个参数 <code>2 + 8 = 10</code> 字节），可以容纳的最大模型约有 $\text{TPU memory}/10$ 个参数。例如，在具有 96GB HBM 和纯数据并行的 TPU v5p 芯片上，这大约是 90 亿参数。</p>
+<p><strong>要点：</strong>采用 Adam 和纯数据并行时，可训练模型的参数量上限为 $\text{num_params}=\text{HBM per device}/10$。在 TPU v5p 上，约为 90 亿参数。（原注：这里尚未计入梯度检查点，所以这种配置实际上并不实用；它对应批量只有 1 个 token 时的绝对最低内存需求。）</p>
+<p><em>为了使其在训练期间对真实模型有用，我们需要至少部分地分割模型参数或优化器。</em></p>
+<p><strong>什么时候我们会因通信而成为瓶颈？</strong> 正如我们在上面看到的，每层有两个 AllReduce，每个大小为 $2DF$（对于 bf16 权重）。数据并行何时使我们的通信受到限制？</p>
+<p>如上表所示，令 $C$ 表示每芯片 FLOPs，$W_{\text{ici}}$ 表示<strong>双向</strong>网络带宽，$X$ 表示批次分区的分片数量（原注：我们假设此分区是通过 ICI 网格完成的，因此相关网络带宽为 $W_\text{ici}$）。让我们计算执行相关 matmul 所需的时间 $T_\text{math}$ 以及通信时间 $T_\text{comms}$。由于这种并行方案在前向传播中不需要通信，因此我们只需要为反向传播计算这些量。</p>
+<p><em>通信时间：</em>从上一节我们知道，在一维网格中执行 AllReduce 所需的时间仅取决于 AllReduce 数组的总字节数和 ICI 带宽 $W_\text{ici}$；具体来说，AllReduce 时间为 $2 \cdot \text{total bytes} / W_\text{ici}$。由于我们需要对 $W_\text{in}$ 和 $W_\text{out}$ 进行 AllReduce，因此每层有 2 个 AllReduce。  每个 AllReduce 都是一个权重矩阵，即 $DF$ 参数数组，或 $2DF$ 字节。将所有这些放在一起，单层中 AllReduce 的总时间为</p>
+<p>$$\begin{align}<br>T_\text{comms} &amp;= \frac{2 \cdot 2 \cdot 2 \cdot D \cdot F}{W_\text{ici}}. \<br>\end{align}$$</p>
+<p><em>Matmul 时间：</em> 每层在前向传播中包含两个 matmul，或在反向传播中包含四个 matmul，每层都需要 $2(B/X)DF$ FLOP。因此，对于反向传播中的单个层，我们有</p>
+<p>$$\begin{align}<br>T_\text{math} &amp;= \frac{2 \cdot 2 \cdot 2 \cdot B \cdot D \cdot F}{X \cdot C} \<br>\end{align}$$</p>
+<p>由于我们重叠，每层的总时间是这两个量的最大值：</p>
+<p>$$\begin{aligned}<br>T &amp;\approx \max(\frac{8 \cdot B \cdot D \cdot F}{X \cdot C}, \frac{8 \cdot D \cdot F}{W_\text{ici}}) \<br>T &amp;\approx 8 \cdot D \cdot F \cdot \max(\frac{B}{X \cdot C}, \frac{1}{W_\text{ici}})<br>\end{aligned}$$</p>
+<p>当 $T_\text{math}/T_\text{comms} &gt; 1$ 时，或者当</p>
+<p>$$\begin{align}<br>\frac{B}{X} &gt; \frac{C}{W_\text{ici}}.<br>\end{align}$$</p>
+<p>结果是，为了保持数据并行性的计算受限，我们需要每设备批量大小 $B/X$ 超过 ICI 操作强度 $C/W_\text{ici}$。这最终是由于计算时间随每个设备的批量大小而变化，而通信时间与该数量无关（因为我们正在传输模型权重）。请注意 $B/X &gt; C/W_\text{ici}$ 条件与单设备计算受限规则 $B &gt; 240$ 的相似之处；在这种情况下，该规则也来自这样一个事实：计算时间随批量大小而变化，而数据传输大小（在 $B \ll F, D$ 机制中）与批量大小无关。</p>
+<p>让我们输入一些实数来了解一下规模。对于 TPUv5p、<code>C=4.6e14</code> 和 <code>W=2 * 9e10</code> 用于 ICI 上的 1D 数据并行性，因此 <strong>我们每个芯片的批量大小必须至少为 2,550，以避免受到通信受限</strong>。由于我们可以在多个轴上进行数据并行，如果我们将 TPUv5p pod 的所有三个轴专用于纯数据并行，我们的带宽 $W_\text{ici}$ 会增加 3 倍，并且可以缩小到每个 TPU 仅 BS=850 或每个 pod 每批 760 万个token（8960 个芯片）！ <strong>这告诉我们，纯数据并行很难成为瓶颈！</strong></p>
+<p><strong>注意[上下文并行性]：</strong>在本节中，$B$ 始终指代总批次大小<strong>以token为单位</strong>。然而，显然我们的批次是由许多不同的序列组成的，那么这是如何工作的呢？就 MLP 而言，<strong>token就是token</strong>！它们属于同一序列还是两个不同序列并不重要。因此，我们或多或少可以自由地在批处理和序列维度上进行数据并行：我们称之为上下文并行或序列并行，但你可以将其简单地视为另一种数据并行。注意力比 MLP 更棘手，因为我们做了一些跨序列计算，但这可以通过在注意力期间收集 KV 或 Q 并仔细重叠 FLOP 和通讯（通常使用称为“环注意力”的东西）来处理。在本节中，我们将完全忽略序列维度并假设一定量的批处理或序列并行性。</p>
+<p><strong>关于多个网格轴的注意事项：</strong> 我们应该快速注意多个轴如何影响可用带宽。当我们针对给定的并行策略使用多个网格轴时，我们可以获得更多的带宽。</p>
+<ul>
+<li><strong>定义：</strong> $M_X$（$M_Y$、$M_Z$ 等）是给定并行策略跨越的硬件网格轴的数量。</li>
+<li><strong>效果（带宽受限）：</strong> 使用 $M$ 轴提供（$\approx M$ 倍）聚合链路带宽，因此集体时间尺度为 $\propto 1/M_X$。</li>
+</ul>
+<!-- source-heading -->
+<p><a id="fully-sharded-data-parallelism-fsdp"></a></p>
+<h3 id="全分片数据并行-FSDP"><a href="#全分片数据并行-FSDP" class="headerlink" title="全分片数据并行 (FSDP)"></a>全分片数据并行 (FSDP)</h3><p><strong>语法：</strong></p>
+<p>$$\text{In}[B_X, D] \cdot_D W_\text{in}[D_X, F] \cdot_F W_\text{out}[F, D_X] \rightarrow \text{Out}[B_X, D]$$</p>
+<p>完全分片数据并行性（通常称为 FSDP 或 ZeRO 分片）将模型优化器状态和权重拆分到数据并行分片上，并根据需要有效地收集和分散它们。<strong>与纯数据并行相比，FSDP 极大地减少了每个设备的内存使用量并节省了反向传播 FLOP，而开销非常小。</strong></p>
+<p><img src="/images/scaling-book/fsdp.png" alt="原文插图"></p>
+<p><b> 图：</b> FSDP 将 Win 的契约维度和 Wout 的输出维度沿数据维度进行分片。这会减少内存，但（从第 3 节开始）要求我们在执行 matmul 之前收集 W 的权重。请注意，激活（左）<i> 并未沿着收缩维度 </i> 进行分片，这迫使我们聚集。 <b>请注意，我们的权重优化器状态同样沿着收缩维度进行分片。</b></p>
+<p>你会记得（来自<a href="/2026/08/01/Scaling-Book-03-%E5%88%86%E7%89%87%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9F%A9%E9%98%B5%E4%B9%98%E6%B3%95/">第 3 章：分片矩阵与矩阵乘法</a>）AllReduce 可以分解为 AllGather 和 ReduceScatter。这意味着，我们可以将权重和优化器状态跨芯片分片，在前向传播过程中在每一层进行 AllGather，并在反向传播过程中在权重上进行 ReduceScatter，而不需要额外的成本，而不是为标准数据并行性执行完整梯度 AllReduce。</p>
+<p><strong>这里是FSDP的完整算法。</strong></p>
+<p><strong>完全分片数据并行性 (FSDP)：</strong></p>
+<p><strong>前向传播：</strong>需要计算Loss[B<sub>X</sub>]</p>
+<ol>
+<li> W<sub>in</sub>[D, F] = <strong>AllGather</strong>(W<sub>in</sub>[D<sub>X</sub>, F])；<em>不在关键路径上，可以在前一层计算时执行</em></li>
+<li> Tmp[B<sub>X</sub>, F] = In[B<sub>X</sub>, D] *<sub>D</sub> W<sub>in</sub>[D, F]；<em>可以释放 W<sub>in</sub>[D, F]，现在不再需要</em></li>
+<li> W<sub>out</sub>[F, D] = <strong>AllGather</strong>(W<sub>out</sub>[F, D<sub>X</sub>])；<em>不在关键路径上，可以在前一层计算时执行</em></li>
+<li> Out[B<sub>X</sub>, D] = Tmp[B<sub>X</sub>, F] *<sub>F</sub> W<sub>out</sub>[F, D]</li>
+<li> Loss[B<sub>X</sub>] = …</li>
+</ol>
+<p><strong>反向传播：</strong>需要计算dW<sub>out</sub>[F, D<sub>X</sub>]， dW<sub>in</sub>[D<sub>X</sub>，F]</p>
+<ol>
+<li> dOut[B<sub>X</sub>, D] = …</li>
+<li> dW<sub>out</sub>[F, D] {U<sub>X</sub>} = Tmp[B<sub>X</sub>, F] *<sub>B</sub> dOut[B<sub>X</sub>, D]</li>
+<li> dW<sub>out</sub>[F, D<sub>X</sub>] = <strong>ReduceScatter</strong>(dW<sub>out</sub>[F, D] {U<sub>X</sub>})；<em>不在关键路径上，可以异步执行</em></li>
+<li> W<sub>out</sub>[F, D] = <strong>AllGather</strong>(W<sub>out</sub>[F, D<sub>X</sub>])；<em>可以提前执行</em></li>
+<li> dTmp[B<sub>X</sub>, F] = dOut[B<sub>X</sub>, D] *<sub>D</sub> W<sub>out</sub>[F, D] <em>(can throw away W<sub>out</sub>[F, D] here)</em></li>
+<li> dW<sub>in</sub>[D,F] {U<sub>X</sub>} = In[B<sub>X</sub>, D] *<sub>B</sub> dTmp[B<sub>X</sub>, F]</li>
+<li> dW<sub>in</sub>[D<sub>X</sub>, F] = <strong>ReduceScatter</strong>(dW<sub>in</sub>[D, F] {U<sub>X</sub>}) <em>(not on critical path, can be done async)</em></li>
+<li> W<sub>in</sub>[D, F] = <strong>AllGather</strong>(W<sub>in</sub>[D<sub>X</sub>, F])；<em>可以提前执行</em></li>
+<li> dIn[B<sub>X</sub>, D] = dTmp[B<sub>X</sub>, F] *<sub>F</sub> W<sub>in</sub>[D, F]；<em>前一层需要；可以释放 W<sub>in</sub>[D, F]，这里不再需要</em></li>
+</ol>
+<p>这也称为“零冗余优化器”中的“零分片”，因为我们不执行任何不必要的计算或存储任何不必要的状态。 ZeRO-{1,2,3}分别用于指以这种方式对优化器状态、梯度和权重进行分片。由于所有通信成本相同（原注：从技术上讲，FSDP 在前向传播中添加了纯 DP 所没有的通信，但这与反向传播的比例相同，因此它应该对通信屋顶线没有影响。这里的关键是ZeRO-3将反向传播的AllReduce变成了AllGather和ReduceScatter，它们具有相同的总通信量。），我们基本上总是可以进行ZeRO-3分片，它将参数、梯度和优化器状态分片到一组设备上。</p>
+<p><strong>我们为什么要这样做？</strong> 标准数据并行涉及大量重复工作。每个 TPU AllReduce 完整梯度，然后更新完整优化器状态（所有 TPU 上的工作相同），然后更新参数（再次完全重复）。对于ZeRO分片（对梯度/优化器状态进行分片），你可以ReduceScatter梯度，而不是AllReduce，仅更新优化器状态的分片，更新参数的分片，然后根据前向传播所需的AllGather参数。</p>
+<p><strong>我们什么时候会因通信而成为瓶颈？</strong> 我们的相对 FLOP 和通信成本与纯数据并行完全相同，因为反向传播中的每个 AllReduce 都变成了 AllGather + ReduceScatter。回想一下，AllReduce 是作为 AllGather 和 ReduceScatter 实现的，每个都有一半的成本。这里我们对前向传播进行建模，因为它与反向传播具有相同的 FLOPs-to-comms 比率：</p>
+<p>$$\begin{aligned}<br>T_\text{math} &amp;= \frac{2 \cdot 2 \cdot B \cdot D \cdot F}{X \cdot C} \<br>T_\text{comms} &amp;= \frac{2 \cdot 2 \cdot D \cdot F}{W_\text{ici}} \<br>T &amp;\approx \max\left(\frac{4 \cdot B \cdot D \cdot F}{X \cdot C}, \frac{4 \cdot D \cdot F}{W_\text{ici}}\right) \<br>T &amp;\approx 4 \cdot D \cdot F \cdot \max\left(\frac{B}{X \cdot C}, \frac{1}{W_\text{ici}}\right)<br>\end{aligned}$$</p>
+<p>因此，与纯数据并行一样，当 $B/X &gt; C/W_\text{ici}$ 时，即当每设备批量大小 $B/X$ 超过“ICI 操作强度”$C/W_\text{ici}$（对于 v5p 为 <code>4.59e14 / 1.8e11 = 2550</code>）时，我们会受到计算受限。这对我们来说非常好，因为这意味着如果每设备批量大小足够大，能够满足纯数据并行的计算受限条件，就可以在不离开计算受限区间的前提下升级到 FSDP，从而节省大量参数和优化器状态内存。尽管我们确实必须在前向传播中添加通信，但这种成本并不重要，因为它只是与前向传播 FLOP 重叠。</p>
+<p><strong>要点：</strong> 当每个设备的批量大小小于 $2550 / M_X$ 时，FSDP 和纯数据并行都会在 TPUv5 上受到带宽受限，其中 $M_X$ 是网格轴的数量。</p>
+<p>例如，DeepSeek-V2（最近唯一发布有关其训练批量大小信息的强大模型之一）使用约 40M token的批量大小。 <strong>这将使我们能够在达到带宽受限之前扩展到大约 47,000 个芯片，或大约 5 个 TPUv5 Pod。</strong></p>
+<p>对于经过大约 <code>6.3e24 (15e12 * 70e9 * 6)</code> FLOP 训练的 LLaMA-3 70B，我们可以将一批 16M token拆分到大约 <code>16e6 / (2550 / 3) = 18,823</code> 芯片（大约 2 个 8960 个芯片的 Pod）上，每个 <code>4.59e14</code> FLOP 以 50% 峰值 FLOP 利用率（通常称为 MFU）运行，并且<strong>大约需要 17 天的时间来训练</strong>。不错！但让我们探讨一下如何做得更好。</p>
+<p><strong>关于关键批量大小的注意事项</strong>：有些不直观的是，随着总批量大小的减小（芯片数量固定），我们的通信瓶颈变得更加严重。只要我们能够不断增加批量大小，数据并行性和 FSDP 就可以让我们扩展到任意数量的芯片！然而，在实践中，随着批量大小的增加，我们往往会看到训练的回报递减，因为我们的梯度几乎没有噪声。我们有时也会看到训练不稳定。因此，在“无限计算机制”中寻找最佳分片方案的游戏通常从由缩放定律确定的固定批量大小和已知（大量）芯片开始，然后旨在找到一种分区，使我们能够在如此多的芯片上适应小批量大小。</p>
+<!-- source-heading -->
+<p><a id="tensor-parallelism"></a></p>
+<h3 id="张量并行性"><a href="#张量并行性" class="headerlink" title="张量并行性"></a>张量并行性</h3><p><strong>语法：</strong></p>
+<p>$$\text{In}[B, D_Y] \cdot_D W_\text{in}[D, F_Y] \cdot_F W_\text{out}[F_Y, D] \rightarrow \text{Out}[B, D_Y]$$</p>
+<p>本章使用 $Y$ 表示张量并行轴，以便后面与 FSDP 结合。</p>
+<p>在完全分片的数据并行 AllReduce 中，我们跨芯片移动权重。我们还可以对模型的前馈维度进行分片，并在层中移动激活——这称为“一维模型并行性”或 Megatron 分片。这可以解锁每个 Pod 更小的有效批量大小。下图展示了以这种方式分片的单个矩阵示例：</p>
+<p><img src="/images/scaling-book/model-parallelism.png" alt="原文插图"></p>
+<p><b> 图：</b> 基本张量并行性的示例。由于我们仅在 Y 上对激活进行分片（与在 FSDP 中对 X 进行分片不同），因此我们在 X 上复制激活。使用我们的标准语法，这是 <b>A</b>[B, D<sub>Y</sub>] * <b>B</b>[D，F<sub>Y</sub>] - &gt; <b>C</b>[B，F<sub>Y</sub>]。因为我们只在收缩维度之一上进行分片，所以我们通常在 matmul 之前 AllGather 激活 <b>A</b>。</p>
+<p>如前所述，<strong>在[B，D<sub>Y</sub>]*<sub>D</sub> W<sub>in</sub>[D， F<sub>Y</sub>] *<sub>F</sub> W<sub>out</sub>[F<sub>Y</sub>，D] -&gt; Out[B, D<sub>Y</sub>] 意味着我们必须在第一个 matmul 之前收集激活值。当激活值小于权重时，这比 ZeRO 分片更便宜。</strong> 这通常仅在添加一定量的 ZeRO 分片（这会减少聚集的大小）时才成立。这是我们倾向于混合使用 ZeRO 分片和张量并行的原因之一。</p>
+<p><strong>这是张量并行的算法！</strong></p>
+<p><strong>张量并行度：</strong></p>
+<p><strong>前向传播：</strong>需要计算Loss[B]</p>
+<ol>
+<li> In[B, D] = <strong>AllGather</strong>(In[B, D<sub>Y</sub>]) <em>(on critical path)</em></li>
+<li> Tmp[B, F<sub>Y</sub>] = In[B, D] *<sub>D</sub> W<sub>in</sub>[D, F<sub>Y</sub>] <em>(not sharded along contracting, so no comms)</em></li>
+<li> Out[B, D] {U<sub>Y</sub>} = Tmp[B, F<sub>Y</sub>] *<sub>F</sub> W<sub>out</sub>[F<sub>Y</sub>, D]</li>
+<li> Out[B, D<sub>Y</sub>] = <strong>ReduceScatter</strong>(Out[B, D] {U<sub>Y</sub>}) <em>(on critical path)</em></li>
+<li> Loss[B] = …</li>
+</ol>
+<p><strong>反向传播：</strong>需要计算 dW<sub>out</sub>[F<sub>Y</sub>, D], dW<sub>in</sub>[D, F<sub>Y</sub>]</p>
+<ol>
+<li> dOut[B, D<sub>Y</sub>] = …</li>
+<li> dOut[B, D] = <strong>AllGather</strong>(dOut[B, D<sub>Y</sub>]) <em>(on critical path)</em></li>
+<li> dW<sub>out</sub>[F<sub>Y</sub>, D] = Tmp[B, F<sub>Y</sub>] *<sub>B</sub> dOut[B, D]</li>
+<li> dTmp[B, F<sub>Y</sub>] = dOut[B, D] *<sub>D</sub> W<sub>out</sub>[F<sub>Y</sub>, D] <em>(can throw away dOut[B, D] here)</em></li>
+<li> In[B, D] = <strong>AllGather</strong>(In[B, D<sub>Y</sub>]) <em>(this can be skipped by sharing with (1) from the forward pass)</em></li>
+<li> dW<sub>in</sub>[D, F<sub>Y</sub>] = In[B, D] *<sub>B</sub> dTmp[B, F<sub>Y</sub>]</li>
+<li> dIn[B, D] {U<sub>Y</sub>} = dTmp[B, F<sub>Y</sub>] *<sub>F</sub> W<sub>in</sub>[D, F<sub>Y</sub>] <em>(needed for previous layers)</em></li>
+<li> dIn[B, D<sub>Y</sub>] = <strong>ReduceScatter</strong>(dIn[B, D] {U<sub>Y</sub>}) <em>(on critical path)</em></li>
+</ol>
+<p>张量并行的一个好处是它可以与 Transformer 前向传播中的两个矩阵很好地交互。天真地，我们会在两个矩阵之后分别执行 AllReduce。但这里我们首先做 <strong>In[B, D<sub>Y</sub>] * W<sub>in</sub>[D, F<sub>Y</sub>] -&gt; Tmp[B, F<sub>Y</sub>]</strong> 然后 **Tmp[B, F<sub>Y</sub>] * W<sub>out</sub>[F<sub>Y</sub>，D] -&gt; 输出[B，D<sub>Y</sub>]**。这意味着我们在开始时 AllGather <strong>In</strong> ，在最后 ReduceScatter <strong>Out</strong> ，而不是执行 AllReduce。</p>
+<p><strong>这有多昂贵？</strong> 我们只对前向传播进行建模 - 反向传播只是这里每个操作的转置。在一维张量并行中，我们在第一个 matmul 之前 AllGather 激活，并在第二个 matmul 之后减少它们的激活，一次发送两个字节 (bf16)。让我们弄清楚什么时候我们会遇到沟通瓶颈。</p>
+<p>$$\begin{align}<br>T_\text{math} &amp; = \frac{4 \cdot B \cdot D \cdot F}{Y \cdot C} \<br>T_\text{comms} &amp; =<br>\frac{2 \cdot 2 \cdot (B \cdot D)}{W_\text{ici}}\<br>\textnormal{T} &amp; \approx \max \left(\frac{4 \cdot B \cdot D \cdot F}{Y \cdot C}, \frac{2 \cdot 2 \cdot (B \cdot D)}{W_\text{ici}}\right)<br>\end{align}$$</p>
+<p>注意到我们希望计算成本大于通信成本，我们得到：</p>
+<p>$$\begin{align}<br>\frac{4 \cdot B \cdot D \cdot F}{Y \cdot C} &gt; \frac{2 \cdot 2 \cdot (B \cdot D)}{W_\text{ici}}<br>\end{align}$$</p>
+<p>$$\begin{align}<br>\frac{F}{Y \cdot C} &gt; \frac{1}{W_\text{ici}}<br>\end{align}$$</p>
+<p>$$\begin{align}<br>F &gt; Y \cdot \frac{C}{W_\text{ici}}<br>\end{align}$$</p>
+<p>因此，例如，对于 TPUv5p，bf16 中的 $C / W_{ici} = 2550$，因此我们只能进行最多 $Y &lt; F / 2550$ 的张量并行。当我们有多个 ICI 轴时，我们的 $T_\text{comms}$ 会减少 $M_Y$ 倍，因此我们得到 $Y &lt; M_Y \cdot F / 2550$。</p>
+<p><strong>要点</strong>：当 $Y &gt; M_Y \cdot F / 2550$ 时，张量并行性将成为通信受限。对于大多数模型来说，这是在 8 到 16 路张量并行度之间。</p>
+<p><strong>请注意，这并不取决于计算精度</strong>。例如，对于 int8，在 TPU v5p 上，$C_\text{int8}/W_\text{ici}$ 是 $5100$ 而不是 $2550$，但通信量也减半，因此两个因素相互抵消。</p>
+<p><strong>让我们考虑一些例子：</strong></p>
+<ul>
+<li><p>对于 $D=8192$、$F\approx 30{,}000$ 的 LLaMA 3 70B，在 TPU v5p 上可以轻松进行 8 路张量并行，但 16 路张量并行会受到通信限制。8 路模型分片要求 $F$ 至少约为 20K。</p>
+</li>
+<li><p>对于 Gemma 7B，$F\approx 50\text{k}$，大约到 19 路张量并行时才会受到通信限制。这意味着可以采用 16 路，并且仍然获得较好的性能。</p>
+</li>
+</ul>
+<!-- source-heading -->
+<p><a id="combining-fsdp-and-tensor-parallelism"></a></p>
+<h3 id="结合-FSDP-和张量并行性"><a href="#结合-FSDP-和张量并行性" class="headerlink" title="结合 FSDP 和张量并行性"></a>结合 FSDP 和张量并行性</h3><p><strong>语法：</strong></p>
+<p>$$\text{In}[B_X, D_Y] \cdot_D W_\text{in}[D_X, F_Y] \cdot_F W_\text{out}[F_Y, D_X] \rightarrow \text{Out}[B_X, D_Y]$$</p>
+<p>FSDP 和张量并行性的好处是它们可以结合起来。通过沿两个轴分片 <strong>W<sub>in</sub></strong> 和 **W<sub>out</sub>**，我们既节省了内存又节省了计算量。因为我们沿着 X 对 B 进行分片，所以我们减少了模型并行 AllGathers 的大小，并且因为我们沿着 Y 对 F 进行了分片，所以我们减少了 FSDP 的通信开销。这意味着两者的结合可以使我们获得比上面看到的更低的有效批量大小。</p>
+<p><img src="/images/scaling-book/mixed-fsdp-model-parallelism.png" alt="原文插图"></p>
+<p><b>图：</b>结合FSDP和张量并行性的图。与其他情况不同，模型参数没有重复。</p>
+<p><strong>这里是混合 FSDP + 张量并行的完整算法。虽然我们有很多沟通，但我们所有的 AllGathers 和 ReduceScatters 都较小，因为我们对激活进行了批量分片，并且张量对权重进行了更多分片！</strong></p>
+<p><strong>前向传播：</strong>需要计算Loss[B]</p>
+<ol>
+<li> In[B<sub>X</sub>, D] = <strong>AllGather</strong><sub>Y</sub>(In[B<sub>X</sub>, D<sub>Y</sub>]) <em>(on critical path)</em></li>
+<li> W<sub>in</sub>[D, F<sub>Y</sub>] = <strong>AllGather</strong><sub>X</sub>(W<sub>in</sub>[D<sub>X</sub>, F<sub>Y</sub>]) <em>(can be done ahead of time)</em></li>
+<li> Tmp[B<sub>X</sub>, F<sub>Y</sub>] = In[B<sub>X</sub>, D] *<sub>D</sub> W<sub>in</sub>[D, F<sub>Y</sub>]</li>
+<li> W<sub>out</sub>[F<sub>Y</sub>, D] = <strong>AllGather</strong><sub>X</sub>(W<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>]) <em>(can be done ahead of time)</em></li>
+<li> Out[B<sub>X</sub>, D] {U<sub>Y</sub>} = Tmp[B<sub>X</sub>, F<sub>Y</sub>] *<sub>F</sub> W<sub>out</sub>[F<sub>Y</sub>, D]</li>
+<li> Out[B<sub>X</sub>, D<sub>Y</sub>] = <strong>ReduceScatter</strong><sub>Y</sub>(Out[B<sub>X</sub>, D] {U<sub>Y</sub>}) <em>(on critical path)</em></li>
+<li> Loss[B<sub>X</sub>] = …</li>
+</ol>
+<p><strong>反向传播：</strong>需要计算dW<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>]， dW<sub>in</sub>[D<sub>X</sub>，F<sub>Y</sub>]</p>
+<ol>
+<li> dOut[B<sub>X</sub>, D<sub>Y</sub>] = …</li>
+<li> dOut[B<sub>X</sub>, D] = <strong>AllGather</strong><sub>Y</sub>(dOut[B<sub>X</sub>, D<sub>Y</sub>]) <em>(on critical path)</em></li>
+<li> dW<sub>out</sub>[F<sub>Y</sub>, D] {U<sub>X</sub>} = Tmp[B<sub>X</sub>, F<sub>Y</sub>] *<sub>B</sub> dOut[B<sub>X</sub>, D]</li>
+<li> dW<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>] = <strong>ReduceScatter</strong><sub>X</sub>(dW<sub>out</sub>[F<sub>Y</sub>, D] {U<sub>X</sub>})</li>
+<li> W<sub>out</sub>[F<sub>Y</sub>, D] = <strong>AllGather</strong><sub>X</sub>(W<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>]) <em>(can be done ahead of time)</em></li>
+<li> dTmp[B<sub>X</sub>, F<sub>Y</sub>] = dOut[B<sub>X</sub>, D] *<sub>D</sub> W<sub>out</sub>[F<sub>Y</sub>, D] <em>(can throw away dOut[B, D] here)</em></li>
+<li>In[B<sub>X</sub>, D] = <strong>AllGather</strong><sub>Y</sub>(In[B<sub>X</sub>, D<sub>Y</sub>]) <em>(not on critical path + this can be shared with (2) from the previous layer)</em></li>
+<li> dW<sub>in</sub>[D, F<sub>Y</sub>] {U<sub>X</sub>} = In[B<sub>X</sub>, D] *<sub>B</sub> dTmp[B<sub>X</sub>, F<sub>Y</sub>]</li>
+<li> dW<sub>in</sub>[D<sub>X</sub>, F<sub>Y</sub>] = <strong>ReduceScatter</strong><sub>X</sub>(dW<sub>in</sub>[D, F<sub>Y</sub>] {U<sub>X</sub>})</li>
+<li>W<sub>in</sub>[D, F<sub>Y</sub>] = <strong>AllGather</strong><sub>X</sub>(W<sub>in</sub>[D<sub>X</sub>, F<sub>Y</sub>]) <em>(can be done ahead of time)</em></li>
+<li>dIn[B<sub>X</sub>, D] {U<sub>Y</sub>} = dTmp[B<sub>X</sub>, F<sub>Y</sub>] *<sub>F</sub> W<sub>in</sub>[D, F<sub>Y</sub>] <em>(needed for previous layers)</em></li>
+<li>dIn[B<sub>X</sub>, D<sub>Y</sub>] = <strong>ReduceScatter</strong><sub>Y</sub>(dIn[B<sub>X</sub>, D] {U<sub>Y</sub>}) <em>(on critical path)</em></li>
+</ol>
+<p><strong>FSDP 和 TP 的正确组合是什么？</strong> 一个简单但关键的格言是 FSDP 移动权重，张量并行性移动激活。这意味着随着我们的批量大小缩小（特别是当我们进行更多的数据并行处理时），张量并行性变得更便宜，因为我们每个分片的激活更小。</p>
+<ul>
+<li>张量并行执行 $\mathbf{AllGather}_Y([B_X, D_Y])$，它随着 $X$ 的增长而缩小。</li>
+<li>FSDP 执行 $\mathbf{AllGather}_X([D_X, F_Y])$，它随着 $Y$ 的增长而缩小。</li>
+</ul>
+<p>因此，通过将两者结合起来，我们可以进一步降低每个副本的最小批量大小。我们可以用与上述相同的方式计算最佳的 FSDP 和 TP 数量：</p>
+<p>令 $X$ 为专用于 FSDP 的芯片数量，$Y$ 为专用于张量并行性的芯片数量。令 $N$ 为切片中的芯片总数，其中 $N=XY$。令 $M_X$ 和 $M_Y$ 分别为 FSDP 和 TP 跨越的网格轴数量（它们的总和应大致为 3）。这里只对前向传播建模，因为它对应每 FLOP 最大的通信量。将上面算法中的通信相加，可以得到</p>
+<p>$$T_\text{FSDP comms}(B, X, Y) = \frac{2\cdot 2\cdot D \cdot F}{Y \cdot W_\text{ici} \cdot M_X}$$</p>
+<p>$$T_\text{TP comms}(B, X, Y) = \frac{2 \cdot 2 \cdot B \cdot D}{X \cdot W_\text{ici} \cdot M_Y}$$</p>
+<p>同样，我们的总 FLOP 时间是</p>
+<p>$$T_\text{math} = \frac{2\cdot 2 \cdot B \cdot D \cdot F}{N \cdot C}.$$</p>
+<p>为了简化分析，我们做两个假设：首先，我们允许$X$和$Y$取非整数值（只要它们是正数并且满足$XY=N$）；其次，我们假设 $X$ 和 $Y$ 轴上的通信可以彼此完全重叠。在第二个假设下，总通信时间为</p>
+<p>$$T_\text{comms} = \max\left(T_\text{FSDP comms}, T_\text{TP comms}\right)$$</p>
+<p>在询问在什么条件下我们将受到计算受限之前，我们先找到 $X$ 和 $Y$ 的最佳值，以最大限度地减少总通信量。由于我们的 FLOP 独立于 $X$ 和 $Y$，因此最佳设置就是那些简单地最小化通信的设置。为此，我们将上面的 $T_\text{comms}$ 写为 $X$ 和 $N$（它是固定的，因为它是我们系统中的芯片数量），而不是 $X$ 和 $Y$：</p>
+<p>$$T_\text{comms} (X) = \frac{4D}{W_\text{ici}} \max\left(\frac{F \cdot X}{N \cdot M_X}, \frac{B}{X \cdot M_Y}\right)$$</p>
+<p>由于 $T_\text{FSDP comms}$ 在 $X$ 中单调递增，而 $T_\text{TP comms}$ 在 $X$ 中单调递减，因此当 $T_\text{FSDP comms} = T_\text{TP comms}$ 时必须最小化最大值，这发生在</p>
+<p>$$\begin{align*}<br>\frac{FX_{opt}}{M_X} = \frac{BN}{X_{opt} M_Y} \rightarrow \<br>X_{opt} = \sqrt{\frac{B}{F} \frac{M_X}{M_Y} N}<br>\end{align*}$$</p>
+<p>这个超级有用！这告诉我们，对于给定的 $B$、$F$ 和 $N$，最佳的 FSDP 量是多少。让我们感受一下规模。  代入实际值，即 $N = 64$（对应于 4x4x4 芯片阵列）、$B=48,000$、$F=32768$，大致得出 $X\approx 13.9$。因此，我们选择 $X$ 为 16，$Y$ 为 4，接近我们计算出的最佳值。</p>
+<p><strong>要点：</strong>一般来说，在训练期间，FSDP 的最佳规模是 $X_{opt}=\sqrt{\frac{B}{F}\frac{M_X}{M_Y}N}$。</p>
+<p>现在让我们回到我们一直在问的所有并行策略的问题： <strong>在什么条件下我们将受到计算受限？</strong> 由于我们可以重叠 FLOP 和通信，因此当我们遇到计算受限时</p>
+<p>$$\max\left(T_\text{FSDP comms}, T_\text{TP comms}\right) &lt; T_\text{math}$$</p>
+<p>通过让 ICI 算术强度 $\alpha \equiv C / W_\text{ici}$，我们可以简化：</p>
+<p>$$\max\left(\frac{F}{Y \cdot M_X}, \frac{B}{X \cdot M_Y}\right) &lt; \frac{B \cdot F}{N \cdot \alpha}$$</p>
+<p>由于我们计算了 $X_{opt}$ 以使 LHS 最大值相等，因此我们可以将其插入任一侧（注意 $Y_{opt} = N/X_{opt}$），即</p>
+<p>$$\frac{F}{N \cdot W_\text{ici} \cdot M_X} \sqrt{\frac{B}{F} \frac{M_X}{M_Y} N} &lt; \frac{B \cdot F}{N \cdot C}$$</p>
+<p>进一步简化，我们发现</p>
+<p>$$ \sqrt{\frac{B\cdot F}{M_X \cdot M_Y \cdot N}} &lt; \frac{B \cdot F}{N \cdot \alpha},$$</p>
+<p>其中左侧与通信时间成正比，右侧与计算时间成正比。请注意，虽然计算时间随批量大小线性缩放（无论并行性如何），但通信时间随批量大小的平方根缩放。因此，计算与通信时间的比率也按批量大小的平方根缩放：</p>
+<p>$$ \frac{T_\text{math}}{T_\text{comms}} = \frac{\sqrt{BF}\sqrt{M_X M_Y}}{\alpha \sqrt{N}}. $$</p>
+<p>为了确保这个比率大于 1，这样我们就受到计算受限，我们需要</p>
+<p>$$ \frac{B}{N} &gt; \frac{\alpha^2}{M_X M_Y F}$$</p>
+<p>要获得近似数字，请再次插入 $F=32,768$、$\alpha=2550$ 和 $M_X M_Y=2$（因为它必须适用于 3D 网格）。这大致给出了 $B/N &gt; 99$。与纯数据并行（或 FSDP）情况相比，这大约为我们赢得了八倍，在纯数据并行（或 FSDP）情况下，假设使用 3D 网格，我们计算出 $B/N$ 必须超过大约 $850$ 才能达到计算极限。</p>
+<p><strong>要点：</strong>将张量并行与 FSDP 相结合，可以把 $B/N$ 降至 $2550^2/(2F)$。这使我们能够处理每个芯片少至 100 个 token 的批次，大约只有单独使用 FSDP 时的八分之一。</p>
+<p>下面我们绘制了混合 FSDP + TP 的 FLOP 与通信时间的比率，并将其与代表性 4x4x4 芯片阵列上的仅张量并行 (TP) 和仅数据并行 (FSDP) 进行比较。虽然纯 FSDP 并行性在非常大的批量大小中占主导地位，但在批量大小与芯片数量之比约为 100 到 850 之间的情况下，需要混合 FSDP + TP 策略才能受计算受限。</p>
+<p><img src="/images/scaling-book/mixed-fsdp-comms-2.png" alt="原文插图"></p>
+<p><b> 图：</b> 在 F=30k 的 TPUv5p 4x4x4 切片上实现最佳混合 FSDP/TP 的 FLOP 与通信时间的比率。正如预期的那样，张量并行度与批量大小具有固定的比率； $\sqrt{B}$ 为理想混合 FSDP + TP 秤，$B$ 为 FSDP 秤。然而，在中等批量大小的情况下，只有 FSDP + TP 的比率大于 1。</p>
+<p>这是 TPU v5p 16x16x16 的另一个示例，显示了不同分片方案的 FLOP 和通信时间作为批量大小的函数。</p>
+<p><img src="/images/scaling-book/math-comms-time.png" alt="原文插图"></p>
+<p><b>图：</b> 不同并行方案的通信所花费的时间。黑色虚线是矩阵乘法 FLOP 所花费的时间，因此这条线上方的任何曲线都是受通信受限的。我们注意到，所有策略在批量大小 6e5 以下时都会受到通信受限，这与我们预期的 4096 * 2550^2 / (2 * 8192 * 4) = 4e5 一致。</p>
+<p>黑色曲线是模型 FLOP 所花费的时间，这意味着低于所有通信成本的任何批量大小都严格受到通信受限。你会注意到黑色曲线与绿色曲线相交于大约 <code>4e5</code> 处，正如预测的那样。</p>
+<p>这是一个交互式动画，显示了不同批量大小的总计算时间和通信时间：</p>
+<p><a href="/images/scaling-book/training-roofline-zh.html">交互图：混合 FSDP／TP 的 MLP Roofline</a></p>
+<p><b>图：</b>在 TPU v5p 16×16×16 上，前向 MLP 的计算时间和通信时间随批量大小的变化（$D=8192$，$F=32768$）。使用的是上面推导的 $T_\text{FSDP comms}$、$T_\text{TP comms}$ 和 $T_\text{math}$。拖动滑块可改变 FSDP 与 TP 的分配；阴影区域内的批量均受通信受限。</p>
+<p>你会注意到这通常与上述内容一致：最佳分割（FSDP = 512 和 TP = 8）在大约 4e5 的批处理大小之上变得受计算受限，而具有更多张量并行性的每个分割在所有批处理大小上都保持通信受限。张量并行度较低的分割需要更大的批次。</p>
+<!-- source-heading -->
+<p><a id="pipelining"></a></p>
+<h3 id="流水线"><a href="#流水线" class="headerlink" title="流水线"></a>流水线</h3><p>你可能会注意到，我们在前面的部分中根本避免讨论管道。流水线是 GPU 并行性的主要策略，但在 TPU 上不太重要。简而言之，流水线训练涉及将模型的各层拆分到多个设备上，并在前向和反向传播过程中在管道阶段之间传递激活。该算法类似于：</p>
+<ol>
+<li>使用在层维度上分片的权重初始化 TPU 0 上的数据（$W_\text{in}[L_Z, D_X, F_Y]$ 用于使用 FSDP 和张量并行性进行流水线操作）。</li>
+<li>在 TPU 0 上执行第一层，然后将生成的激活复制到 TPU 1，并重复直到到达最后一个 TPU。</li>
+<li>计算损失函数及其导数 $\partial L / \partial x_L$。</li>
+<li>对于最后一个管道阶段，计算导数 $\partial L / \partial W_L$ 和 $\partial L / \partial x_{L-1}$，然后将 $\partial L / \partial x_{L-1}$ 复制到前一个管道阶段并重复，直到达到 TPU 0。</li>
+</ol>
+<p><strong>这里是一些（工作的）Python伪代码</strong></p>
+<p>此伪代码应在 Cloud TPU VM 上运行。虽然它不是很高效或不现实，但它可以让你了解数据是如何跨设备传播的。</p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">batch_size <span class="token operator">=</span> <span class="token number">32</span>
+d_model <span class="token operator">=</span> <span class="token number">128</span>
+d_ff <span class="token operator">=</span> <span class="token number">4</span> <span class="token operator">*</span> d_model
+
+num_layers <span class="token operator">=</span> <span class="token builtin">len</span><span class="token punctuation">(</span>jax<span class="token punctuation">.</span>devices<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+key <span class="token operator">=</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>PRNGKey<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
+
+<span class="token comment"># Pretend each layer is just a single matmul.</span>
+x <span class="token operator">=</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>normal<span class="token punctuation">(</span>key<span class="token punctuation">,</span> <span class="token punctuation">(</span>batch_size<span class="token punctuation">,</span> d_model<span class="token punctuation">)</span><span class="token punctuation">)</span>
+weights <span class="token operator">=</span> jax<span class="token punctuation">.</span>random<span class="token punctuation">.</span>normal<span class="token punctuation">(</span>key<span class="token punctuation">,</span> <span class="token punctuation">(</span>num_layers<span class="token punctuation">,</span> d_model<span class="token punctuation">,</span> d_model<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token keyword">def</span> <span class="token function">layer_fn</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> weight<span class="token punctuation">)</span><span class="token punctuation">:</span>
+  <span class="token keyword">return</span> x @ weight
+
+<span class="token comment"># Assume we have num_layers == num_pipeline_stages</span>
+intermediates <span class="token operator">=</span> <span class="token punctuation">[</span>x<span class="token punctuation">]</span>
+<span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>num_layers<span class="token punctuation">)</span><span class="token punctuation">:</span>
+  x <span class="token operator">=</span> layer_fn<span class="token punctuation">(</span>x<span class="token punctuation">,</span> weights<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
+  intermediates<span class="token punctuation">.</span>append<span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+
+  <span class="token keyword">if</span> i <span class="token operator">!=</span> num_layers <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">:</span>
+    x <span class="token operator">=</span> jax<span class="token punctuation">.</span>device_put<span class="token punctuation">(</span>x<span class="token punctuation">,</span> jax<span class="token punctuation">.</span>devices<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token keyword">def</span> <span class="token function">loss_fn</span><span class="token punctuation">(</span>batch<span class="token punctuation">)</span><span class="token punctuation">:</span>
+  <span class="token keyword">return</span> jnp<span class="token punctuation">.</span>mean<span class="token punctuation">(</span>batch <span class="token operator">**</span> <span class="token number">2</span><span class="token punctuation">)</span>  <span class="token comment"># make up some fake loss function</span>
+
+loss<span class="token punctuation">,</span> dx <span class="token operator">=</span> jax<span class="token punctuation">.</span>value_and_grad<span class="token punctuation">(</span>loss_fn<span class="token punctuation">)</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+
+<span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>num_layers <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+  _<span class="token punctuation">,</span> f_vjp <span class="token operator">=</span> jax<span class="token punctuation">.</span>vjp<span class="token punctuation">(</span>layer_fn<span class="token punctuation">,</span> intermediates<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> weights<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
+  dx<span class="token punctuation">,</span> dw <span class="token operator">=</span> f_vjp<span class="token punctuation">(</span>dx<span class="token punctuation">)</span>  <span class="token comment"># compute the jvp dx @ J(L)(x[i], W[i])</span>
+  weights<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> weights<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token number">0.01</span> <span class="token operator">*</span> dw  <span class="token comment"># update our weights</span>
+
+  <span class="token keyword">if</span> i <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">:</span>
+    dx <span class="token operator">=</span> jax<span class="token punctuation">.</span>device_put<span class="token punctuation">(</span>dx<span class="token punctuation">,</span> jax<span class="token punctuation">.</span>devices<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span>i<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+
+<p><strong>为什么这是一个好主意？</strong> 流水线之所以伟大，有很多原因：它在流水线阶段之间的通信成本较低，这意味着即使使用低带宽互连，你也可以训练非常大的模型。这对于 GPU 通常非常有用，因为它们不像 TPU 那样通过 ICI 密集连接。</p>
+<p><strong>为什么这很困难/烦人？</strong> 你可能已经在上面的伪代码中注意到 TPU 0 几乎总是空闲的！它只在管道的第一步和最后一步上工作。空闲期称为管道泡沫，处理起来非常烦人。通常，我们首先尝试通过微批处理来缓解这一问题，微批处理通过管道发送多个小批次，从而使 TPU 0 至少在总步骤时间的较大部分中得到利用。</p>
+<p>第二种方法是仔细重叠前向 matmul $W_i @ x_i$、后向 $dx$ matmul $W_i @ \partial L / \partial x_{i+1}$ 和 $dW$ matmul $\partial L / \partial x_{i+1} @ x_i$。由于其中每一个都需要一些 FLOP，我们可以将它们重叠以隐藏气泡。下图来自 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2412.19437">DeepSeek-V3 论文</a>，展示了其“无气泡”流水线调度：</p>
+<p><img src="/images/scaling-book/deepseek-pipeline.png" alt="原文插图"></p>
+<p><b>图：</b>DeepSeek v3 的流水线调度，来自其<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2412.19437">近期论文</a>。橙色表示前向矩阵乘法，绿色表示 dL/dx 矩阵乘法，蓝色表示 dL/dW 矩阵乘法。优先执行反向传播中的 dL/dx 乘法，就可以避免计算能力闲置。</p>
+<p>TPU 的紧密互连 Pod 较大，对流水线的依赖相对较小，因此这里不再深入展开。不过，理解流水线的主要瓶颈仍然是很好的练习。</p>
+<!-- source-heading -->
+<p><a id="scaling-across-pods"></a></p>
+<h3 id="跨-Pod-扩展"><a href="#跨-Pod-扩展" class="headerlink" title="跨 Pod 扩展"></a>跨 Pod 扩展</h3><p>这里讨论的最大 TPU 切片是 TPU v5p SuperPod，包含 8960 块芯片、2240 台主机。超过这个规模，就需要跨越数据中心网络（DCN）的边界。每台 TPU 主机配有一张或多张网卡（NIC），通过以太网连接其他 TPU v5p Pod。<a href="/2026/07/25/Scaling-Book-02-%E7%90%86%E8%A7%A3TPU/">第 2 章：理解 TPU</a>提到，每台主机约有 200Gbps（25GB/s）的全双工 DCN 带宽，折合每块 TPU 约 6.25GB/s 的全双工出口带宽。</p>
+<p>跨越单个 Pod 时，通常在 ICI 域内使用某种模型并行或 FSDP，而在多个 Pod 之间采用纯数据并行。设目标 TPU 总数为 $N$，每个 ICI 互连切片内的 TPU 数为 $M$。要在 DCN 上执行 AllReduce，可以让这些 Pod 组成一个环做归约，反向传播时便得到：</p>
+<p>$$T_\text{math} = \frac{2 \cdot 2 \cdot 2 \cdot BDF}{N \cdot C}$$</p>
+<p>$$T_\text{comms} = \frac{2 \cdot 2 \cdot 2 \cdot DF}{M \cdot W_\text{dcn}}$$</p>
+<p>通信带宽随 $M$ 增长。这一点与 ICI 不同：ICI 域变大时，参与的网卡也会增加，总 DCN 带宽随之增大。化简后可以发现，下列条件成立时，有 $T_\text{math} &gt; T_\text{comms}$：</p>
+<p>$$\frac{B}{\text{slice}} &gt; \frac{C}{W_\text{dcn}}$$</p>
+<p>对于 TPU v5p，$\frac{C}{W_\text{dcn}}$ 约为 <code>4.59e14 / 6.25e9 = 73,440</code>。这告诉我们，为了有效地扩展 DCN，每个 ICI 域需要有一个最小批量大小才能传出每个节点。</p>
+<p><strong>这有多大问题？</strong> 举一个具体的例子，假设我们想要在 TPU v5p 上使用 2M token的 BS 训练 LLaMA-3 70B。 LLaMA-3 70B 的编号为 $F\approx 30,000$。从以上几节，我们知道以下几点：</p>
+<ul>
+<li>我们可以做到张量并行度达到 $Y = M_Y \cdot F / 2550 \approx 11 \cdot M_Y$。</li>
+<li>只要$B / N &gt; 2550 / M_X$我们就可以做FSDP。这意味着，如果我们想要使用 BS=2M 和 3 轴数据并行性进行训练，我们最多只能使用 $\approx 2400$ 芯片，大约是 TPU v5p pod 的四分之一。</li>
+<li>当我们结合 FSDP + 张量并行性时，当我们拥有 $B / N &lt; 2550^2 / (2 \cdot 30000) = 108$ 时，就会成为通信受限，因此这让我们可以扩展到大约 18k 芯片！然而，TPU v5p pod 的最大尺寸为 8k 芯片，因此超出此范围我们必须使用 DCN。</li>
+</ul>
+<p>总而言之，我们有一个很好的方法来进行 BS=1M 的训练，大致使用 X (FSDP) = 1024 和 Y (TP) = 8，但是当 BS=2M 时，我们需要使用 DCN。如上所述，我们的 DCN 算术强度为 $\text{73,440}$，因此我们只需确保每个 ICI 域的批量大小大于此值。这对我们来说是微不足道的，因为使用 2 个 pod，每个 pod 的 BS 为 1M，每个 TPU 的批量大小为 111，这非常好（可能有点接近，但理论上是合理的）。</p>
+<p><strong>要点：</strong> 只要我们的每个 Pod 批量大小至少为 73k 个token，使用纯数据并行在多个 TPU Pod 之间进行扩展就相当简单。</p>
+<!-- source-heading -->
+<p><a id="takeaways-from-llm-training-on-tpus"></a></p>
+<h2 id="TPU-法学硕士培训要点"><a href="#TPU-法学硕士培训要点" class="headerlink" title="TPU 法学硕士培训要点"></a>TPU 法学硕士培训要点</h2><ul>
+<li><p>增加并行性或减少批量大小都会使我们更加受通信受限，因为它们减少了每个芯片执行的计算量。</p>
+</li>
+<li><p>在合理的上下文长度（~32k）内，我们可以将 Transformer 建模为 MLP 块的堆栈，并通过它们如何分割每层的两个/三个主矩阵相乘来定义每个并行方案。</p>
+</li>
+<li><p>在训练过程中，我们考虑了 4 种主要的并行方案，每种方案都有自己的带宽和计算要求（数据并行、FSDP、张量并行和混合 FSDP + 张量并行）。</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><strong>策略</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>数据并行性</strong></td>
+<td>激活是批量分片的，其他一切都是完全复制的，我们在反向传播期间全部减少梯度。</td>
+</tr>
+<tr>
+<td><strong>FSDP</strong></td>
+<td>激活、权重和优化器被批量分片，权重在使用前收集，梯度被减少分散。</td>
+</tr>
+<tr>
+<td><strong>张量并行（又名模型并行）</strong></td>
+<td>激活沿着 $d_\text{model}$ 分片，权重沿着 $d_\text{ff}$ 分片，激活在 W<sub>in</sub> 之前收集，结果在 W<sub>out</sub> 之后执行 ReduceScatter。</td>
+</tr>
+<tr>
+<td><strong>混合 FSDP + 张量并行</strong></td>
+<td>在上述两者中，FSDP 收集模型分片权重。</td>
+</tr>
+</tbody></table>
+<p>以下是每种方法的“公式”：</p>
+<p>$$\small<br>\begin{array}{cc}<br>\text{Strategy} &amp; \text{Formula}\<br>\hline<br>\text{DP} &amp; \text{In}[B_X, D] \cdot_D W_\text{in}[D, F] \cdot_F W_\text{out}[F, D] \rightarrow \text{Out}[B_X, D] \<br>\text{FSDP} &amp; \text{In}[B_X, D] \cdot_D W_\text{in}[D_X, F] \cdot_F W_\text{out}[F, D_X] \rightarrow \text{Out}[B_X, D] \<br>\text{TP} &amp; \text{In}[B, D_Y] \cdot_D W_\text{in}[D, F_Y] \cdot_F W_\text{out}[F_Y, D] \rightarrow \text{Out}[B, D_Y] \<br>\text{TP + FSDP}  &amp; \text{In}[B_X, D_Y] \cdot_D W_\text{in}[D_X, F_Y] \cdot_F W_\text{out}[F_Y, D_X] \rightarrow \text{Out}[B_X, D_Y] \<br>\hline<br>\end{array}$$</p>
+<ul>
+<li>每种策略都可能根据单设备的计算与通信比例进入网络瓶颈。下表给出每层的计算与通信量，其中 $X$ 表示 FSDP 规模，$Y$ 表示张量并行规模。</li>
+</ul>
+<p>$$<br>\small<br>\begin{array}{ccc}<br>\text{Strategy} &amp; \text{Compute per layer} &amp; \text{Comms per layer} \<br>&amp; \text{(ignoring gating einsum)} &amp; \text{(bytes, forward + backward pass)}\<br>\hline<br>\text{DP} &amp; 4BDF/X + 8BDF/X &amp; 0 + 8DF \<br>\text{FSDP} &amp; 4BDF/X + 8BDF/X &amp; 4DF + 8DF \<br>\text{TP} &amp; 4BDF/Y + 8BDF/Y &amp; 4BD + 4BD \<br>\text{FSDP + TP} &amp; 4BDF/(XY) + 8BDF/(XY) &amp; (4BD/X + 4DF/Y) + (8BD/X + 8DF/Y) \<br>\hline<br>\end{array}$$</p>
+<ul>
+<li><p>纯数据并行很少有用，因为模型及其优化器状态使用字节 = 10x 参数计数。这意味着我们很少能在内存中容纳超过数十亿个参数。</p>
+</li>
+<li><p>当 $\text{batch size per shard}&lt;C/W$ 时，数据并行和 FSDP 会受到通信限制。对于 ICI，该阈值为 2,550；对于 DCN，该阈值约为 71,000。使用更多并行轴可以提高可用聚合带宽。</p>
+</li>
+<li><p>当 $\lvert Y\rvert&gt;F/2550$ 时，张量并行会受到通信限制。<strong>对于大多数模型来说，这大约对应 8～16 路并行。</strong>这与批量大小无关。</p>
+</li>
+<li><p>混合 FSDP 与张量并行允许我们将单芯片批量大小降至 $2550^2/(2F)\approx 100$。</p>
+</li>
+<li><p>在成为 DCN 绑定之前，跨 Pod 的数据并行性要求每个 Pod 的最小批量大小约为 71,000。</p>
+</li>
+<li><p>基本上，如果你的批量较大或模型较小，事情就很简单。你可以跨 DCN 进行数据并行或 FSDP + 数据并行。中间部分是事情变得有趣的地方。</p>
+</li>
+</ul>
+<!-- source-heading -->
+<p><a id="some-problems-to-work"></a></p>
+<h2 id="工作中的一些问题"><a href="#工作中的一些问题" class="headerlink" title="工作中的一些问题"></a>工作中的一些问题</h2><p>让我们使用 LLaMA-2 13B 作为本节的基本模型。以下是型号详细信息：</p>
+<table>
+<thead>
+<tr>
+<th>超参数</th>
+<th>价值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>L</td>
+<td>40</td>
+</tr>
+<tr>
+<td>D</td>
+<td>5,120</td>
+</tr>
+<tr>
+<td>F</td>
+<td>13824</td>
+</tr>
+<tr>
+<td>N</td>
+<td>40</td>
+</tr>
+<tr>
+<td>K</td>
+<td>40</td>
+</tr>
+<tr>
+<td>H</td>
+<td>128</td>
+</tr>
+<tr>
+<td>V</td>
+<td>32,000</td>
+</tr>
+</tbody></table>
+<p>LLaMA-2 具有独立的嵌入和输出矩阵以及门控 MLP 模块。</p>
+<p><strong>问题 1：</strong> LLaMA-2 13B 有多少个参数（我知道这很傻，但算一下）？<em>请注意，与<a href="/2026/08/08/Scaling-Book-04-Transformer%E6%95%B0%E5%AD%A6/">第 4 章：Transformer 数学</a>中一样，LLaMA-3 有 3 个大 FFW 矩阵，两个上投影和一个下投影。我们忽略了本节中的两个“门控”einsum 矩阵，但它们的行为与本节中的 W<sub>in</sub> 相同。</em></p>
+<p><strong>答案：</strong></p>
+<ul>
+<li>FFW 参数：$3LDF$ = <code>8.5e9</code></li>
+<li>注意力参数：$4DNHL$ = <code>4.2e9</code></li>
+<li>词表参数：$2VD$ = <code>0.33e9</code></li>
+<li>总计：<code>8.5e9 + 4.2e9 + 0.33e9 = 13.0e9</code>，正如预期的那样！</li>
+</ul>
+<p><strong>问题 2：</strong> 假设我们正在使用 BS=16M token并使用 Adam 进行训练。暂时忽略并行性，模型的参数、优化器状态和激活使用了多少总内存？ <em>假设我们将参数存储在 bf16 中，将优化器状态存储在 fp32 中，并且每层检查点激活三次（在三个大 FFW matmuls 之后）。</em></p>
+<p><strong>答案：</strong></p>
+<p>用于参数 (bf16) 和两个优化器状态（fp32，第一和第二矩累加器）的总内存为 <code>(2 + 4 + 4) * 13e9 ~ 130GB</code>。前两个 matmul 之后的激活形状为 $BF$，最后一个 matmul 之后的激活形状为 $BD$（根据上面的 Transformer 图），因此 bf16 的总内存为 $2 \cdot L \cdot (BD + 2 * BF) = 2LB \cdot (D + 2F)$ 或 <code>2 * 40 * 16e6 * 5,120 * (1 + 2 * 2.7) ~ 4.2e13 = 42TB</code>，因为 <code>B=16e6</code>。所有其他激活或多或少都可以忽略不计。</p>
+<p><strong>问题 3：</strong> 假设我们想要在 TPUv5p 16x16x16 切片上训练 32k 序列长度和 3M token的总批量大小。假设我们想要使用 bfloat16 权重和 float32 优化器，如上所述。</p>
+<ol>
+<li>我们可以使用纯数据并行吗？为什么或为什么不呢？</li>
+<li>我们可以使用纯粹的 FSDP 而不受通讯限制吗？为什么或为什么不呢？使用纯 FSDP，每个设备将使用多少内存（假设我们仅在 3 个大 FFW 矩阵之后进行梯度检查点）。</li>
+<li>我们可以使用混合 FSDP + 张量并行吗？为什么或为什么不呢？如果是这样，$X$ 和 $Y$ 应该是什么？每个设备将存储多少内存？仅使用 Roofline FLOP 估计并忽略注意力，在 40% MFU 下每个训练步骤需要多长时间？</li>
+</ol>
+<p><strong>答案：</strong></p>
+<p>首先，让我们写下一些数字。序列长度为 32k，批量大小为 3M，序列批量大小为 96。在 TPU v5p 16x16x16 切片上，我们有 HBM <code>393TB</code>。</p>
+<ol>
+<li><p>我们不能使用纯粹的数据并行性，因为它会在每个芯片上复制参数和优化器状态，​​这些参数和优化器状态已经约为 130GB（从第二季度开始），这比我们每个芯片 (96GB) 的 HBM 还要多。</p>
+</li>
+<li><p>让我们从纯粹的内存开始。在第二季度将 BS=16M 替换为 3M，我们得到 <code>~7.86e12</code> 检查点激活总数，并且在 1.3e11 优化器状态下，这使我们几乎完全达到 8e12 = 8TB。 TPUv5p 切片总共具有 <code>393TB</code> 的 HBM，因此我们安全地处于 HBM 限制之下。接下来让我们看看我们是否会受到通信或计算的限制。凭借 4096 个芯片和 3 个并行轴，我们可以实现 <code>850 * 4096 = 3.48M</code> token的最小批量大小。这略高于我们的 3M 批量大小。所以我们实际上是受通讯束缚的，这很可悲。因此，一般答案是<strong>不，我们无法在不受通信受限的情况下单独进行 FSDP</strong>。</p>
+</li>
+<li><p>现在我们知道我们最关心的是通讯绑定，所以让我们插入一些数字。首先，我们从上面知道，混合 FSDP + 张量并行性的每芯片批量大小需要高于 $2550^2 / 2F = 235$。这意味着理论上我们可以做到这一点！让我们算一下每一个有多少。</p>
+</li>
+</ol>
+<p>我们有规则 $X_{opt} = \sqrt{(B / F) \cdot (M_X / M_Y) \cdot N}$，所以这里有 <code>sqrt(3e6 * 2 * 4096 / 13824) = 1333</code>，这意味着我们将执行大约 1024 路 DP 和 4 路 TP。每个 TPU 内存将如 (2) 中所示，步骤时间将为 <code>6 * 3e6 * 13e9 / (4096 * 4.6e14 * 0.4) = 300ms</code>。</p>
+<!-- source-heading -->
+<p><a id="thats-it-for-part-5-for-part-6-which-applies-this-content-to-real-llama-models-click-here06-在tpu上训练llama3md"></a></p>
+<h3 id="第-5-章到此结束！原著第-6-章将把这些方法应用到真实的-LLaMA-模型。"><a href="#第-5-章到此结束！原著第-6-章将把这些方法应用到真实的-LLaMA-模型。" class="headerlink" title="第 5 章到此结束！原著第 6 章将把这些方法应用到真实的 LLaMA 模型。"></a>第 5 章到此结束！<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/applied-training/">原著第 6 章</a>将把这些方法应用到真实的 LLaMA 模型。</h3><!-- source-heading -->
+<p><a id="appendix"></a></p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><!-- source-heading -->
+<p><a id="appendix-a-deriving-the-backward-pass-comms"></a></p>
+<h3 id="附录-A：导出反向传播通信"><a href="#附录-A：导出反向传播通信" class="headerlink" title="附录 A：导出反向传播通信"></a>附录 A：导出反向传播通信</h3><p>上面，我们将 Transformer 层前向传播简化为 Out[B, D] = In[B, D] *<sub>D</sub> W<sub>in</sub>[D, F] *<sub>F</sub> W<sub>out</sub>[F，D]。我们如何获得反向传播所需的通信？</p>
+<p>这很自然地遵循上一节中单个 matmul <strong>Y = X * A</strong> 的规则：</p>
+<p>$$\frac{dL}{dA} = \frac{dL}{dY}\frac{dY}{dA} = X^T \left(\frac{dL}{dY}\right)$$</p>
+<p>$$\frac{dL}{dX} = \frac{dL}{dY}\frac{dY}{dX} = \left(\frac{dL}{dY}\right) A^T$$</p>
+<p>使用它，我们得到以下公式（让 Tmp[B, F] 代表 In[B, D] * W<sub>in</sub>[D, F]）：</p>
+<ol>
+<li>dW<sub>out</sub>[F, D] = Tmp[B, F] *<sub>B</sub> dOut[B, D]</li>
+<li>dTmp[B, F] = dOut[B, D] *<sub>D</sub> W<sub>out</sub>[F, D]</li>
+<li>dW<sub>in</sub>[D, F] = In[B, D] *<sub>B</sub> dTmp[B, F]</li>
+<li>dIn[B, D] = dTmp[B, F] *<sub>F</sub> W<sub>in</sub>[D, F]</li>
+</ol>
+<p>请注意，这些公式是数学陈述，没有提及分片。反向传播的工作是计算这四个量。因此，为了计算出必要的通信，我们只需对上面四个方程（Tmp、dOut、W<sub>out</sub>、W<sub>in</sub>）中要进行矩阵运算的所有量进行分片，这些量由我们的并行化方案指定，再使用分片 matmul 规则判断需要执行哪些通信。请注意，dOut 的分片方式与 Out 相同。</p>
+<hr>
+<blockquote>
+<p><strong>译文与许可：</strong>本章是基于固定版本 <code>173fb0851d7e654872f0327aff2e17607cf24106</code> 的机器辅助中文初译，并非逐句人工精校。原文与配图基于 MIT License 发布。Copyright (c) 2022 Maruan Al-Shedivat；Copyright (c) 2025 Google LLC。完整许可见 <a href="/images/scaling-book/LICENSE.txt">MIT License</a>。</p>
+</blockquote>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">Jacob Austin 等</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://yitrus.github.io/2026/08/15/Scaling-Book-05-Transformer%E5%B9%B6%E8%A1%8C%E8%AE%AD%E7%BB%83/">https://yitrus.github.io/2026/08/15/Scaling-Book-05-Transformer%E5%B9%B6%E8%A1%8C%E8%AE%AD%E7%BB%83/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">Jacob Austin 等</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Transformer/">
+                                    <span class="chip bg-color">Transformer</span>
+                                </a>
+                            
+                                <a href="/tags/Scaling-Book/">
+                                    <span class="chip bg-color">Scaling Book</span>
+                                </a>
+                            
+                                <a href="/tags/Distributed-Training/">
+                                    <span class="chip bg-color">Distributed Training</span>
+                                </a>
+                            
+                                <a href="/tags/FSDP/">
+                                    <span class="chip bg-color">FSDP</span>
+                                </a>
+                            
+                                <a href="/tags/Tensor-Parallelism/">
+                                    <span class="chip bg-color">Tensor Parallelism</span>
+                                </a>
+                            
+                                <a href="/tags/Pipeline-Parallelism/">
+                                    <span class="chip bg-color">Pipeline Parallelism</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+        <div class="card utterances-card">
+    <div class="card-content">
+        <h2 style="font-size: 20px; font-weight: 700; margin-top: 0;">
+            <i class="fas fa-comments fa-fw" aria-hidden="true"></i> 评论
+        </h2>
+        <p>使用 GitHub 账号参与评论，评论将公开保存在 GitHub Issues 中。</p>
+        <script src="https://utteranc.es/client.js"
+                repo="Yitrus/yitrus.github.io"
+                issue-term="pathname"
+                theme="preferred-color-scheme"
+                crossorigin="anonymous"
+                async></script>
+        <p><a href="https://github.com/Yitrus/yitrus.github.io/issues" target="_blank" rel="noopener noreferrer">在 GitHub 查看评论</a></p>
+        <noscript>请启用 JavaScript 加载评论，或通过上方链接前往 GitHub。</noscript>
+    </div>
+</div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2026/08/15/Scaling-Book-05-Transformer%E5%B9%B6%E8%A1%8C%E8%AE%AD%E7%BB%83/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/6.jpg" class="responsive-img" alt="Scaling Book 中文（05）：如何并行训练 Transformer">
+                        
+                        <span class="card-title">Scaling Book 中文（05）：如何并行训练 Transformer</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            分析数据并行、FSDP、张量并行和流水线并行的计算、通信与内存开销，并推导不同策略进入通信瓶颈的条件。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-08-15
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/AI-infra/" class="post-category">
+                                    AI infra
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Transformer/">
+                        <span class="chip bg-color">Transformer</span>
+                    </a>
+                    
+                    <a href="/tags/Scaling-Book/">
+                        <span class="chip bg-color">Scaling Book</span>
+                    </a>
+                    
+                    <a href="/tags/Distributed-Training/">
+                        <span class="chip bg-color">Distributed Training</span>
+                    </a>
+                    
+                    <a href="/tags/FSDP/">
+                        <span class="chip bg-color">FSDP</span>
+                    </a>
+                    
+                    <a href="/tags/Tensor-Parallelism/">
+                        <span class="chip bg-color">Tensor Parallelism</span>
+                    </a>
+                    
+                    <a href="/tags/Pipeline-Parallelism/">
+                        <span class="chip bg-color">Pipeline Parallelism</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/08/08/Scaling-Book-04-Transformer%E6%95%B0%E5%AD%A6/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/26.jpg" class="responsive-img" alt="Scaling Book 中文（04）：Transformer 数学——参数量、FLOPs 与 KV Cache">
+                        
+                        <span class="card-title">Scaling Book 中文（04）：Transformer 数学——参数量、FLOPs 与 KV Cache</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            从点积与反向传播的计算量出发，核算 Transformer 的参数量、训练 FLOPs、注意力成本、MoE、重计算、KV Cache 与 Flash Attention。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-08-08
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/AI-infra/" class="post-category">
+                                    AI infra
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Transformer/">
+                        <span class="chip bg-color">Transformer</span>
+                    </a>
+                    
+                    <a href="/tags/Scaling-Book/">
+                        <span class="chip bg-color">Scaling Book</span>
+                    </a>
+                    
+                    <a href="/tags/FLOPs/">
+                        <span class="chip bg-color">FLOPs</span>
+                    </a>
+                    
+                    <a href="/tags/Attention/">
+                        <span class="chip bg-color">Attention</span>
+                    </a>
+                    
+                    <a href="/tags/KV-Cache/">
+                        <span class="chip bg-color">KV Cache</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('4'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+<script src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script>
+    MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$', '$'], ['\(', '\)']]}
+    });
+</script>
+
+
+
+    <footer class="page-footer bg-color">
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2026</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">易百分</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                class="white-color">395.2k</span>&nbsp;字
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/Yitrus" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:citrusyi@163.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我citrusyi@163.com" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+</div>
+    </div>
+
+</footer>
+
+<div class="progress-bar"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10.3.1/dist/mermaid.min.js"></script> -->
+
+<!-- Mermaid 初始化 -->
+<!-- <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 查找所有 mermaid 代码块（包括 pre code.language-mermaid 和 pre.mermaid）
+  var mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, pre.mermaid');
+  
+  mermaidBlocks.forEach(function(block, index) {
+    // 获取原始代码
+    var code = block.textContent || block.innerText;
+    
+    // 解码 HTML 实体
+    code = code.replace(/&lt;/g, '<')
+               .replace(/&gt;/g, '>')
+               .replace(/&amp;/g, '&')
+               .replace(/&quot;/g, '"')
+               .replace(/&#39;/g, "'")
+               .replace(/&#91;/g, '[')
+               .replace(/&#93;/g, ']')
+               .replace(/&nbsp;/g, ' ');
+    
+    // 创建新的 mermaid div
+    var newDiv = document.createElement('div');
+    newDiv.className = 'mermaid';
+    newDiv.textContent = code;
+    
+    // 替换原元素
+    if (block.parentNode.tagName === 'PRE') {
+      block.parentNode.parentNode.replaceChild(newDiv, block.parentNode);
+    } else {
+      block.parentNode.replaceChild(newDiv, block);
+    }
+  });
+  
+  // 初始化 mermaid
+  if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default'
+    });
+    
+    // 手动渲染
+    mermaid.run({
+      querySelector: '.mermaid'
+    });
+  }
+});
+</script> -->
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js?v=20261028"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
