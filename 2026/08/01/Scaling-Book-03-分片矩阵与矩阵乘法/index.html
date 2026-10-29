@@ -472,7 +472,7 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    57 分
+                    56 分
                 </div>
                 
 
@@ -496,7 +496,7 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <blockquote>
-<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/sharding/">本章原文</a>。原文固定版本：<code>173fb0851d7e</code>，获取日期：2026-10-26，MIT 许可。<br>本章为完整范围的机器辅助中文初译</p>
+<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/sharding/">本章原文</a>。原文固定版本：<code>173fb0851d7e</code>，MIT 许可。<br>本章为完整范围的机器辅助中文初译</p>
 </blockquote>
 <blockquote>
 <p><strong>简介：</strong>训练大型机器学习模型时，必须把参数或输入拆开，也就是分片，分给许多加速器。LLM 的主要操作是矩阵乘法，因此理解分片计算的关键，是理解跨设备分布的矩阵如何相乘。本章根据 TPU 通信原语的开销，建立一个简单的分片矩阵乘法分析方法。</p>
@@ -894,13 +894,13 @@ y <span class="token operator">=</span> jax<span class="token punctuation">.</sp
 <li>现在简单解释一下双向环中AllGather时间和AllToAll时间的比率。</li>
 </ol>
 <p><strong>答案：</strong></p>
-<p>(1) <strong>解决方案：</strong> 过程很简单：在算法的每一步中，每个设备都会将矩阵的单分片“条带”（总大小为 $$\frac{N}{D} \times N$$ 元素）发送到其最近的邻居。这种情况会发生 $$D-1$$ 次，因为每个分片都需要与除其开始所在的设备之外的所有设备进行通信。因此，总共 $$\frac{N^2(D-1)}{D}$$ 标量由每个设备传输，即流经单个 ICI 链路。</p>
-<p><strong>答案：</strong> $$N^2 (1-\frac{1}{D})$$，或者在 $$D &gt;&gt; 1$$ 时简称为 $$N^2$$。</p>
-<p>(2) <strong>解决方案：</strong> 从通信的角度来看，AllToAll 和 AllGather 之间的主要区别在于，在 AllToAll 中，特定设备上的整个分片不需要与所有其他设备进行通信。想象一下存储在特定设备（称为设备 0）上的分片是 $$[A, B, C, D]$$（这里 A、B、C、D 是矩阵，我们想象一个包含 4 个设备的环以进行说明）。现在矩阵 $$A$$ 不需要在任何地方进行通信，矩阵 $$B$$ 需要最终到达设备 1 上；矩阵 $$C$$ 最终出现在设备 2 上；矩阵 $$D$$ 最终在设备 3 上。因此，在算法的第一步中，我们将 $$B$$、$$C$$ 和 $$D$$ 发送到设备 1；下一步，设备1向设备2发送$$C$$和$$D$$；在最后一步中，设备 2 仅将 $$D$$ 发送到设备 3。在这种情况下，传输的参数总数为 $$(\text{size of A/B/C/D}) * (3 + 2 + 1)$$。 A/B/C/D 的大小是（现在一般情况下）$$\frac{N^2}{D^2}$$，并且在一般情况下，$$(3 + 2 + 1)$$ 项再次变为 $$((D-1) + (D-2) + … + 1)$$ 或 $$\frac{(D)(D-1)}{2}$$。因此，通过单个 ICI 链路传输的字节总数为 $$\frac{N^2(D-1)}{D \times 2}$$。</p>
-<p><strong>答案：</strong> $$\frac{N^2}{2}(1-\frac{1}{D})$$，或者在 $$D &gt;&gt; 1$$ 时简称为 $$\frac{N^2}{2}$$。</p>
-<p>(3) <strong>解决方案：</strong> 因子就是 $$\frac{1}{2}$$，即 AllToAll 的成本是单向环形拓扑上的 all-gather/ReduceScatter 的一半。看看上面的推导，这最终来自于这样一个事实：在全收集情况下，我们每次 $$(D-1)$$ 次传输相同大小的块，即我们正在计算 $$ \text{tiny block size} * (D + D + D + … + D)$$ 的总和，而在 AllToAll 情况下，我们正在计算 $$\text{tiny block size} * (D + D-1 + D-2 + … + 1)$$ 的总和。因此，因子 2 本质上来自 $$1 + 2 + \ldots + n = n(n+1)/2$$ 这一事实。</p>
+<p>(1) <strong>解决方案：</strong> 过程很简单：在算法的每一步中，每个设备都会将矩阵的单分片“条带”（总大小为 $\frac{N}{D} \times N$ 个元素）发送到其最近的邻居。这种情况会发生 $D-1$ 次，因为每个分片都需要与除其开始所在的设备之外的所有设备进行通信。因此，每个设备总共传输 $\frac{N^2(D-1)}{D}$ 个标量，这些标量会流经单个 ICI 链路。</p>
+<p><strong>答案：</strong> $N^2(1-\frac{1}{D})$，或者在 $D \gg 1$ 时近似为 $N^2$。</p>
+<p>(2) <strong>解决方案：</strong> 从通信的角度来看，AllToAll 和 AllGather 之间的主要区别在于，在 AllToAll 中，特定设备上的整个分片不需要与所有其他设备进行通信。假设设备 0 上存储的分片为 $[A, B, C, D]$，其中 $A$、$B$、$C$、$D$ 都是矩阵，并以包含 4 个设备的环为例。矩阵 $A$ 不需要移动，矩阵 $B$ 最终需要到达设备 1，矩阵 $C$ 最终需要到达设备 2，矩阵 $D$ 最终需要到达设备 3。因此，在算法的第一步中，我们将 $B$、$C$ 和 $D$ 发送到设备 1；下一步，设备 1 向设备 2 发送 $C$ 和 $D$；最后，设备 2 仅将 $D$ 发送到设备 3。传输的参数总数为 $(\text{size of A/B/C/D}) \times (3+2+1)$。一般情况下，$A$、$B$、$C$、$D$ 的大小均为 $\frac{N^2}{D^2}$，而求和项 $(3+2+1)$ 会变为 $(D-1)+(D-2)+\cdots+1$，也就是 $\frac{D(D-1)}{2}$。因此，通过单个 ICI 链路传输的标量总数为 $\frac{N^2(D-1)}{2D}$。</p>
+<p><strong>答案：</strong> $\frac{N^2}{2}(1-\frac{1}{D})$，或者在 $D \gg 1$ 时近似为 $\frac{N^2}{2}$。</p>
+<p>(3) <strong>解决方案：</strong> 这个因子就是 $\frac{1}{2}$，即 AllToAll 的成本是单向环形拓扑上 AllGather 或 ReduceScatter 的一半。观察上面的推导可以发现，在 AllGather 情况下，我们会传输 $D-1$ 次大小相同的块，相当于计算 $\text{tiny block size} \times (D+D+D+\cdots+D)$；而在 AllToAll 情况下，计算的是 $\text{tiny block size} \times (D+(D-1)+(D-2)+\cdots+1)$。因此，因子 2 本质上来自等式 $1+2+\cdots+n=\frac{n(n+1)}{2}$。</p>
 <p>(4) <strong>解决方案</strong>：任何一个链路必须携带的标量总数现在减少了 2 倍，因为在双向环中，每个“分片条”可以同时以两种方式发送。</p>
-<p>(5) <strong>解决方案</strong>：在这种情况下，与单向情况相比，我们赢得了 4 倍的胜利。  通过考虑单个分片条中每个大小 (N2/D2) 块的命运，例如源自设备 0 的块，最容易看出这一点。我们现在将条带划分为向右或向左移动的块，移动最大距离为楼层 (D/2)，而不是（如在单向情况下）将其中一个块发送距离 D-1，将另一个块发送距离 D-2，等等，一直到 1。  因此，相应的总和现在变为 $$D/2 + D/2 - 1 + D/2 - 2 + … = D/2 \cdot (D/2+1)/2$$，或者在大 $$D$$ 的限制下为 $$D^2/8$$。  将其与单向情况下的 $$D^2/2$$ 进行比较，我们发现我们赢得了 4 倍。</p>
+<p>(5) <strong>解决方案</strong>：在这种情况下，与单向通信相比，开销降低了 4 倍。考虑单个分片条中每个大小为 $N^2/D^2$ 的块，例如源自设备 0 的块，就很容易看出这一点。现在可以把条带划分为向右或向左移动的块，最大移动距离为 $\lfloor D/2 \rfloor$；而在单向通信中，需要将不同的块分别发送 $D-1$、$D-2$ 直至 1 跳。因此，相应的求和变为 $D/2+(D/2-1)+(D/2-2)+\cdots=\frac{D}{2}\frac{(D/2+1)}{2}$，当 $D$ 较大时约为 $D^2/8$。与单向情况下的 $D^2/2$ 相比，开销正好降低了 4 倍。</p>
 <p>(6) <strong>解决方案：</strong> 在单向环中，我们看到AllToAll时间已经是all-gather时间的两倍；这是因为我们不需要将完整的条带发送到每个设备。  然后，当我们添加双向性时，我们发现 AllToAll 获得了 4 倍的胜利，而 all-gathers 只获得了 2 倍的胜利。  将这些比率放在一起，我们得到了我们所追捧的因子 4。</p>
 <!-- source-heading -->
 <p><a id="thats-it-for-part-3-for-part-4-about-transformer-math-click-here04-transformer数学md"></a></p>
@@ -1319,7 +1319,7 @@ y <span class="token operator">=</span> jax<span class="token punctuation">.</sp
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">375.8k</span>&nbsp;字
+                class="white-color">375.7k</span>&nbsp;字
             
             
             
