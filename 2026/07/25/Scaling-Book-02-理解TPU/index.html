@@ -496,7 +496,7 @@
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <blockquote>
-<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/tpus/">本章原文</a>。原文固定版本：<code>173fb0851d7e</code>，获取日期：2026-10-26，MIT 许可。<br>本章为完整范围的机器辅助中文初译</p>
+<p>原著：Jacob Austin 等，Google DeepMind，《How to Scale Your Model》。<a target="_blank" rel="noopener" href="https://jax-ml.github.io/scaling-book/tpus/">本章原文</a>。原文固定版本：<code>173fb0851d7e</code>，MIT 许可。<br>本章为完整范围的机器辅助中文初译</p>
 </blockquote>
 <blockquote>
 <p><strong>简介：</strong>本章介绍 TPU 如何工作、如何组成网络以支持多芯片训练和推理，以及这些特点如何影响常见算法的性能。GPU 使用者也能从中获得有用的认识。</p>
@@ -676,7 +676,7 @@
 </li>
 <li><p><strong>HBM $\rightarrow$ MXU 加载：</strong> 为了执行最终的 matmul，我们需要通过 HBM 带宽将这 16e9 字节加上 bf16[8, 128 * 1024] 数组（另外 2MB，因此可以忽略不计）加载到 MXU 中，这将占用 <code>16e9 / 8.2e11 = 20ms</code>。</p>
 </li>
-<li><p><strong>FLOPs：</strong> 我们总共执行了 $$2 \cdot 8 \cdot 128 \cdot 1024 \cdot 128 \cdot 1024 = 2.7 \times 10^{11}$$ FLOPs，并且由于我们可以执行 <code>1.97e14</code> bf16 FLOPs/s，因此我们得到 1.4ms。</p>
+<li><p><strong>FLOPs：</strong> 我们总共执行了 $2 \cdot 8 \cdot 128 \cdot 1024 \cdot 128 \cdot 1024 = 2.7 \times 10^{11}$ FLOPs，并且由于我们可以执行 <code>1.97e14</code> bf16 FLOPs/s，因此我们得到 1.4ms。</p>
 </li>
 </ol>
 <p>总时间的上限是所有这些时间的总和，但由于 TPU 通常可以重叠这些操作，因此我们可以将其视为因最慢部分而成为瓶颈的流水线问题。假设这是真的，那么答案至少是 167 毫秒，在不完美重叠的情况下可能接近 200 毫秒。</p>
@@ -980,12 +980,12 @@
                         <span class="chip bg-color">Scaling Book</span>
                     </a>
                     
-                    <a href="/tags/Roofline/">
-                        <span class="chip bg-color">Roofline</span>
-                    </a>
-                    
                     <a href="/tags/TPU/">
                         <span class="chip bg-color">TPU</span>
+                    </a>
+                    
+                    <a href="/tags/Roofline/">
+                        <span class="chip bg-color">Roofline</span>
                     </a>
                     
                 </div>
