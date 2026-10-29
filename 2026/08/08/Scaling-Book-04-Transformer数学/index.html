@@ -469,14 +469,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    6.8k
+                    6.6k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    28 分
+                    27 分
                 </div>
                 
 
@@ -510,13 +510,6 @@
 <h2 id="计数点"><a href="#计数点" class="headerlink" title="计数点"></a>计数点</h2><p>让我们从以下形状的向量 $x$、$y$ 和矩阵 $A$、$B$ 开始：</p>
 
 $$
-\def \red#1{\textcolor{red}{#1}}
-\def \green#1{\textcolor{green}{#1}}
-\def \blue#1{\textcolor{blue}{#1}}
-\def \purple#1{\textcolor{purple}{#1}}
-\def \orange#1{\textcolor{orange}{#1}}
-\def \gray#1{\textcolor{gray}{#1}}
-
 \begin{array}{cc}
 \textrm{array}  &amp; \textrm{shape} \\ \hline
 x               &amp; \textrm{[P]}   \\
@@ -532,9 +525,25 @@ $$
 <li>$x \cdot y$ 的点积需要 $P$ <em>adds</em> 和 _multiplies_，或 $2P$ 浮点运算总计。</li>
 <li>对于 $2NP$ FLOP，矩阵向量积 $Ax$ 沿着 $A$ 的行进行 $N$ 点积。</li>
 <li>矩阵-矩阵乘积 $AB$ 对 $B$ 的每个 $M$ 列进行矩阵-向量乘积，总计 $2NPM$ FLOP。</li>
-<li>一般来说，如果我们有两个高维数组 $C$ 和 $D$，其中一些维度是 <span style="color:red">CONTRACTING</span>，一些维度是 <span style="color:blue">BATCHING</span>（例如$C[\blue{GH}IJ\red{KL}], D[\blue{GH}MN\red{KL}]$），则此收缩的 FLOP 成本是所有 $C$ 和 $D$ 维度的乘积的两倍，其中批量和收缩维度仅计算一次（例如 $2\blue{GH}IJMN\red{KL}$）。请注意，只有当某个维度同时出现在两个被乘数中时，该维度才是批处理。 （另请注意，如果没有收缩维度，则因子 2 将不适用，并且这只是一个元素乘积。）（原注：<b>Contracting</b> 维度是在操作过程中求和的轴（它们出现在两个输入中，但不在输出中），就像矩阵乘法中的内部维度一样。 <b>Batching</b> 尺寸是出现在两个输入中的共享轴，并且不改变地传送到输出；它们索引独立的子问题，并且不会在 FLOP 计数中相乘。用 Einsum 术语来说：输入和输出上出现的标签都是批处理的；两个输入上都存在但输出中不存在的标签正在收缩。）</li>
+<li>一般来说，如果我们有两个高维数组 $C$ 和 $D$，其中一些维度是 <span style="color:red">CONTRACTING</span>，一些维度是 <span style="color:blue">BATCHING</span>（例如 $C[GHIJKL]$、$D[GHMNKL]$，其中 $GH$ 是批处理维度，$KL$ 是收缩维度），则此收缩的 FLOP 成本是所有 $C$ 和 $D$ 维度的乘积的两倍，其中批处理和收缩维度仅计算一次（例如 $2GHIJMNKL$）。请注意，只有当某个维度同时出现在两个被乘数中时，该维度才是批处理维度。（另请注意，如果没有收缩维度，则因子 2 将不适用，并且这只是一个逐元素乘积。）（原注：<b>Contracting</b> 维度是在操作过程中求和的轴；<b>Batching</b> 维度是同时出现在两个输入和输出中的共享轴，用于索引彼此独立的子问题。）</li>
 </ul>
-<p>$$<br>\begin{array}{ccc}<br>\textrm{Operation} &amp; \textrm{FLOPs} &amp; \textrm{Data} \<br>\hline<br>x \cdot y  &amp; 2P   &amp; 2P      \<br>A x        &amp; 2NP  &amp; NP + P  \<br>AB         &amp; 2NPM &amp; NP + PM \<br>[c_0,…,c_N] \cdot [d_0,…,d_N] &amp;<br>2 \prod c_i \times \prod_{\substack{d_j \notin \blue{BATCH} \ d_j \notin \red{CONTRACT}}} d_j<br>&amp;<br>  \prod c_i + \prod d_j \<br>\hline<br>\end{array}<br>$$</p>
+
+$$
+\begin{array}{ccc}
+\textrm{Operation} &amp; \textrm{FLOPs} &amp; \textrm{Data} \\
+\hline
+x \cdot y  &amp; 2P   &amp; 2P      \\
+A x        &amp; 2NP  &amp; NP + P  \\
+AB         &amp; 2NPM &amp; NP + PM \\
+[c_0,...,c_N] \cdot [d_0,...,d_N] &amp;
+2 \prod c_i \times \prod_{\substack{d_j \notin \mathrm{BATCH} \\ d_j \notin \mathrm{CONTRACT}}} d_j
+&amp;
+  \prod c_i + \prod d_j \\
+\hline
+\end{array}
+$$
+
+
 <p>请注意，对于矩阵-矩阵乘法，<em>计算</em>按三次方缩放 $O(N^3)$，而数据传输仅按二次方缩放 $O(N^2)$ — 这意味着当我们扩大 matmul 大小时，它会<em>更容易</em>达到计算饱和极限。这是极其不寻常的，并且在很大程度上解释了为什么我们使用以矩阵乘法为主的架构——它们适合扩展！</p>
 <p><img src="/images/scaling-book/matmul-flops.gif" alt="原文插图"></p>
 <!-- source-heading -->
@@ -561,22 +570,83 @@ $$
 <!-- source-heading -->
 <p><a id="mlps"></a></p>
 <h3 id="MLP"><a href="#MLP" class="headerlink" title="MLP"></a>MLP</h3><p>Transformer 的 MLP 通常由 2 个按元素组合的输入 matmul 和一个输出 matmul 组成：</p>
-<p>$$<br>\begin{array}{ccc}<br>\textrm{operation} &amp; \textrm{train FLOPs} &amp; \textrm{params} \<br>\hline \<br>A[B,T,\red{D}] \cdot W_{in1}[\red{D}, F] &amp; 6BTDF &amp; DF \[10pt]<br>A[B,T,\red{D}] \cdot W_{in2}[\red{D}, F] &amp; 6BTDF &amp; DF \[10pt]<br>\sigma\left(A_{in1}\right)[B,T, F] * A_{in2}[B,T, F] &amp; \gray{O(BTF)} \[10pt]<br>A[B,T,\red{F}] \cdot W_{out}[\red{F}, D] &amp; 6BTDF &amp; DF \[10pt]<br>\hline \<br>&amp; \approx 18BTDF &amp; 3DF<br>\end{array}<br>$$</p>
+
+$$
+\begin{array}{ccc}
+\textrm{operation} &amp; \textrm{train FLOPs} &amp; \textrm{params} \\
+\hline \\
+A[B,T,D] \cdot W_{in1}[D, F] &amp; 6BTDF &amp; DF \\[10pt]
+A[B,T,D] \cdot W_{in2}[D, F] &amp; 6BTDF &amp; DF \\[10pt]
+\sigma\left(A_{in1}\right)[B,T,F] \odot A_{in2}[B,T,F] &amp; O(BTF) \\[10pt]
+A[B,T,F] \cdot W_{out}[F, D] &amp; 6BTDF &amp; DF \\[10pt]
+\hline \\
+&amp; \approx 18BTDF &amp; 3DF
+\end{array}
+$$
+
+
 <!-- source-heading -->
 <p><a id="attention"></a></p>
 <h3 id="注意力"><a href="#注意力" class="headerlink" title="注意力"></a>注意力</h3><p>对于具有不同 <strong>Q</strong> 和 <strong>KV</strong> 头数的通用分组查询注意情况，让我们假设 <strong>Q</strong>、<strong>K</strong>、<strong>V</strong> 投影的头尺寸 H 相等，并估计 <strong>QKVO</strong> 矩阵相乘的成本：</p>
-<p>$$<br>\begin{array}{ccc}<br>\textrm{operation} &amp; \textrm{train FLOPs} &amp; \textrm{params} \<br>\hline \<br>A[B,T,\red{D}] \cdot W_{Q}[\red{D}, N, H] &amp; 6BTDNH &amp; DNH \[10pt]<br>A[B,T,\red{D}] \cdot W_{K}[\red{D}, K, H] &amp; 6BTDKH &amp; DKH \[10pt]<br>A[B,T,\red{D}] \cdot W_{V}[\red{D}, K, H] &amp; 6BTDKH &amp; DKH \[10pt]<br>A[B,T,\red{N}, \red{H}] \cdot W_{O}[\red{N}, \red{H}, D] &amp; 6BTDNH &amp; DNH \[10pt]<br>\hline \ &amp; 12BTD(N+K)H &amp; 2D(N+K)H<br>\end{array}<br>$$</p>
-<p>点积注意力操作更加微妙，实际上是在 $B$、$K$ 维度上批处理的 $TH \cdot HS$ matmul、softmax 和在 $B$、$K$ 维度上再次批处理的 $TS \cdot SH$ matmul。我们用蓝色突出显示批处理的暗淡：</p>
-<p>$$<br>\begin{array}{cc}<br>\textrm{operation} &amp; \textrm{train FLOPs} \<br>\hline \[3pt]<br>Q[\blue{B}, T, \blue{K}, G, \red{H}] \cdot K[\blue{B}, S, \blue{K}, \red{H}]<br>&amp; 6BTSKGH = 6BTSNH  \[3pt]<br>\textrm{softmax}_S ;; L[B, T, S, K, G] &amp; \gray{O(BTSKG) = O(BTSN)} \[3pt]<br>S[\blue{B}, T, \red{S}, \blue{K}, G] \cdot V[\blue{B}, \red{S}, \blue{K}, H]<br>&amp; 6BTSKGH = 6BTSNH \[3pt]<br>\hline \<br>&amp; \approx 12BTSNH = 12BT^2NH \<br>\end{array}<br>$$</p>
+
+$$
+\begin{array}{ccc}
+\textrm{operation} &amp; \textrm{train FLOPs} &amp; \textrm{params} \\
+\hline \\
+A[B,T,D] \cdot W_{Q}[D, N, H] &amp; 6BTDNH &amp; DNH \\[10pt]
+A[B,T,D] \cdot W_{K}[D, K, H] &amp; 6BTDKH &amp; DKH \\[10pt]
+A[B,T,D] \cdot W_{V}[D, K, H] &amp; 6BTDKH &amp; DKH \\[10pt]
+A[B,T,N,H] \cdot W_{O}[N,H,D] &amp; 6BTDNH &amp; DNH \\[10pt]
+\hline \\ &amp; 12BTD(N+K)H &amp; 2D(N+K)H
+\end{array}
+$$
+
+
+<p>点积注意力操作更加微妙，实际上是在 $B$、$K$ 维度上批处理的 $TH \cdot HS$ matmul、softmax 和在 $B$、$K$ 维度上再次批处理的 $TS \cdot SH$ matmul：</p>
+
+$$
+\begin{array}{cc}
+\textrm{operation} &amp; \textrm{train FLOPs} \\
+\hline \\[3pt]
+Q[B,T,K,G,H] \cdot K[B,S,K,H]
+&amp; 6BTSKGH = 6BTSNH  \\[3pt]
+\textrm{softmax}_S \;\; L[B,T,S,K,G] &amp; O(BTSKG) = O(BTSN) \\[3pt]
+S[B,T,S,K,G] \cdot V[B,S,K,H]
+&amp; 6BTSKGH = 6BTSNH \\[3pt]
+\hline \\
+&amp; \approx 12BTSNH = 12BT^2NH \\
+\end{array}
+$$
+
+
 <p>**注意[因果屏蔽]**：最近的 Transformer 使用因果屏蔽，而不是完全双向关注。在这种情况下，点积运算的有用 FLOP 会减少一半。为了在实践中实现这种减少，我们需要使用注意力内核，而不是朴素的 einsum。</p>
 <!-- source-heading -->
 <p><a id="other-operations"></a></p>
 <h3 id="其他操作"><a href="#其他操作" class="headerlink" title="其他操作"></a>其他操作</h3><p>Transformer 中还发生其他一些操作。层范数相对便宜，对于一阶成本估计可以忽略。请注意，每一层通常有两个（一个在注意力之前，一个在 MLP 之前）。还有最后一个巨大的（尽管不是每层）非嵌入矩阵乘法。</p>
-<p>$$<br>\begin{array}{ccc}<br>\textsf{operation} &amp; \textsf{train FLOPs} &amp; \textsf{params} \<br>\hline \<br>2 \times \textrm{layernorm}<em>D ;; A[B,T,\red{D}] &amp; \gray{O\left(BTD\right)} &amp; \gray{2D} \[10pt]<br>A[B,T,\red{D}] \cdot W</em>{unembed}[\red{D}, V] &amp; 6BTDV &amp; DV \<br>\end{array}<br>$$</p>
+
+$$
+\begin{array}{ccc}
+\textsf{operation} &amp; \textsf{train FLOPs} &amp; \textsf{params} \\
+\hline \\
+2 \times \textrm{layernorm}_D \;\; A[B,T,D] &amp; O\left(BTD\right) &amp; 2D \\[10pt]
+A[B,T,D] \cdot W_{unembed}[D,V] &amp; 6BTDV &amp; DV \\
+\end{array}
+$$
+
+
 <!-- source-heading -->
 <p><a id="general-rule-of-thumb-for-transformer-flops"></a></p>
 <h3 id="Transformer-FLOP-的一般经验法则"><a href="#Transformer-FLOP-的一般经验法则" class="headerlink" title="Transformer FLOP 的一般经验法则"></a>Transformer FLOP 的一般经验法则</h3><p>如果我们忽略点积注意力的成本（这对于较短上下文的训练是合理的），那么所有层的总 FLOP 是</p>
-<p>$$<br>\begin{align*}<br>(18BTDF + 12BTD(N+K)H)L = 6 <em>BT * (3DF + 2D(N+K)H)L \ = 6 * \textrm{num tokens} * \textrm{parameter count}<br>\end{align</em>}<br>$$</p>
+
+$$
+\begin{aligned}
+(18BTDF + 12BTD(N+K)H)L
+  &amp;= 6BT\left(3DF + 2D(N+K)H\right)L \\
+  &amp;= 6 \cdot \textrm{num tokens} \cdot \textrm{parameter count}
+\end{aligned}
+$$
+
+
 <p>这导致了一个著名的经验法则，用于估计密集 Transformer FLOP 计数，忽略注意力 FLOP。 （取消嵌入是另一个简单的 matmul，具有 $6BTDV$ FLOP 和 $DV$ 参数，并遵循相同的经验法则。）</p>
 <!-- source-heading -->
 <p><a id="fractional-cost-of-attention-with-context-length"></a></p>
@@ -735,7 +805,15 @@ $$
 <p>在该梯度反向传播到 Q 和 K 期间</p>
 <p>$$d(q_i \cdot k_j) = (dS_{ij} - S_{ij} \cdot_j dS_{ij}) S_{ij}$$</p>
 <p>我们利用一个恒等式，允许我们将沿大密钥<strong>长度</strong>维度的收缩与沿特征<strong>深度</strong>维度的局部收缩进行交换。</p>
-<p>$$\begin{align*}<br>S_{ij} \cdot_j dS_{ij} &amp;= \sum_j \frac{e^{\tau q_i \cdot k_j}}{\sum_k e^{\tau q_i \cdot k_k}} \sum_d dO_{id} V_{jd} \<br>&amp;= \sum_d dO_{id} \sum_j \frac{e^{\tau q_i \cdot k_j}}{\sum_k e^{\tau q_i \cdot k_k}} V_{jd} \<br>&amp;= \sum_d dO_{id} O_{id} \<br>&amp;= dO_{id} \cdot_d O_{id}<br>\end{align*}$$</p>
+
+$$\begin{align*}
+S_{ij} \cdot_j dS_{ij} &amp;= \sum_j \frac{e^{\tau q_i \cdot k_j}}{\sum_k e^{\tau q_i \cdot k_k}} \sum_d dO_{id} V_{jd} \\
+&amp;= \sum_d dO_{id} \sum_j \frac{e^{\tau q_i \cdot k_j}}{\sum_k e^{\tau q_i \cdot k_k}} V_{jd} \\
+&amp;= \sum_d dO_{id} O_{id} \\
+&amp;= dO_{id} \cdot_d O_{id}
+\end{align*}$$
+
+
 <p>这种替换对于能够为 VJP 实现序列块<em>局部</em>计算至关重要，并且能够实现更智能的分片方案，例如环关注。</p>
 <hr>
 <blockquote>
@@ -1162,7 +1240,7 @@ $$
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">395.2k</span>&nbsp;字
+                class="white-color">395.1k</span>&nbsp;字
             
             
             
