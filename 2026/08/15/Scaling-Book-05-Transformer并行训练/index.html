@@ -473,14 +473,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    16.1k
+                    17.9k
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    63 分
+                    69 分
                 </div>
                 
 
@@ -824,6 +824,32 @@
 <p>$$\text{In}[B, D_Y] \cdot_D W_\text{in}[D, F_Y] \cdot_F W_\text{out}[F_Y, D] \rightarrow \text{Out}[B, D_Y]$$</p>
 <p>本章使用 $Y$ 表示张量并行轴，以便后面与沿 $X$ 轴的数据并行／FSDP 组合。</p>
 <p><strong>张量并行的核心，是让多块芯片共同完成同一层、同一批 token 的计算。</strong>纯数据并行中，各卡用完整权重处理不同的数据；张量并行中，各卡持有不同的权重分片，分别计算同一次矩阵乘法的一部分结果。这里的“激活”是一个包含多个 token、多个特征维度的张量，不是单个数值。</p>
+<p><strong>译者补充：DP、CP 与 TP 分别拆分什么？</strong></p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>拆分什么？</th>
+<th>两张卡的例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DP：数据并行</strong></td>
+<td>批次中的不同序列／样本</td>
+<td>卡 0 处理文章 A，卡 1 处理文章 B</td>
+</tr>
+<tr>
+<td><strong>CP：上下文并行</strong></td>
+<td>同一条序列的长度维度</td>
+<td>卡 0 处理文章 A 的一部分 token，卡 1 处理另一部分</td>
+</tr>
+<tr>
+<td><strong>TP：张量并行</strong></td>
+<td>层内部的特征计算</td>
+<td>两张卡处理同一批 token，各负责部分特征或注意力头</td>
+</tr>
+</tbody></table>
+<p>表格只用少量样本说明区别，不表示每张卡只能处理一个样本。一个 CP 组可以同时处理多条序列，组内每张卡分别负责这些序列中的一部分位置。组合 DP 与 CP 时，DP 决定各组处理哪些样本，CP 再划分组内每个样本的位置。CP 的不同片段仍属于同一条序列，计算注意力时需要交换相关信息，并遵守相应的注意力掩码。CP 的定义与通信方式可参考 <a target="_blank" rel="noopener" href="https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/features/context_parallel.html">Megatron Core 官方说明</a>。</p>
 <p>FSDP 在计算前临时收集当前参数组的完整权重，各卡随后独立处理自己的数据。这里的张量并行则让权重保持分片，通过交换激活来共同完成计算。这种“一维模型并行”也称为 Megatron 分片。在合适的硬件和模型配置下，它可以降低高效使用整个 Pod 所需的全局批量，不必只靠增加批次数据来利用更多芯片。</p>
 <p><img src="/images/scaling-book/model-parallelism.png" alt="原文插图"></p>
 <p><strong>图：</strong>本例将激活的特征维度 D 沿设备轴 Y 分片，同时将输入投影权重的输出维度 F 沿 Y 分片。输入记为 <code>A[B, D_Y]</code>，权重记为 <code>W[D, F_Y]</code>。为了计算输出 <code>C[B, F_Y]</code>，每块设备需要完整的 D 维输入，因此先沿 Y 执行 AllGather，将输入恢复为 <code>A[B, D]</code>。之后，每块设备用自己的权重分片，计算输出特征的一部分。图中若还存在 X 设备轴，由于此处没有沿 X 切分批次，同一份激活会沿 X 复制；后面与 FSDP 组合时，才会沿 X 分担不同批次的数据。</p>
@@ -876,7 +902,13 @@
 
 <p><strong>为什么把两个矩阵乘法一起考虑？</strong>第一个矩阵乘法沿输出维 F 分片，得到的中间激活无需跨卡求和，就能直接作为第二个矩阵乘法的输入。第二次乘法才沿分片的 F 维求和。因此，这个 MLP 块可以在入口 AllGather 输入、在出口 ReduceScatter 输出，不必在每次矩阵乘法后都单独执行 AllReduce。这里的 ReduceScatter 合并的是不同特征分片产生的部分结果，与数据并行中汇总不同数据产生的权重梯度，含义不同。</p>
 <p><strong>通信开销有多大？</strong>下面先估算前向传播，反向传播中的运算及通信可以按相应的转置关系分析。一次前向传播需要一次输入 AllGather 和一次输出 ReduceScatter；bf16 每个元素占 2 字节。根据前面采用的一维通信近似，计算时间与通信时间如下：</p>
-<p>$$\begin{align}<br>T_\text{math} &amp; = \frac{4 \cdot B \cdot D \cdot F}{Y \cdot C} \<br>T_\text{comms} &amp; =<br>\frac{2 \cdot 2 \cdot (B \cdot D)}{W_\text{ici}}\<br>\textnormal{T} &amp; \approx \max \left(\frac{4 \cdot B \cdot D \cdot F}{Y \cdot C}, \frac{2 \cdot 2 \cdot (B \cdot D)}{W_\text{ici}}\right)<br>\end{align}$$</p>
+<p><strong>计算时间：</strong></p>
+<p>$$<br>T_{\mathrm{math}} = \frac{4 \cdot B \cdot D \cdot F}{Y \cdot C}<br>$$</p>
+<p><strong>通信时间：</strong></p>
+<p>$$<br>T_{\mathrm{comms}} = \frac{2 \cdot 2 \cdot B \cdot D}{W_{\mathrm{ici}}}<br>$$</p>
+<p>通信量中的两个因子 2，分别对应一次 AllGather 加一次 ReduceScatter，以及 bf16 每个元素占 2 字节。这里使用前文的一维带宽近似，忽略延迟等额外开销。</p>
+<p><strong>假设计算与通信可以完全重叠，总耗时近似取两者中的较大值：</strong></p>
+<p>$$<br>T \approx \max\left(T_{\mathrm{math}},\ T_{\mathrm{comms}}\right)<br>$$</p>
 <p>注意到我们希望计算成本大于通信成本，我们得到：</p>
 <p>$$\begin{align}<br>\frac{4 \cdot B \cdot D \cdot F}{Y \cdot C} &gt; \frac{2 \cdot 2 \cdot (B \cdot D)}{W_\text{ici}}<br>\end{align}$$</p>
 <p>$$\begin{align}<br>\frac{F}{Y \cdot C} &gt; \frac{1}{W_\text{ici}}<br>\end{align}$$</p>
@@ -895,40 +927,77 @@
 <p><a id="combining-fsdp-and-tensor-parallelism"></a></p>
 <h3 id="FSDP-与张量并行的组合"><a href="#FSDP-与张量并行的组合" class="headerlink" title="FSDP 与张量并行的组合"></a>FSDP 与张量并行的组合</h3><p><strong>语法：</strong></p>
 <p>$$\text{In}[B_X, D_Y] \cdot_D W_\text{in}[D_X, F_Y] \cdot_F W_\text{out}[F_Y, D_X] \rightarrow \text{Out}[B_X, D_Y]$$</p>
-<p>FSDP 和张量并行性的好处是它们可以结合起来。通过沿两个轴分片 <strong>W<sub>in</sub></strong> 和 **W<sub>out</sub>**，我们既节省了内存又节省了计算量。因为我们沿着 X 对 B 进行分片，所以我们减少了模型并行 AllGathers 的大小，并且因为我们沿着 Y 对 F 进行了分片，所以我们减少了 FSDP 的通信开销。这意味着两者的结合可以使我们获得比上面看到的更低的有效批量大小。</p>
+<p>FSDP 和张量并行性的好处是它们可以结合起来。通过沿两个设备网格轴对输入投影权重 <code>W_in</code> 和输出投影权重 <code>W_out</code> 进行分片，我们既节省了内存又节省了计算量。因为我们沿着 X 对 B 进行分片，所以我们减少了模型并行 AllGathers 的大小，并且因为我们沿着 Y 对 F 进行了分片，所以我们减少了 FSDP 的通信开销。这意味着两者的结合可以使我们获得比上面看到的更低的有效批量大小。</p>
 <p><img src="/images/scaling-book/mixed-fsdp-model-parallelism.png" alt="原文插图"></p>
-<p><b>图：</b>结合FSDP和张量并行性的图。与其他情况不同，模型参数没有重复。</p>
-<p><strong>这里是混合 FSDP + 张量并行的完整算法。虽然我们有很多沟通，但我们所有的 AllGathers 和 ReduceScatters 都较小，因为我们对激活进行了批量分片，并且张量对权重进行了更多分片！</strong></p>
-<p><strong>前向传播：</strong>需要计算Loss[B]</p>
-<ol>
-<li> In[B<sub>X</sub>, D] = <strong>AllGather</strong><sub>Y</sub>(In[B<sub>X</sub>, D<sub>Y</sub>]) <em>(on critical path)</em></li>
-<li> W<sub>in</sub>[D, F<sub>Y</sub>] = <strong>AllGather</strong><sub>X</sub>(W<sub>in</sub>[D<sub>X</sub>, F<sub>Y</sub>]) <em>(can be done ahead of time)</em></li>
-<li> Tmp[B<sub>X</sub>, F<sub>Y</sub>] = In[B<sub>X</sub>, D] *<sub>D</sub> W<sub>in</sub>[D, F<sub>Y</sub>]</li>
-<li> W<sub>out</sub>[F<sub>Y</sub>, D] = <strong>AllGather</strong><sub>X</sub>(W<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>]) <em>(can be done ahead of time)</em></li>
-<li> Out[B<sub>X</sub>, D] {U<sub>Y</sub>} = Tmp[B<sub>X</sub>, F<sub>Y</sub>] *<sub>F</sub> W<sub>out</sub>[F<sub>Y</sub>, D]</li>
-<li> Out[B<sub>X</sub>, D<sub>Y</sub>] = <strong>ReduceScatter</strong><sub>Y</sub>(Out[B<sub>X</sub>, D] {U<sub>Y</sub>}) <em>(on critical path)</em></li>
-<li> Loss[B<sub>X</sub>] = …</li>
-</ol>
-<p><strong>反向传播：</strong>需要计算dW<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>]， dW<sub>in</sub>[D<sub>X</sub>，F<sub>Y</sub>]</p>
-<ol>
-<li> dOut[B<sub>X</sub>, D<sub>Y</sub>] = …</li>
-<li> dOut[B<sub>X</sub>, D] = <strong>AllGather</strong><sub>Y</sub>(dOut[B<sub>X</sub>, D<sub>Y</sub>]) <em>(on critical path)</em></li>
-<li> dW<sub>out</sub>[F<sub>Y</sub>, D] {U<sub>X</sub>} = Tmp[B<sub>X</sub>, F<sub>Y</sub>] *<sub>B</sub> dOut[B<sub>X</sub>, D]</li>
-<li> dW<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>] = <strong>ReduceScatter</strong><sub>X</sub>(dW<sub>out</sub>[F<sub>Y</sub>, D] {U<sub>X</sub>})</li>
-<li> W<sub>out</sub>[F<sub>Y</sub>, D] = <strong>AllGather</strong><sub>X</sub>(W<sub>out</sub>[F<sub>Y</sub>, D<sub>X</sub>]) <em>(can be done ahead of time)</em></li>
-<li> dTmp[B<sub>X</sub>, F<sub>Y</sub>] = dOut[B<sub>X</sub>, D] *<sub>D</sub> W<sub>out</sub>[F<sub>Y</sub>, D] <em>(can throw away dOut[B, D] here)</em></li>
-<li>In[B<sub>X</sub>, D] = <strong>AllGather</strong><sub>Y</sub>(In[B<sub>X</sub>, D<sub>Y</sub>]) <em>(not on critical path + this can be shared with (2) from the previous layer)</em></li>
-<li> dW<sub>in</sub>[D, F<sub>Y</sub>] {U<sub>X</sub>} = In[B<sub>X</sub>, D] *<sub>B</sub> dTmp[B<sub>X</sub>, F<sub>Y</sub>]</li>
-<li> dW<sub>in</sub>[D<sub>X</sub>, F<sub>Y</sub>] = <strong>ReduceScatter</strong><sub>X</sub>(dW<sub>in</sub>[D, F<sub>Y</sub>] {U<sub>X</sub>})</li>
-<li>W<sub>in</sub>[D, F<sub>Y</sub>] = <strong>AllGather</strong><sub>X</sub>(W<sub>in</sub>[D<sub>X</sub>, F<sub>Y</sub>]) <em>(can be done ahead of time)</em></li>
-<li>dIn[B<sub>X</sub>, D] {U<sub>Y</sub>} = dTmp[B<sub>X</sub>, F<sub>Y</sub>] *<sub>F</sub> W<sub>in</sub>[D, F<sub>Y</sub>] <em>(needed for previous layers)</em></li>
-<li>dIn[B<sub>X</sub>, D<sub>Y</sub>] = <strong>ReduceScatter</strong><sub>Y</sub>(dIn[B<sub>X</sub>, D] {U<sub>Y</sub>}) <em>(on critical path)</em></li>
-</ol>
-<p><strong>FSDP 和 TP 的正确组合是什么？</strong> 一个简单但关键的格言是 FSDP 移动权重，张量并行性移动激活。这意味着随着我们的批量大小缩小（特别是当我们进行更多的数据并行处理时），张量并行性变得更便宜，因为我们每个分片的激活更小。</p>
+<p><strong>图：</strong>FSDP 与张量并行的组合。权重同时沿 X、Y 两个设备网格轴分片；在图示的这组设备中，每块设备长期保存不同的权重分片，不再沿其中某个轴重复保存相同的权重。计算前按需 AllGather 时，仍会临时产生相应权重的副本。</p>
+<p><strong>FSDP 与张量并行组合的完整算法</strong></p>
+<p>这种组合需要执行多次 AllGather 和 ReduceScatter，但每次传输的数据量更小：沿 X 轴划分批次后，每个张量并行组处理的 token 更少，张量并行所需的激活通信量随之减少；沿 Y 轴划分权重的前馈维度后，每个 FSDP 组只需收集对应的权重分片，FSDP 的权重通信量也随之减少。下面分别列出前向与反向传播的步骤。</p>
+<p>下列伪代码中，<code>AllGather_X</code>／<code>ReduceScatter_X</code> 沿 FSDP 轴 X 通信，带 <code>_Y</code> 的操作沿张量并行轴 Y 通信。<code>*_D</code> 等表示沿指定维度相乘并求和；<code>{U_X}</code>、<code>{U_Y}</code> 表示尚未沿对应设备轴归约的部分和。权重收集后只在本次计算所需期间保留，具体释放与预取时机取决于实现。</p>
+<p><strong>前向传播：计算本地批次的损失</strong></p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">1. In[B_X, D] = AllGather_Y(In[B_X, D_Y])
+   # 收齐输入特征；第 3 步必须等待它完成，处于计算依赖链上。
+
+2. W_in[D, F_Y] = AllGather_X(W_in[D_X, F_Y])
+   # 收集输入投影权重；可以提前预取，与之前的计算重叠。
+   # 第 3 步使用权重之前，通信必须完成。
+
+3. Tmp[B_X, F_Y] = In[B_X, D] *_D W_in[D, F_Y]
+
+4. W_out[F_Y, D] = AllGather_X(W_out[F_Y, D_X])
+   # 收集输出投影权重；可以提前预取，但第 5 步使用前必须完成。
+
+5. Out[B_X, D] {U_Y} = Tmp[B_X, F_Y] *_F W_out[F_Y, D]
+
+6. Out[B_X, D_Y] = ReduceScatter_Y(Out[B_X, D] {U_Y})
+   # 将不同 F 分片产生的部分输出求和，再沿 D 分片。
+   # 后续计算需要归约后的结果，因此存在直接依赖。
+
+7. Loss[B_X] = ...<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>反向传播：计算本地权重分片的梯度，以及传给前一层的输入梯度</strong></p>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">1. dOut[B_X, D_Y] = ...
+
+2. dOut[B_X, D] = AllGather_Y(dOut[B_X, D_Y])
+   # 收齐输出梯度；第 3、6 步的梯度计算依赖这一结果。
+
+3. dW_out[F_Y, D] {U_X} = Tmp[B_X, F_Y] *_B dOut[B_X, D]
+
+4. dW_out[F_Y, D_X] = ReduceScatter_X(dW_out[F_Y, D] {U_X})
+   # 汇总不同数据分片产生的权重梯度，每卡保留自己负责的梯度分片。
+   # 可与后续反向计算重叠，但优化器使用该梯度前必须完成。
+
+5. W_out[F_Y, D] = AllGather_X(W_out[F_Y, D_X])
+   # 重新收集反向计算所需的输出投影权重；可提前预取。
+
+6. dTmp[B_X, F_Y] = dOut[B_X, D] *_D W_out[F_Y, D]
+   # 第 3、6 步完成且没有其他使用者后，可释放完整 dOut 的临时缓冲区。
+
+7. In[B_X, D] = AllGather_Y(In[B_X, D_Y])
+   # 收集计算 dW_in 所需的输入激活；可按依赖关系提前安排通信。
+   # 若保留了前向时收集的完整输入，可直接复用，但需要额外激活内存。
+
+8. dW_in[D, F_Y] {U_X} = In[B_X, D] *_B dTmp[B_X, F_Y]
+
+9. dW_in[D_X, F_Y] = ReduceScatter_X(dW_in[D, F_Y] {U_X})
+   # 沿 X 汇总权重梯度并分片，供本地优化器更新使用。
+
+10. W_in[D, F_Y] = AllGather_X(W_in[D_X, F_Y])
+    # 收集计算输入梯度所需的权重；可提前预取，第 11 步使用前必须完成。
+
+11. dIn[B_X, D] {U_Y} = dTmp[B_X, F_Y] *_F W_in[D, F_Y]
+    # 得到输入梯度的部分和；前一层需要归约后的输入梯度。
+
+12. dIn[B_X, D_Y] = ReduceScatter_Y(dIn[B_X, D] {U_Y})
+    # 沿 Y 合并部分和并分片，前一层才能继续相应的反向计算。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p><strong>关于注释中的“提前执行”与“复用”：</strong>它们都需要满足数据依赖与内存条件，不代表通信可以省略或任意延迟。只有同一个张量、数值与布局均符合要求时，才能复用已有结果；不能仅因为形状相同，就把前一层的梯度当作当前层的输入激活复用。</p>
+<p><strong>怎样组合 FSDP 与张量并行？</strong>理解两者配合的关键，是看它们各自在传输什么：在这里讨论的方案中，FSDP 按需收集权重，张量并行则交换激活。沿 X 轴分担批次数据后，每个张量并行组处理的 token 更少，因此需要交换的激活更小；沿 Y 轴切分前馈维度后，每个 FSDP 组负责的权重更少，因此需要收集的权重也更小。两种分片可以相互降低对方的通信负担。</p>
+<p><strong>译者补充：X、Y 增大时，什么在变小？</strong>下面固定全局 token 批量 B、模型维度 D 和 F，假设数据与权重均匀分片。X 表示 FSDP／数据并行轴的设备数，Y 表示张量并行轴的设备数；<code>B_X</code> 表示本地大小为 <code>B/X</code>，<code>D_Y</code>、<code>D_X</code>、<code>F_Y</code> 同理。</p>
 <ul>
-<li>张量并行执行 $\mathbf{AllGather}_Y([B_X, D_Y])$，它随着 $X$ 的增长而缩小。</li>
-<li>FSDP 执行 $\mathbf{AllGather}_X([D_X, F_Y])$，它随着 $Y$ 的增长而缩小。</li>
+<li><strong>张量并行沿 Y 收集激活：</strong><code>AllGather_Y(In[B_X, D_Y]) → In[B_X, D]</code>。收集后，每张卡持有的这份激活大小为 <code>(B/X) × D</code> 个元素。因此，X 越大，每个张量并行组分到的 token 越少，需要收集的激活就越小。例如，全局 B 不变，X 从 2 增加到 4，这份激活的元素数减半。</li>
+<li><strong>FSDP 沿 X 收集权重：</strong><code>AllGather_X(W_in[D_X, F_Y]) → W_in[D, F_Y]</code>。收集后，每张卡持有的这份权重大小为 <code>D × (F/Y)</code> 个元素。因此，Y 越大，每个 FSDP 组负责的前馈特征越少，需要收集的权重就越小。例如，Y 从 2 增加到 4，这份权重的元素数减半。</li>
 </ul>
+<p>这里“变小”指的是相应通信中需要收集的张量大小，并不是全局模型或全局批量变小。在前文忽略延迟、有限设备数修正等因素的带宽近似下，张量并行通信量随 X 增大而减小，FSDP 通信量随 Y 增大而减小。如果固定总设备数 <code>N = X × Y</code>，就不能同时增大 X 和 Y：增加一个就必须减小另一个，因此后面需要寻找两类通信之间的平衡。</p>
 <p>因此，通过将两者结合起来，我们可以进一步降低每个副本的最小批量大小。我们可以用与上述相同的方式计算最佳的 FSDP 和 TP 数量：</p>
 <p>令 $X$ 为专用于 FSDP 的芯片数量，$Y$ 为专用于张量并行性的芯片数量。令 $N$ 为切片中的芯片总数，其中 $N=XY$。令 $M_X$ 和 $M_Y$ 分别为 FSDP 和 TP 跨越的网格轴数量（它们的总和应大致为 3）。这里只对前向传播建模，因为它对应每 FLOP 最大的通信量。将上面算法中的通信相加，可以得到</p>
 <p>$$T_\text{FSDP comms}(B, X, Y) = \frac{2\cdot 2\cdot D \cdot F}{Y \cdot W_\text{ici} \cdot M_X}$$</p>
@@ -957,7 +1026,8 @@
 <p>$$ \frac{B}{N} &gt; \frac{\alpha^2}{M_X M_Y F}$$</p>
 <p>要获得近似数字，请再次插入 $F=32,768$、$\alpha=2550$ 和 $M_X M_Y=2$（因为它必须适用于 3D 网格）。这大致给出了 $B/N &gt; 99$。与纯数据并行（或 FSDP）情况相比，这大约为我们赢得了八倍，在纯数据并行（或 FSDP）情况下，假设使用 3D 网格，我们计算出 $B/N$ 必须超过大约 $850$ 才能达到计算极限。</p>
 <p><strong>要点：</strong>将张量并行与 FSDP 相结合，可以把 $B/N$ 降至 $2550^2/(2F)$。这使我们能够处理每个芯片少至 100 个 token 的批次，大约只有单独使用 FSDP 时的八分之一。</p>
-<p>下面我们绘制了混合 FSDP + TP 的 FLOP 与通信时间的比率，并将其与代表性 4x4x4 芯片阵列上的仅张量并行 (TP) 和仅数据并行 (FSDP) 进行比较。虽然纯 FSDP 并行性在非常大的批量大小中占主导地位，但在批量大小与芯片数量之比约为 100 到 850 之间的情况下，需要混合 FSDP + TP 策略才能受计算受限。</p>
+<p>下图以一个 <code>4×4×4</code> 的 TPU 芯片阵列为例，比较纯 FSDP、纯张量并行（TP）以及混合 FSDP + TP 三种方案的“计算时间／通信时间”比值。比值大于 1，表示在计算与通信能够充分重叠的近似下，通信可以被计算掩盖，运行主要受算力限制。</p>
+<p><strong>在本例的硬件、模型与带宽假设下，全局批量很大时，纯 FSDP 的这一比值更高；但当全局 token 批量除以芯片总数，即 <code>B/N</code>，约为 100～850 时，只有将 FSDP 与 TP 结合起来，才能使计算时间超过通信时间，避免通信成为主要瓶颈。</strong>这里的 <code>B/N</code> 是平均到每块芯片的全局 token 工作量指标；使用 TP 时，多块芯片会共同处理同一批 token，因此它不一定等于每块芯片实际持有的 token 数。100～850 也不是适用于所有模型和硬件的固定范围。</p>
 <p><img src="/images/scaling-book/mixed-fsdp-comms-2.png" alt="原文插图"></p>
 <p><b> 图：</b> 在 F=30k 的 TPUv5p 4x4x4 切片上实现最佳混合 FSDP/TP 的 FLOP 与通信时间的比率。正如预期的那样，张量并行度与批量大小具有固定的比率； $\sqrt{B}$ 为理想混合 FSDP + TP 秤，$B$ 为 FSDP 秤。然而，在中等批量大小的情况下，只有 FSDP + TP 的比率大于 1。</p>
 <p>这是 TPU v5p 16x16x16 的另一个示例，显示了不同分片方案的 FLOP 和通信时间作为批量大小的函数。</p>
@@ -1074,12 +1144,73 @@ loss<span class="token punctuation">,</span> dx <span class="token operator">=</
 <td>在上述两者中，FSDP 收集模型分片权重。</td>
 </tr>
 </tbody></table>
-<p>以下是每种方法的“公式”：</p>
-<p>$$\small<br>\begin{array}{cc}<br>\text{Strategy} &amp; \text{Formula}\<br>\hline<br>\text{DP} &amp; \text{In}[B_X, D] \cdot_D W_\text{in}[D, F] \cdot_F W_\text{out}[F, D] \rightarrow \text{Out}[B_X, D] \<br>\text{FSDP} &amp; \text{In}[B_X, D] \cdot_D W_\text{in}[D_X, F] \cdot_F W_\text{out}[F, D_X] \rightarrow \text{Out}[B_X, D] \<br>\text{TP} &amp; \text{In}[B, D_Y] \cdot_D W_\text{in}[D, F_Y] \cdot_F W_\text{out}[F_Y, D] \rightarrow \text{Out}[B, D_Y] \<br>\text{TP + FSDP}  &amp; \text{In}[B_X, D_Y] \cdot_D W_\text{in}[D_X, F_Y] \cdot_F W_\text{out}[F_Y, D_X] \rightarrow \text{Out}[B_X, D_Y] \<br>\hline<br>\end{array}$$</p>
-<ul>
-<li>每种策略都可能根据单设备的计算与通信比例进入网络瓶颈。下表给出每层的计算与通信量，其中 $X$ 表示 FSDP 规模，$Y$ 表示张量并行规模。</li>
-</ul>
-<p>$$<br>\small<br>\begin{array}{ccc}<br>\text{Strategy} &amp; \text{Compute per layer} &amp; \text{Comms per layer} \<br>&amp; \text{(ignoring gating einsum)} &amp; \text{(bytes, forward + backward pass)}\<br>\hline<br>\text{DP} &amp; 4BDF/X + 8BDF/X &amp; 0 + 8DF \<br>\text{FSDP} &amp; 4BDF/X + 8BDF/X &amp; 4DF + 8DF \<br>\text{TP} &amp; 4BDF/Y + 8BDF/Y &amp; 4BD + 4BD \<br>\text{FSDP + TP} &amp; 4BDF/(XY) + 8BDF/(XY) &amp; (4BD/X + 4DF/Y) + (8BD/X + 8DF/Y) \<br>\hline<br>\end{array}$$</p>
+<p>以下用统一记号汇总各方案的分片布局。<code>*_D</code>、<code>*_F</code> 表示沿相应维度相乘并求和；下标 <code>_X</code>、<code>_Y</code> 表示数组的相应维度沿设备轴 X、Y 分片。表中描述的是各阶段的存储布局，计算前仍需按前文算法执行必要的 AllGather。</p>
+<table>
+<thead>
+<tr>
+<th>并行方案</th>
+<th>分片布局表达式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>纯数据并行（DP）</td>
+<td><code>In[B_X, D] *_D W_in[D, F] *_F W_out[F, D] → Out[B_X, D]</code></td>
+</tr>
+<tr>
+<td>全分片数据并行（FSDP）</td>
+<td><code>In[B_X, D] *_D W_in[D_X, F] *_F W_out[F, D_X] → Out[B_X, D]</code></td>
+</tr>
+<tr>
+<td>张量并行（TP）</td>
+<td><code>In[B, D_Y] *_D W_in[D, F_Y] *_F W_out[F_Y, D] → Out[B, D_Y]</code></td>
+</tr>
+<tr>
+<td>FSDP + TP</td>
+<td><code>In[B_X, D_Y] *_D W_in[D_X, F_Y] *_F W_out[F_Y, D_X] → Out[B_X, D_Y]</code></td>
+</tr>
+</tbody></table>
+<p><strong>计算量与通信量汇总：</strong><code>X</code> 表示 FSDP／数据并行轴的规模，<code>Y</code> 表示张量并行轴的规模；混合方案的总设备数为 <code>X × Y</code>。<code>B</code> 为全局 token 批量，<code>D</code> 为模型隐藏维度，<code>F</code> 为前馈中间维度。</p>
+<p>下表沿用原文的简化估算，分别列出每块设备、每个 MLP 层在前向和反向传播中的开销。计算量单位为 FLOPs，忽略门控分支；通信量单位为字节，按 bf16 每元素 2 字节以及前文的集体通信近似计数，不包含延迟等额外开销。<strong>这些是工作量与数据量，不是耗时</strong>；估算时间还需分别除以芯片算力和适用的网络带宽。</p>
+<table>
+<thead>
+<tr>
+<th>并行方案</th>
+<th>前向计算量（FLOPs）</th>
+<th>反向计算量（FLOPs）</th>
+<th>前向通信量（字节）</th>
+<th>反向通信量（字节）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DP</td>
+<td><code>4BDF/X</code></td>
+<td><code>8BDF/X</code></td>
+<td><code>0</code></td>
+<td><code>8DF</code></td>
+</tr>
+<tr>
+<td>FSDP</td>
+<td><code>4BDF/X</code></td>
+<td><code>8BDF/X</code></td>
+<td><code>4DF</code></td>
+<td><code>8DF</code></td>
+</tr>
+<tr>
+<td>TP</td>
+<td><code>4BDF/Y</code></td>
+<td><code>8BDF/Y</code></td>
+<td><code>4BD</code></td>
+<td><code>4BD</code></td>
+</tr>
+<tr>
+<td>FSDP + TP</td>
+<td><code>4BDF/(XY)</code></td>
+<td><code>8BDF/(XY)</code></td>
+<td><code>4BD/X + 4DF/Y</code></td>
+<td><code>8BD/X + 8DF/Y</code></td>
+</tr>
+</tbody></table>
+<p>其中 <code>BDF</code> 等表示变量相乘，例如 <code>4BDF/X = 4 × B × D × F ÷ X</code>。上表保留原文各方案的通信计数口径；实际实现中的通信复用、预取与内存保留策略会影响具体开销。</p>
 <ul>
 <li><p>纯数据并行很少有用，因为模型及其优化器状态使用字节 = 10x 参数计数。这意味着我们很少能在内存中容纳超过数十亿个参数。</p>
 </li>
@@ -1616,7 +1747,7 @@ loss<span class="token punctuation">,</span> dx <span class="token operator">=</
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">398.4k</span>&nbsp;字
+                class="white-color">400.2k</span>&nbsp;字
             
             
             
